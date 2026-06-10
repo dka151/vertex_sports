@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex Sports - Badminton Scoring</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 1.1rem;
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        /* Tournament Info Section */
+        .tournament-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-group {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .info-group input, .info-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .info-group input:focus, .info-group select:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 2px rgba(233,69,96,0.2);
+        }
+
+        .info-group select option { background: #1a1a2e; color: #fff; }
+
+        /* Scoring Table */
+        .scoring-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow-x: auto;
+            margin-bottom: 25px;
+        }
+
+        .scoring-section h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .score-table th {
+            background: rgba(233,69,96,0.2);
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-table td {
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            vertical-align: middle;
+        }
+
+        .score-table .team-cell {
+            text-align: left;
+            padding-left: 12px;
+            font-weight: 600;
+            min-width: 120px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .score-table .set-label {
+            font-size: 0.7rem;
+            color: #aaa;
+            min-width: 30px;
+        }
+
+        .score-table .slot-num {
+            font-weight: bold;
+            color: #e94560;
+            width: 30px;
+        }
+
+        .score-input {
+            width: 45px;
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: #e94560;
+            background: rgba(233,69,96,0.1);
+        }
+
+        .score-input.games {
+            width: 35px;
+            background: rgba(39,174,96,0.1);
+            border-color: rgba(39,174,96,0.3);
+        }
+
+        .score-input.games:focus {
+            border-color: #27ae60;
+        }
+
+        .total-cell {
+            font-weight: bold;
+            color: #f39c12;
+            background: rgba(243,156,18,0.1) !important;
+        }
+
+        .diagonal-cell {
+            background: rgba(255,255,255,0.02) !important;
+            position: relative;
+        }
+
+        .diagonal-cell::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 5px,
+                rgba(255,255,255,0.03) 5px,
+                rgba(255,255,255,0.03) 6px
+            );
+        }
+
+        /* Team Names Input */
+        .teams-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+
+        .teams-section h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .team-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-number {
+            background: #e94560;
+            color: #fff;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .team-input-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .team-input-group input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            color: #fff;
+        }
+
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(233,69,96,0.4); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-clear {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-clear:hover { background: rgba(255,255,255,0.2); }
+
+        .btn-calc {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+        }
+
+        .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(39,174,96,0.4); }
+
+        /* Status Messages */
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .status.success { display: block; background: rgba(39,174,96,0.2); color: #2ecc71; border: 1px solid rgba(39,174,96,0.3); }
+        .status.error { display: block; background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+        .status.loading { display: block; background: rgba(52,152,219,0.2); color: #3498db; border: 1px solid rgba(52,152,219,0.3); }
+
+        /* Match Schedule */
+        .schedule-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+
+        .schedule-section h3 { color: #e94560; margin-bottom: 15px; }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .match-slot {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .match-slot .match-num { font-size: 0.7rem; color: #aaa; margin-bottom: 5px; }
+        .match-slot .match-teams { font-weight: 600; color: #f39c12; }
+
+        /* Rules */
+        .rules-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+
+        .rules-section h3 { color: #e94560; margin-bottom: 12px; }
+        .rules-section ul { list-style: none; padding: 0; }
+        .rules-section li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        .rules-section li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #e94560;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.3rem; }
+            .score-input { width: 38px; padding: 5px 2px; }
+            .score-table { font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏸 Vertex Sports Badminton Championship Tournament 2026</h1>
+            <h2>Round Robin Scoring Sheet</h2>
+        </div>
+
+        <!-- Tournament Info -->
+        <div class="tournament-info">
+            <div class="info-group">
+                <label>Day / Date</label>
+                <input type="date" id="tournamentDate" value="2026-06-13">
+            </div>
+            <div class="info-group">
+                <label>Event</label>
+                <select id="eventType">
+                    <option value="Men's Doubles">Men's Doubles</option>
+                    <option value="Women's Doubles">Women's Doubles</option>
+                    <option value="Mixed Doubles">Mixed Doubles</option>
+                    <option value="Men's Singles">Men's Singles</option>
+                    <option value="Women's Singles">Women's Singles</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Division</label>
+                <select id="division">
+                    <option value="2-3">2-3</option>
+                    <option value="4-5" selected>4-5</option>
+                    <option value="6-7">6-7</option>
+                    <option value="8-10">8-10</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Pool</label>
+                <select id="pool">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Format</label>
+                <select id="format" onchange="updateTeamSlots()">
+                    <option value="3">3 Partner</option>
+                    <option value="4" selected>4 Partner</option>
+                    <option value="5">5 Partner</option>
+                    <option value="6">6 Partner</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Courts</label>
+                <input type="text" id="courts" placeholder="e.g. 1, 2, 3">
+            </div>
+        </div>
+
+        <!-- Team Names -->
+        <div class="teams-section">
+            <h3>📋 Team / Partnership Names</h3>
+            <div class="teams-grid">
+                <div class="team-input-group">
+                    <span class="team-number">1</span>
+                    <input type="text" id="team1" placeholder="Player 1 / Player 2" value="Deepak / Dilesh">
+                </div>
+                <div class="team-input-group">
+                    <span class="team-number">2</span>
+                    <input type="text" id="team2" placeholder="Player 1 / Player 2" value="Gokul / Surya">
+                </div>
+                <div class="team-input-group">
+                    <span class="team-number">3</span>
+                    <input type="text" id="team3" placeholder="Player 1 / Player 2" value="Riaz / Akshit">
+                </div>
+                <div class="team-input-group">
+                    <span class="team-number">4</span>
+                    <input type="text" id="team4" placeholder="Player 1 / Player 2" value="Nikil / John">
+                </div>
+                <div class="team-input-group" id="team5group" style="display:none;">
+                    <span class="team-number">5</span>
+                    <input type="text" id="team5" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team6group" style="display:none;">
+                    <span class="team-number">6</span>
+                    <input type="text" id="team6" placeholder="Player 1 / Player 2">
+                </div>
+            </div>
+        </div>
+
+        <!-- Scoring Table -->
+        <div class="scoring-section">
+            <h3>📊 Score Entry — Round Robin</h3>
+            <p style="color:#aaa; font-size:0.8rem; margin-bottom:12px;">Enter Games Won (0 or 1) and Points scored in each set. Totals auto-calculate.</p>
+            <table class="score-table" id="scoreTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Team</th>
+                        <th>Set</th>
+                        <th colspan="2">vs 1</th>
+                        <th colspan="2">vs 2</th>
+                        <th colspan="2">vs 3</th>
+                        <th colspan="2">vs 4</th>
+                        <th colspan="2">vs 5</th>
+                        <th colspan="2">vs 6</th>
+                        <th>Total Games</th>
+                        <th>Total Points</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>G</th><th>P</th>
+                        <th>G</th><th>P</th>
+                        <th>G</th><th>P</th>
+                        <th>G</th><th>P</th>
+                        <th>G</th><th>P</th>
+                        <th>G</th><th>P</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="scoreBody">
+                    <!-- Generated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Match Schedule -->
+        <div class="schedule-section">
+            <h3>📅 Suggested Match Schedule</h3>
+            <div class="schedule-grid" id="matchSchedule">
+                <!-- Generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="rules-section">
+            <h3>📖 Rules</h3>
+            <ul>
+                <li>4 Partner Group Format - All Players play each other in 2 Sets - up to 21 Points - No Setting</li>
+                <li>5 or 6 Partner Group Format - All Players play each other in 2 Sets - up to 21 Points - No Setting</li>
+                <li><strong>Winner Decided:</strong> First by Total Sets Won</li>
+                <li>If even - Then on Points Won</li>
+                <li>If even - On Head to Head Comparison</li>
+                <li>Where only One Section in Division - Top is Winner, Second is Runner-Up</li>
+                <li>Where Two Sections in Division - Top Partnership Only from each into a Final</li>
+                <li>Final - A Standard 3 Set Match - Setting is Permitted in Final</li>
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn btn-calc" onclick="calculateTotals()">🧮 Calculate Totals</button>
+            <button class="btn btn-submit" id="submitBtn" onclick="submitScores()">📤 Save Scores</button>
+            <button class="btn btn-clear" onclick="clearScores()">🗑️ Clear Scores</button>
+        </div>
+
+        <!-- Status -->
+        <div class="status" id="statusMsg"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION - Local server saves to scores.json
+        // ============================================================
+        const SAVE_URL = '/save';
+        // ============================================================
+
+        const SCHEDULES = {
+            4: [
+                { match: 1, teams: [1, 2] },
+                { match: 2, teams: [3, 4] },
+                { match: 3, teams: [1, 3] },
+                { match: 4, teams: [2, 4] },
+                { match: 5, teams: [1, 4] },
+                { match: 6, teams: [2, 3] }
+            ],
+            5: [
+                { match: 1, teams: [1, 2] },
+                { match: 2, teams: [3, 4] },
+                { match: 3, teams: [1, 5] },
+                { match: 4, teams: [2, 3] },
+                { match: 5, teams: [4, 5] },
+                { match: 6, teams: [1, 3] },
+                { match: 7, teams: [2, 4] },
+                { match: 8, teams: [3, 5] },
+                { match: 9, teams: [2, 5] },
+                { match: 10, teams: [1, 4] }
+            ],
+            6: [
+                { match: 1, teams: [1, 2] }, { match: 2, teams: [1, 6] },
+                { match: 3, teams: [3, 4] }, { match: 4, teams: [3, 5] },
+                { match: 5, teams: [5, 6] }, { match: 6, teams: [2, 4] },
+                { match: 7, teams: [1, 3] }, { match: 8, teams: [1, 4] },
+                { match: 9, teams: [4, 5] }, { match: 10, teams: [3, 6] },
+                { match: 11, teams: [2, 6] }, { match: 12, teams: [2, 5] },
+                { match: 13, teams: [1, 5] }, { match: 14, teams: [2, 3] },
+                { match: 15, teams: [4, 6] }
+            ]
+        };
+        // 3-partner schedule
+        SCHEDULES[3] = [
+            { match: 1, teams: [1, 2] },
+            { match: 2, teams: [1, 3] },
+            { match: 3, teams: [2, 3] }
+        ];
+
+        function updateTeamSlots() {
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 5; i <= 6; i++) {
+                const group = document.getElementById(`team${i}group`);
+                if (group) group.style.display = i <= format ? 'flex' : 'none';
+            }
+            generateScoreTable();
+            generateSchedule();
+        }
+
+        function generateScoreTable() {
+            const format = parseInt(document.getElementById('format').value);
+            const tbody = document.getElementById('scoreBody');
+            tbody.innerHTML = '';
+
+            for (let row = 1; row <= format; row++) {
+                // Set 1 row
+                const tr1 = document.createElement('tr');
+                tr1.innerHTML = `
+                    <td class="slot-num" rowspan="2">${row}</td>
+                    <td class="team-cell" rowspan="2" id="teamLabel${row}"></td>
+                    <td class="set-label">1st</td>
+                    ${generateScoreCells(row, 1, format)}
+                    <td class="total-cell" rowspan="2" id="totalGames${row}">0</td>
+                    <td class="total-cell" rowspan="2" id="totalPoints${row}">0</td>
+                `;
+                tbody.appendChild(tr1);
+
+                // Set 2 row
+                const tr2 = document.createElement('tr');
+                tr2.innerHTML = `
+                    <td class="set-label">2nd</td>
+                    ${generateScoreCells(row, 2, format)}
+                `;
+                tbody.appendChild(tr2);
+            }
+
+            updateTeamLabels();
+        }
+
+        function generateScoreCells(teamRow, set, format) {
+            let cells = '';
+            for (let col = 1; col <= 6; col++) {
+                if (col > format) {
+                    cells += `<td style="display:none;"></td><td style="display:none;"></td>`;
+                } else if (col === teamRow) {
+                    cells += `<td class="diagonal-cell"></td><td class="diagonal-cell"></td>`;
+                } else {
+                    cells += `
+                        <td><input type="number" class="score-input games" id="g_${teamRow}_${col}_${set}" min="0" max="1" placeholder="G"></td>
+                        <td><input type="number" class="score-input" id="p_${teamRow}_${col}_${set}" min="0" max="21" placeholder="P"></td>
+                    `;
+                }
+            }
+            return cells;
+        }
+
+        function updateTeamLabels() {
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 1; i <= format; i++) {
+                const label = document.getElementById(`teamLabel${i}`);
+                const input = document.getElementById(`team${i}`);
+                if (label && input) {
+                    label.textContent = input.value || `Team ${i}`;
+                }
+            }
+        }
+
+        function generateSchedule() {
+            const format = parseInt(document.getElementById('format').value);
+            const schedule = SCHEDULES[format] || [];
+            const container = document.getElementById('matchSchedule');
+            container.innerHTML = '';
+
+            schedule.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'match-slot';
+                div.innerHTML = `
+                    <div class="match-num">Match ${m.match}</div>
+                    <div class="match-teams">${m.teams[0]} v ${m.teams[1]}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calculateTotals() {
+            const format = parseInt(document.getElementById('format').value);
+
+            for (let row = 1; row <= format; row++) {
+                let totalGames = 0;
+                let totalPoints = 0;
+
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+
+                    for (let set = 1; set <= 2; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        if (gInput && gInput.value) totalGames += parseInt(gInput.value) || 0;
+                        if (pInput && pInput.value) totalPoints += parseInt(pInput.value) || 0;
+                    }
+                }
+
+                document.getElementById(`totalGames${row}`).textContent = totalGames;
+                document.getElementById(`totalPoints${row}`).textContent = totalPoints;
+            }
+
+            showStatus('Totals calculated!', 'success');
+            setTimeout(() => hideStatus(), 2000);
+        }
+
+        function collectFormData() {
+            const format = parseInt(document.getElementById('format').value);
+            const data = {
+                date: document.getElementById('tournamentDate').value,
+                event: document.getElementById('eventType').value,
+                division: document.getElementById('division').value,
+                pool: document.getElementById('pool').value,
+                format: format,
+                courts: document.getElementById('courts').value,
+                teams: [],
+                scores: []
+            };
+
+            for (let i = 1; i <= format; i++) {
+                data.teams.push(document.getElementById(`team${i}`).value);
+            }
+
+            for (let row = 1; row <= format; row++) {
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+                    for (let set = 1; set <= 2; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        data.scores.push({
+                            team: row,
+                            opponent: col,
+                            set: set,
+                            games: gInput ? (parseInt(gInput.value) || 0) : 0,
+                            points: pInput ? (parseInt(pInput.value) || 0) : 0
+                        });
+                    }
+                }
+            }
+
+            // Calculate totals
+            for (let row = 1; row <= format; row++) {
+                let totalGames = 0, totalPoints = 0;
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+                    for (let set = 1; set <= 2; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        if (gInput && gInput.value) totalGames += parseInt(gInput.value) || 0;
+                        if (pInput && pInput.value) totalPoints += parseInt(pInput.value) || 0;
+                    }
+                }
+                data.teams[row - 1] = {
+                    name: document.getElementById(`team${row}`).value,
+                    totalGames: totalGames,
+                    totalPoints: totalPoints
+                };
+            }
+
+            return data;
+        }
+
+        async function submitScores() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            showStatus('⏳ Saving scores...', 'loading');
+
+            calculateTotals();
+            const data = collectFormData();
+
+            try {
+                const response = await fetch(SAVE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showStatus(`✅ Saved to scores.json (${result.totalEntries} entries total)`, 'success');
+                } else {
+                    showStatus('❌ Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Cannot connect to server. Make sure you ran: node server.js', 'error');
+                console.error('Submit error:', error);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function clearScores() {
+            if (!confirm('Are you sure you want to clear all scores?')) return;
+            document.querySelectorAll('.score-input').forEach(input => input.value = '');
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 1; i <= format; i++) {
+                document.getElementById(`totalGames${i}`).textContent = '0';
+                document.getElementById(`totalPoints${i}`).textContent = '0';
+            }
+            showStatus('Scores cleared.', 'success');
+            setTimeout(() => hideStatus(), 2000);
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = 'status ' + type;
+        }
+
+        function hideStatus() {
+            document.getElementById('statusMsg').className = 'status';
+        }
+
+        // Listen for team name changes
+        document.querySelectorAll('[id^="team"]').forEach(input => {
+            if (input.tagName === 'INPUT') {
+                input.addEventListener('input', updateTeamLabels);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            generateScoreTable();
+            generateSchedule();
+        });
+    </script>
+</body>
+</html>
