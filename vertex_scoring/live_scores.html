@@ -1,0 +1,3489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertex Sports - Live Scores</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #090b14;
+  --panel: rgba(255,255,255,0.055);
+  --panel-strong: rgba(255,255,255,0.09);
+  --line: rgba(255,255,255,0.12);
+  --text: #edf2f7;
+  --muted: #96a5b8;
+  --red: #e94560;
+  --gold: #f2b84b;
+  --green: #2ecc71;
+  --blue: #48a4d8;
+}
+
+body {
+  min-height: 100vh;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--text);
+  padding-bottom: 54px;
+  background:
+    linear-gradient(rgba(9,11,20,0.975), rgba(9,11,20,0.975)),
+    url("vertex_sports_wallpaper_4k_clean.jpg") center top / 100% auto no-repeat,
+    var(--bg);
+}
+
+@media (min-width: 900px) {
+  body {
+    background:
+      linear-gradient(rgba(9,11,20,0.975), rgba(9,11,20,0.975)),
+      url("vertex_sports_wallpaper_4k_clean_1400.jpg") center top / 100% auto no-repeat,
+      var(--bg);
+  }
+}
+
+a { color: inherit; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 74px;
+  padding: 14px clamp(16px, 3vw, 32px);
+  background: rgba(9,11,20,0.92);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid rgba(233,69,96,0.8);
+}
+
+.brand-title {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-link,
+.back-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.back-button:hover { border-color: rgba(233,69,96,0.6); }
+
+.page {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 34px);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+  padding-bottom: 22px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(46,204,113,0.8);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(46,204,113,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(46,204,113,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+}
+
+@keyframes clickFlash {
+  0%, 100% {
+    color: var(--gold);
+    text-shadow: 0 0 0 rgba(242,184,75,0);
+  }
+  50% {
+    color: #fff;
+    text-shadow: 0 0 12px rgba(242,184,75,0.95);
+  }
+}
+
+@keyframes finalWinnerFlash {
+  0%, 100% {
+    color: var(--gold);
+    text-shadow: 0 0 2px rgba(242,184,75,0.45);
+  }
+  50% {
+    color: #fff3b0;
+    text-shadow: 0 0 14px rgba(242,184,75,0.95), 0 0 24px rgba(242,184,75,0.55);
+  }
+}
+
+@keyframes trophyOrbit {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+@keyframes trophyOrbitText {
+  from { rotate: 0deg; }
+  to { rotate: -360deg; }
+}
+
+@keyframes sprinklePop {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes unresolvedTieFlash {
+  0%, 100% {
+    color: #ff7aa2;
+    text-shadow: 0 0 0 rgba(255,122,162,0);
+  }
+  50% {
+    color: #ffd7e5;
+    text-shadow: 0 0 10px rgba(255,122,162,0.85);
+  }
+}
+
+@keyframes confettiShower {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0) rotate(0deg) scale(0.75);
+  }
+  12% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 0px), 112px, 0) rotate(430deg) scale(1);
+  }
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.hero-copy {
+  max-width: 720px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.5vw, 1.08rem);
+  line-height: 1.55;
+}
+
+.hero-copy .instruction-line {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 6px 10px;
+  border: 1px solid rgba(72,164,216,0.42);
+  border-radius: 6px;
+  background: #0b2a4a;
+  color: var(--text);
+  font-weight: 750;
+}
+
+.hero-copy .flash-word {
+  display: inline-block;
+  color: var(--gold);
+  font-weight: 950;
+  animation: clickFlash 1.1s infinite;
+}
+
+.refresh-card {
+  display: grid;
+  gap: 6px;
+  min-width: 190px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  background: rgba(9,11,20,0.78);
+}
+
+.refresh-label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.refresh-value {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.refresh-countdown {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.category-grid {
+  display: grid;
+  gap: 22px;
+}
+
+.category-row {
+  display: grid;
+  gap: 10px;
+}
+
+.category-row-heading {
+  margin: 0;
+  width: fit-content;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 58%, transparent);
+  border-left: 5px solid var(--accent, var(--gold));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, var(--gold)) 22%, transparent);
+  color: var(--accent, var(--gold));
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.category-row-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.category-tile {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  min-height: 178px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(9,11,20,0.78);
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.category-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(233,69,96,0.58);
+  background: rgba(12,15,28,0.9);
+}
+
+.category-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: var(--accent, var(--red));
+}
+
+.tile-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+}
+
+.tile-title {
+  font-size: 1.08rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.tile-subtitle,
+.tile-meta,
+.tile-status {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.tile-meta {
+  display: grid;
+  gap: 2px;
+}
+
+.tile-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 74px;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.32);
+  border: 1px solid rgba(255,255,255,0.16);
+  font-size: 0.72rem;
+  font-weight: 850;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.tile-stat {
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.34);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.tile-stat strong {
+  display: block;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.tile-stat span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.69rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.tile-stage-board {
+  display: grid;
+  gap: 7px;
+}
+
+.tile-category-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.tile-info-item {
+  min-width: 0;
+  padding: 8px 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, var(--gold)) 14%, rgba(0,0,0,0.52));
+  text-align: center;
+}
+
+.tile-info-item strong {
+  display: block;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.tile-info-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 850;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.tile-stage-row {
+  display: grid;
+  grid-template-columns: 32px repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 5px;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.18);
+}
+
+.tile-stage-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent, var(--gold)) 22%, rgba(0,0,0,0.3));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.tile-stage-count {
+  min-width: 0;
+  padding: 5px 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.tile-stage-count.status-pending {
+  background: rgba(255,122,162,0.13);
+  border-color: rgba(255,122,162,0.26);
+}
+
+.tile-stage-count.status-ready {
+  background: rgba(72,164,216,0.13);
+  border-color: rgba(72,164,216,0.28);
+}
+
+.tile-stage-count.status-live {
+  background: rgba(46,204,113,0.13);
+  border-color: rgba(46,204,113,0.28);
+}
+
+.tile-stage-count.status-finished {
+  background: rgba(255,230,109,0.13);
+  border-color: rgba(255,230,109,0.28);
+}
+
+.tile-stage-count strong {
+  display: block;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.tile-stage-count.status-pending strong { color: #ff9fbd; }
+.tile-stage-count.status-ready strong { color: #8fd7ff; }
+.tile-stage-count.status-live strong { color: #9af0ba; }
+.tile-stage-count.status-finished strong { color: #ffe66d; }
+
+.tile-stage-count span {
+  display: block;
+  margin-top: 2px;
+  color: rgba(237,242,247,0.76);
+  font-size: 0.56rem;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.detail-shell { display: none; }
+body.detail .home-shell { display: none; }
+body.detail .detail-shell { display: block; }
+
+.detail-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  padding-bottom: 18px;
+}
+
+.stage-flow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(360px, 1fr);
+  gap: 14px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 14px;
+}
+
+.stage-summary {
+  display: none;
+  margin-bottom: 14px;
+}
+
+.stage-summary.show {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stage-summary-item {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.055);
+}
+
+.stage-group {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stage-summary-item .stage-title {
+  justify-content: flex-start;
+}
+
+.stage-summary-item .stage-title span {
+  text-transform: none;
+}
+
+.stage-summary-item .stage-note {
+  max-width: none;
+}
+
+.stage-column {
+  min-height: 660px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.045);
+}
+
+.stage-header {
+  position: sticky;
+  top: 75px;
+  z-index: 5;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(15,18,30,0.96);
+  border-radius: 8px 8px 0 0;
+}
+
+.stage-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.stage-title span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.stage-note {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.pool-list,
+.knockout-list {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.pool-card,
+.match-card,
+.empty-card {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+.pool-card-head,
+.match-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.035);
+}
+
+.pool-card-head {
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.085);
+  border-left: 5px solid var(--accent);
+}
+
+.standings-scroll {
+  overflow-x: hidden;
+}
+
+.pool-name,
+.match-name {
+  font-weight: 900;
+}
+
+.pool-name {
+  color: #fff;
+  font-size: 1.08rem;
+}
+
+.pool-state,
+.match-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(46,204,113,0.12);
+  border: 1px solid rgba(46,204,113,0.25);
+  color: #a6f3c2;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.pool-state.pending,
+.match-state.pending {
+  background: rgba(242,184,75,0.12);
+  border-color: rgba(242,184,75,0.25);
+  color: #ffe0a2;
+}
+
+.pool-state.finished,
+.match-state.finished {
+  background: rgba(72,164,216,0.14);
+  border-color: rgba(72,164,216,0.32);
+  color: #bde8ff;
+}
+
+.standings {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pool-card .standings {
+  min-width: 0;
+  table-layout: auto;
+}
+
+.standings th,
+.standings td {
+  padding: 9px 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  text-align: center;
+  font-size: 0.74rem;
+  vertical-align: middle;
+}
+
+.standings th {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.standings th:nth-child(2),
+.standings td:nth-child(2) {
+  width: 42%;
+  text-align: left;
+}
+
+.pool-card .standings th:first-child,
+.pool-card .standings td:first-child {
+  width: 44px;
+}
+
+.pool-card .standings th:nth-child(2),
+.pool-card .standings td:nth-child(2) {
+  width: auto;
+}
+
+.pool-card .standings th:nth-child(3),
+.pool-card .standings td:nth-child(3),
+.pool-card .standings th:nth-child(4),
+.pool-card .standings td:nth-child(4),
+.pool-card .standings th:nth-child(5),
+.pool-card .standings td:nth-child(5) {
+  width: 42px;
+}
+
+.pool-card .standings th:nth-child(6),
+.pool-card .standings td:nth-child(6) {
+  width: 72px;
+}
+
+.tie-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 850;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.tie-choice input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, var(--gold));
+  cursor: pointer;
+}
+
+.best-runner-tie-card {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 70%, transparent);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.075);
+}
+
+.best-runner-tie-title {
+  color: var(--gold);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.best-runner-tie-note {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.best-runner-tie-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.best-runner-choice {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+
+.best-runner-choice.selected {
+  border-color: color-mix(in srgb, var(--accent, var(--gold)) 78%, white 8%);
+  background: color-mix(in srgb, var(--accent, var(--gold)) 18%, rgba(0,0,0,0.2));
+}
+
+.best-runner-choice.unresolved-tie strong,
+.best-runner-choice.unresolved-tie span,
+.standings tr.unresolved-tie td,
+.standings tr.unresolved-tie .team-name,
+.standings tr.unresolved-tie .rank,
+.standings tr.unresolved-tie .tie-choice {
+  color: #ff7aa2;
+}
+
+.best-runner-choice.unresolved-tie strong,
+.best-runner-choice.unresolved-tie span,
+.standings tr.unresolved-tie td,
+.standings tr.unresolved-tie .team-name,
+.standings tr.unresolved-tie .rank,
+.standings tr.unresolved-tie .tie-choice {
+  animation: unresolvedTieFlash 1.15s ease-in-out infinite;
+}
+
+.standings tr.unresolved-tie .rank {
+  background: rgba(255,122,162,0.16);
+}
+
+.best-runner-choice.resolved-tie strong,
+.best-runner-choice.resolved-tie span,
+.standings tr.resolved-tie td,
+.standings tr.resolved-tie .team-name,
+.standings tr.resolved-tie .rank,
+.standings tr.resolved-tie .tie-choice {
+  color: #ffe66d;
+}
+
+.standings tr.resolved-tie .rank {
+  background: rgba(255,230,109,0.16);
+}
+
+.best-runner-choice input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent, var(--gold));
+}
+
+.best-runner-choice strong {
+  font-size: 0.86rem;
+}
+
+.best-runner-choice span {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.standings tr:last-child td { border-bottom: 0; }
+
+.rank {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.rank.qualifier {
+  background: rgba(46,204,113,0.18);
+  color: #a6f3c2;
+}
+
+.team-name {
+  display: block;
+  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+
+.pool-matches {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.pool-match {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid var(--accent, var(--red));
+  border-left-width: 5px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.035);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.pool-match strong {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pool-match strong.final-winner-name {
+  color: var(--gold);
+  font-weight: 950;
+  animation: finalWinnerFlash 1.15s infinite;
+}
+
+.pool-match strong.final-runner-name {
+  color: #cfd3dc;
+  font-weight: 950;
+}
+
+.pool-match strong.h2h-winner-name {
+  color: var(--accent, var(--blue));
+  font-weight: 950;
+}
+
+.pool-match strong.h2h-tie-name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.pool-match.knockout-score-pair {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  margin: 0;
+}
+
+.pool-match.knockout-score-pair.with-vs {
+  grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+}
+
+.knockout-vs,
+.match-versus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 26px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, var(--gold)) 18%, rgba(0,0,0,0.2));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.match-versus {
+  justify-self: center;
+}
+
+.score-chip {
+  min-width: 64px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.065);
+  border: 1px solid var(--accent, var(--blue));
+  color: #b7e6ff;
+  text-align: center;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.score-chip.detailed {
+  display: grid;
+  gap: 3px;
+  min-width: 160px;
+  white-space: normal;
+}
+
+.game-points {
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.score-total {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.match-teams {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.match-team {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.045);
+}
+
+.match-card .match-team {
+  display: grid;
+  justify-content: center;
+  justify-items: center;
+  place-items: center;
+  text-align: center;
+}
+
+.match-card .match-team > span {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.match-team .seed {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.match-card .match-team .seed {
+  white-space: normal;
+}
+
+.match-card .knockout-score-pair > strong {
+  justify-self: center;
+  text-align: center;
+}
+
+.match-score {
+  margin: 0 12px 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(72,164,216,0.12);
+  border: 1px solid rgba(72,164,216,0.22);
+  color: #b7e6ff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.winner-trophy-stage {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 0 12px 14px;
+  padding: 10px 12px 14px;
+}
+
+.winner-trophy-label {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(242,184,75,0.18);
+  border: 1px solid rgba(242,184,75,0.45);
+  color: var(--gold);
+  font-size: 0.96rem;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(242,184,75,0.45);
+  animation: finalWinnerFlash 1.15s infinite;
+}
+
+.winner-trophy-orbit {
+  position: relative;
+  width: 250px;
+  height: 250px;
+}
+
+.winner-confetti-shower {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 220px;
+  height: 170px;
+  translate: -50% 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+.winner-confetti-shower span {
+  position: absolute;
+  left: var(--x, 50%);
+  top: 0;
+  width: var(--w, 7px);
+  height: var(--h, 13px);
+  border-radius: 2px;
+  background: var(--c, var(--gold));
+  opacity: 0;
+  animation: confettiShower 1.85s linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.winner-confetti-shower span:nth-child(1) { --x: 12%; --drift: -18px; --c: #f2b84b; --delay: 0s; }
+.winner-confetti-shower span:nth-child(2) { --x: 24%; --drift: 22px; --c: #48a4d8; --delay: 0.12s; --w: 9px; --h: 9px; }
+.winner-confetti-shower span:nth-child(3) { --x: 36%; --drift: -10px; --c: #fff3b0; --delay: 0.24s; }
+.winner-confetti-shower span:nth-child(4) { --x: 48%; --drift: 18px; --c: #2ecc71; --delay: 0.36s; --w: 6px; }
+.winner-confetti-shower span:nth-child(5) { --x: 60%; --drift: -20px; --c: #e94560; --delay: 0.48s; }
+.winner-confetti-shower span:nth-child(6) { --x: 72%; --drift: 16px; --c: #f2b84b; --delay: 0.6s; --w: 10px; --h: 8px; }
+.winner-confetti-shower span:nth-child(7) { --x: 84%; --drift: -14px; --c: #fff; --delay: 0.72s; }
+.winner-confetti-shower span:nth-child(8) { --x: 18%; --drift: 28px; --c: #2ecc71; --delay: 0.84s; --w: 6px; }
+.winner-confetti-shower span:nth-child(9) { --x: 42%; --drift: -28px; --c: #48a4d8; --delay: 0.96s; }
+.winner-confetti-shower span:nth-child(10) { --x: 66%; --drift: 26px; --c: #fff3b0; --delay: 1.08s; --w: 8px; --h: 8px; }
+
+.winner-trophy {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  color: var(--gold);
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 14px rgba(242,184,75,0.4));
+}
+
+.winner-trophy svg {
+  width: 112px;
+  height: 112px;
+}
+
+.winner-trophy-orbit-ring {
+  position: absolute;
+  inset: 12px;
+  animation: trophyOrbit 8s linear infinite;
+}
+
+.winner-name-stack {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% calc(-50% - 112px);
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-width: 190px;
+  color: #fff3b0;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+  animation: trophyOrbitText 8s linear infinite;
+}
+
+.winner-name-stack span {
+  display: block;
+}
+
+.winner-sprinkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.winner-sprinkles span {
+  position: absolute;
+  width: 5px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--gold);
+  animation: sprinklePop 1.6s ease-in-out infinite;
+}
+
+.winner-sprinkles span:nth-child(1) { left: 18%; top: 19%; rotate: -28deg; }
+.winner-sprinkles span:nth-child(2) { left: 78%; top: 18%; rotate: 28deg; animation-delay: 0.18s; }
+.winner-sprinkles span:nth-child(3) { left: 12%; top: 52%; rotate: 72deg; background: #fff3b0; animation-delay: 0.34s; }
+.winner-sprinkles span:nth-child(4) { left: 85%; top: 52%; rotate: -72deg; background: #fff3b0; animation-delay: 0.5s; }
+.winner-sprinkles span:nth-child(5) { left: 31%; top: 83%; rotate: 38deg; animation-delay: 0.66s; }
+.winner-sprinkles span:nth-child(6) { left: 67%; top: 83%; rotate: -38deg; animation-delay: 0.82s; }
+
+.connector {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.connector::before,
+.connector::after {
+  content: "";
+  height: 1px;
+  background: rgba(255,255,255,0.13);
+}
+
+.empty-card {
+  padding: 18px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.error-box {
+  display: none;
+  margin: 0 0 16px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(233,69,96,0.35);
+  background: rgba(233,69,96,0.12);
+  color: #ffd1d9;
+}
+
+body.has-error .error-box { display: block; }
+
+.tie-admin-modal,
+.tie-lock-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5,8,14,0.74);
+  backdrop-filter: blur(8px);
+}
+
+.tie-admin-modal.show,
+.tie-lock-modal.show {
+  display: grid;
+}
+
+.tie-admin-box,
+.tie-lock-box {
+  width: min(420px, 100%);
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 55%, rgba(255,255,255,0.18));
+  border-radius: 8px;
+  background: #111827;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.38);
+}
+
+.tie-lock-box {
+  border-color: rgba(255,230,109,0.45);
+}
+
+.tie-admin-box h2,
+.tie-lock-box h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.tie-admin-box p,
+.tie-lock-box p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.tie-admin-field {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.tie-admin-field label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.tie-admin-field input {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font: inherit;
+}
+
+.tie-admin-error {
+  min-height: 18px;
+  margin-top: 10px;
+  color: #ffd1d9;
+  font-size: 0.8rem;
+}
+
+.tie-admin-actions,
+.tie-lock-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tie-admin-actions button,
+.tie-lock-actions button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #fff;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.tie-admin-cancel {
+  background: rgba(255,255,255,0.07);
+}
+
+.tie-admin-submit {
+  background: color-mix(in srgb, var(--accent, var(--gold)) 78%, #111827);
+}
+
+.tie-lock-ok {
+  background: color-mix(in srgb, #ffe66d 70%, #111827);
+}
+
+.promo-ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255,255,255,0.14);
+  background: rgba(9,11,20,0.95);
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.25);
+  backdrop-filter: blur(12px);
+}
+
+.promo-label {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #c0392b, #f2b84b);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.promo-window {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.promo-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  white-space: nowrap;
+  will-change: transform;
+  animation: promoScroll 44s linear infinite;
+}
+
+.promo-ticker:hover .promo-track {
+  animation-play-state: paused;
+}
+
+.promo-message {
+  color: #f7fafc;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.promo-separator {
+  color: rgba(255,255,255,0.28);
+  font-weight: 900;
+}
+
+@keyframes promoScroll {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-100%); }
+}
+
+@media (max-width: 900px) {
+  .topbar,
+  .hero,
+  .detail-header {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .topbar { position: static; }
+
+  .nav-actions { justify-content: flex-start; }
+
+  .stage-flow {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: minmax(340px, 1fr);
+    overflow-x: visible;
+  }
+
+  .stage-column { min-height: 0; }
+  .stage-header { position: static; }
+}
+
+@media (max-width: 560px) {
+  body { padding-bottom: 48px; }
+  .brand-subtitle { white-space: normal; }
+  .category-row-cards { grid-template-columns: 1fr; }
+  .tile-stats { grid-template-columns: 1fr 1fr 1fr; }
+  .pool-match { grid-template-columns: 1fr; }
+  .score-chip { justify-self: start; }
+  .promo-ticker { min-height: 48px; }
+  .promo-label { padding: 0 10px; font-size: 0.64rem; }
+  .promo-message { font-size: 0.78rem; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../index.html">
+    <img src="../vertex_logo.png" alt="Vertex Sports">
+    <div>
+      <div class="brand-title">Vertex Sports Live Scores</div>
+      <div class="brand-subtitle">HOTSHOT BC SUMMER TOURNAMENT 2026</div>
+    </div>
+  </a>
+  <nav class="nav-actions">
+    <a class="nav-link" href="../index.html">Home</a>
+    <a class="nav-link" href="../full_schedule.html">Schedule</a>
+  </nav>
+</header>
+
+<main class="page">
+  <div id="errorBox" class="error-box"></div>
+
+  <section class="home-shell">
+    <div class="hero">
+      <div>
+        <div class="eyebrow"><span class="live-dot"></span> Live category scoreboard</div>
+        <h1>Live Scores</h1>
+        <p class="hero-copy">
+          Scores update automatically from the latest live results data.<br>
+          <span class="instruction-line"><span class="flash-word">CLICK</span> below on any category to view its <span class="flash-word">DETAILED</span> scoring and knockout flow.</span>
+        </p>
+      </div>
+      <div class="refresh-card">
+        <div class="refresh-label">Last refresh</div>
+        <div id="homeRefresh" class="refresh-value">Loading...</div>
+        <div id="homeRefreshCountdown" class="refresh-countdown">Next refresh in 15s</div>
+      </div>
+    </div>
+    <div id="categoryGrid" class="category-grid"></div>
+  </section>
+
+  <section class="detail-shell">
+    <div class="detail-header">
+      <div>
+        <div class="eyebrow"><span class="live-dot"></span> Live category detail</div>
+        <h1 id="detailTitle">Category Scores</h1>
+        <p id="detailCopy" class="hero-copy"></p>
+      </div>
+      <div class="refresh-card">
+        <div class="refresh-label">Last refresh</div>
+        <div id="detailRefresh" class="refresh-value">Loading...</div>
+        <div id="detailRefreshCountdown" class="refresh-countdown">Next refresh in 15s</div>
+        <a class="back-button" href="live_scores.html">All categories</a>
+      </div>
+    </div>
+
+    <div id="stageSummary" class="stage-summary"></div>
+    <div id="stageFlow" class="stage-flow">
+      <section class="stage-column">
+        <div class="stage-header">
+          <div class="stage-title">Pool <span id="poolCount">0 pools</span></div>
+          <div class="stage-note">Round-robin standings sorted by games won, total points scored, total points conceded, then head-to-head points.</div>
+        </div>
+        <div id="poolList" class="pool-list"></div>
+      </section>
+
+      <section class="stage-column">
+        <div class="stage-header">
+          <div class="stage-title" id="middleStageTitle">Semi Final</div>
+          <div id="middleStageNote" class="stage-note"></div>
+        </div>
+        <div id="middleList" class="knockout-list"></div>
+      </section>
+
+      <section class="stage-column">
+        <div class="stage-header">
+          <div class="stage-title">Final</div>
+          <div class="stage-note">Finalists populate from the previous stage as the draw is confirmed.</div>
+        </div>
+        <div id="finalList" class="knockout-list"></div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div class="promo-ticker" aria-label="Vertex Sports promotional message">
+  <div class="promo-label">Vertex Sports</div>
+  <div class="promo-window">
+    <div class="promo-track">
+      <span class="promo-message">Elevate your game with Vertex Sports! We offer premium badminton gear, elite shuttlecocks, and live-score tournament software subscriptions for clubs. Please contact Dilesh - 0876032397 / Deepak - 0873490862</span>
+      <span class="promo-separator">|</span>
+      <span class="promo-message">Elevate your game with Vertex Sports! We offer premium badminton gear, elite shuttlecocks, and live-score tournament software subscriptions for clubs. Please contact Dilesh - 0876032397 / Deepak - 0873490862</span>
+    </div>
+  </div>
+</div>
+
+<div class="tie-admin-modal" id="tieAdminModal" aria-hidden="true">
+  <form class="tie-admin-box" id="tieAdminForm">
+    <h2>Admin approval required</h2>
+    <p>Enter the admin username and password to change this tie-breaker selection.</p>
+    <div class="tie-admin-field">
+      <label for="tieAdminUsername">Username</label>
+      <input id="tieAdminUsername" name="username" type="text" autocomplete="username">
+    </div>
+    <div class="tie-admin-field">
+      <label for="tieAdminPassword">Password</label>
+      <input id="tieAdminPassword" name="password" type="password" autocomplete="current-password">
+    </div>
+    <div class="tie-admin-error" id="tieAdminError"></div>
+    <div class="tie-admin-actions">
+      <button class="tie-admin-cancel" type="button" id="tieAdminCancel">Cancel</button>
+      <button class="tie-admin-submit" type="submit">Approve</button>
+    </div>
+  </form>
+</div>
+
+<div class="tie-lock-modal" id="tieLockModal" aria-hidden="true">
+  <div class="tie-lock-box" role="alertdialog" aria-modal="true" aria-labelledby="tieLockTitle">
+    <h2 id="tieLockTitle">Tie-breaker locked</h2>
+    <p id="tieLockMessage">This tie-breaker cannot be changed because the next round already has published points.</p>
+    <div class="tie-lock-actions">
+      <button class="tie-lock-ok" type="button" id="tieLockOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id: "wd-1-3", event: "Women's Doubles", division: "1-3", title: "Women's Doubles", grade: "Division 1-3", teams: 5, start: "9:00 AM", flow: "1P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "wd-4-5", event: "Women's Doubles", division: "4-5", title: "Women's Doubles", grade: "Division 4-5", teams: 8, start: "9:00 AM", flow: "2P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "wd-6-7", event: "Women's Doubles", division: "6-7", title: "Women's Doubles", grade: "Division 6-7", teams: 8, start: "9:00 AM", flow: "2P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "wd-8-9", event: "Women's Doubles", division: "8-9", title: "Women's Doubles", grade: "Division 8-9", teams: 8, start: "11:00 AM", flow: "2P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "xd-1-3", event: "Mixed Doubles", division: "1-3", title: "Mixed Doubles", grade: "Division 1-3", teams: 8, start: "3:00 PM", flow: "2P > F", accent: "#e67e22", middle: "Final qualifier" },
+  { id: "xd-4-5", event: "Mixed Doubles", division: "4-5", title: "Mixed Doubles", grade: "Division 4-5", teams: 16, start: "3:00 PM", flow: "4P > SF > F", accent: "#e67e22", middle: "Semi Final" },
+  { id: "xd-6-7", event: "Mixed Doubles", division: "6-7", title: "Mixed Doubles", grade: "Division 6-7", teams: 16, start: "1:00 PM", flow: "4P > SF > F", accent: "#e67e22", middle: "Semi Final" },
+  { id: "xd-8-9", event: "Mixed Doubles", division: "8-9", title: "Mixed Doubles", grade: "Division 8-9", teams: 10, start: "2:40 PM", flow: "2P > F", accent: "#e67e22", middle: "Final qualifier" },
+  { id: "md-1-3", event: "Men's Doubles", division: "1-3", title: "Men's Doubles", grade: "Division 1-3", teams: 16, start: "11:00 AM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "md-4-5", event: "Men's Doubles", division: "4-5", title: "Men's Doubles", grade: "Division 4-5", teams: 20, start: "6:15 PM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "md-6-7", event: "Men's Doubles", division: "6-7", title: "Men's Doubles", grade: "Division 6-7", teams: 20, start: "9:00 AM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "md-8-9", event: "Men's Doubles", division: "8-9", title: "Men's Doubles", grade: "Division 8-9", teams: 10, start: "6:15 PM", flow: "2P > F", accent: "#2980b9", middle: "Final qualifier" }
+];
+
+const CATEGORY_ALIASES = {
+  "wd-8-10": "wd-8-9",
+  "xd-8-10": "xd-8-9",
+  "md-2-3": "md-1-3",
+  "md-8-10": "md-8-9"
+};
+
+const DEFAULT_REFRESH_MS = 15000;
+const RANKING_RULE_TEXT = "Round-robin standings sorted by games won, point difference (points won minus points conceded), then head-to-head points.";
+const SUPER_POOL_ASSIGNMENTS = [
+  { poolName: "X", sourcePools: ["A", "B", "C"] },
+  { poolName: "Y", sourcePools: ["D", "E", "F"] }
+];
+const ROUND_KEYS = {
+  semiFinal: "semiFinal",
+  final: "final"
+};
+const params = new URLSearchParams(window.location.search);
+const requestedCategoryId = params.get("category");
+const selectedCategoryId = CATEGORY_ALIASES[requestedCategoryId] || requestedCategoryId;
+const selectedCategory = CATEGORIES.find(category => category.id === selectedCategoryId);
+let refreshTimer = null;
+let countdownTimer = null;
+let nextRefreshAt = 0;
+let refreshMs = DEFAULT_REFRESH_MS;
+let tournamentDataPromise = null;
+const TIE_BREAK_SELECTION_KEY = "vertexLiveScoreTieBreaks";
+const BEST_RUNNER_SELECTION_KEY = "vertexLiveScoreBestRunnerBreaks";
+let tieBreakSelectionsMemory = {};
+let bestRunnerSelectionsMemory = {};
+let liveTieAdminAuthorized = false;
+let pendingTieAdminAction = null;
+
+function getTieActionFromInput(input) {
+  if (!input) return null;
+  if (input.classList.contains("tie-break-radio")) {
+    return {
+      type: "poolTie",
+      pool: input.dataset.pool || "",
+      tieGroup: input.dataset.tieGroup || "",
+      value: input.value
+    };
+  }
+  if (input.classList.contains("best-runner-radio")) {
+    return {
+      type: "bestRunnerTie",
+      tieKey: input.dataset.tieKey || "",
+      value: input.value
+    };
+  }
+  return null;
+}
+
+function getTieInputFromEventTarget(target) {
+  const input = target?.closest?.(".tie-break-radio, .best-runner-radio");
+  if (input) return input;
+  const choice = target?.closest?.(".tie-choice, .best-runner-choice");
+  return choice?.querySelector?.(".tie-break-radio, .best-runner-radio") || null;
+}
+
+function openTieAdminModal(action) {
+  pendingTieAdminAction = action;
+  const modal = document.getElementById("tieAdminModal");
+  const errorBox = document.getElementById("tieAdminError");
+  const username = document.getElementById("tieAdminUsername");
+  const password = document.getElementById("tieAdminPassword");
+  if (errorBox) errorBox.textContent = "";
+  if (username) username.value = "";
+  if (password) password.value = "";
+  modal?.classList.add("show");
+  modal?.setAttribute("aria-hidden", "false");
+  window.setTimeout(() => username?.focus(), 0);
+}
+
+function closeTieAdminModal() {
+  const modal = document.getElementById("tieAdminModal");
+  modal?.classList.remove("show");
+  modal?.setAttribute("aria-hidden", "true");
+  pendingTieAdminAction = null;
+}
+
+function latestPoolEntry(scoreFile, poolName) {
+  const entries = scoreFile?.pools?.[poolName];
+  return Array.isArray(entries) && entries.length ? entries[entries.length - 1] : null;
+}
+
+function hasRoundResult(entry) {
+  return hasAnyPoolResult(entry);
+}
+
+function getDependentSemiFinalKeys(action) {
+  if (!action || !selectedCategory) return [];
+  if (action.type === "bestRunnerTie") return ["SF2"];
+
+  const pool = String(action.pool || "").toUpperCase();
+  const flow = selectedCategory.flow || "";
+
+  if (flow.startsWith("2P")) {
+    return ["SF1", "SF2"];
+  }
+
+  if (flow.startsWith("3P")) {
+    if (pool === "C") return ["SF2"];
+    if (["A", "B"].includes(pool)) return ["SF1", "SF2"];
+  }
+
+  if (flow.startsWith("4P")) {
+    if (["A", "D"].includes(pool)) return ["SF1"];
+    if (["B", "C"].includes(pool)) return ["SF2"];
+  }
+
+  return ["SF1", "SF2"];
+}
+
+function getDependentSuperPoolName(poolName) {
+  const pool = String(poolName || "").toUpperCase();
+  const assignment = SUPER_POOL_ASSIGNMENTS.find(item => item.sourcePools.includes(pool));
+  return assignment?.poolName || "";
+}
+
+function getPublishedNextRoundMessage(action, scoreFile) {
+  if (!action || !selectedCategory) return "";
+  const knockoutEntries = getKnockoutEntries(scoreFile);
+  const finalHasScores = hasRoundResult(knockoutEntries.final.F);
+  const isSuperPoolTie = action.type === "poolTie" && ["X", "Y"].includes(String(action.pool || "").toUpperCase());
+
+  if (isSuperPoolTie) {
+    return finalHasScores
+      ? "This tie-breaker cannot be changed because Final points have already been published."
+      : "";
+  }
+
+  if (selectedCategory.middle === "Super-pool") {
+    const superPoolName = getDependentSuperPoolName(action.pool);
+    const superPoolHasScores = superPoolName && hasRoundResult(latestPoolEntry(scoreFile, superPoolName));
+    return superPoolHasScores || finalHasScores
+      ? `This pool tie-breaker cannot be changed because ${superPoolName ? `Super-pool ${superPoolName}` : "Super-pool"} or Final points have already been published.`
+      : "";
+  }
+
+  if (selectedCategory.flow.includes("SF")) {
+    const dependentSemiFinals = getDependentSemiFinalKeys(action);
+    const blockedSemiFinal = dependentSemiFinals.find(matchKey => hasRoundResult(knockoutEntries.semiFinal[matchKey]));
+    return blockedSemiFinal || finalHasScores
+      ? `This tie-breaker cannot be changed because ${blockedSemiFinal ? blockedSemiFinal.replace("SF", "Semi Final ") : "Final"} points have already been published.`
+      : "";
+  }
+
+  return finalHasScores
+    ? "This pool tie-breaker cannot be changed because Final points have already been published."
+    : "";
+}
+
+async function getTieChangeBlockedMessage(action) {
+  if (!action || !selectedCategory) return "";
+  try {
+    const scoreFile = await fetchScoreFile(selectedCategory);
+    return getPublishedNextRoundMessage(action, scoreFile);
+  } catch (error) {
+    return "Tie-breaker changes are temporarily blocked because the latest score file could not be checked.";
+  }
+}
+
+function showTieChangeBlockedMessage(message) {
+  const modal = document.getElementById("tieLockModal");
+  const messageBox = document.getElementById("tieLockMessage");
+  if (messageBox) messageBox.textContent = message;
+  modal?.classList.add("show");
+  modal?.setAttribute("aria-hidden", "false");
+  window.setTimeout(() => document.getElementById("tieLockOk")?.focus(), 0);
+}
+
+function closeTieLockModal() {
+  const modal = document.getElementById("tieLockModal");
+  modal?.classList.remove("show");
+  modal?.setAttribute("aria-hidden", "true");
+}
+
+async function applyTieAction(action) {
+  if (!action) return;
+  if (action.type === "poolTie") {
+    setTieBreakSelection(action.pool, action.tieGroup, action.value);
+  } else if (action.type === "bestRunnerTie") {
+    setBestRunnerSelection(action.tieKey, action.value);
+  }
+  await refresh();
+}
+
+async function requestTieAdminApproval(action) {
+  openTieAdminModal(action);
+}
+
+async function approveTieAdminSelection(event) {
+  event.preventDefault();
+  const errorBox = document.getElementById("tieAdminError");
+  const username = document.getElementById("tieAdminUsername")?.value || "";
+  const password = document.getElementById("tieAdminPassword")?.value || "";
+
+  if (errorBox) errorBox.textContent = "Checking admin credentials...";
+
+  try {
+    const response = await fetch("/admin-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ username, password })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.status !== "success") {
+      throw new Error(result.message || "Invalid admin username or password.");
+    }
+
+    const action = pendingTieAdminAction;
+    closeTieAdminModal();
+    const blockedMessage = await getTieChangeBlockedMessage(action);
+    if (blockedMessage) {
+      showTieChangeBlockedMessage(blockedMessage);
+      await refresh();
+      return;
+    }
+
+    await applyTieAction(action);
+    liveTieAdminAuthorized = false;
+  } catch (error) {
+    if (errorBox) errorBox.textContent = error.message || "Admin login failed.";
+  }
+}
+
+function readTieBreakSelections() {
+  try {
+    const storedSelections = window.localStorage?.getItem(TIE_BREAK_SELECTION_KEY);
+    if (storedSelections) {
+      tieBreakSelectionsMemory = JSON.parse(storedSelections);
+    }
+  } catch (error) {
+  }
+
+  return { ...tieBreakSelectionsMemory };
+}
+
+function getTieBreakKey(poolName, tieGroup) {
+  return `${selectedCategory?.id || "all"}|${poolName}|${tieGroup}`;
+}
+
+function getTieBreakSelection(poolName, tieGroup) {
+  const selections = readTieBreakSelections();
+  return Number(selections[getTieBreakKey(poolName, tieGroup)]) || null;
+}
+
+function setTieBreakSelection(poolName, tieGroup, seed) {
+  const selections = readTieBreakSelections();
+  selections[getTieBreakKey(poolName, tieGroup)] = Number(seed);
+  tieBreakSelectionsMemory = selections;
+  try {
+    window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
+  } catch (error) {
+  }
+}
+
+function readBestRunnerSelections() {
+  try {
+    const storedSelections = window.localStorage?.getItem(BEST_RUNNER_SELECTION_KEY);
+    if (storedSelections) {
+      bestRunnerSelectionsMemory = JSON.parse(storedSelections);
+    }
+  } catch (error) {
+  }
+
+  return { ...bestRunnerSelectionsMemory };
+}
+
+function getBestRunnerValue(team) {
+  return `${team.pool}:${team.seed}`;
+}
+
+function getBestRunnerTieKey(candidates) {
+  const categoryId = selectedCategory?.id || "all";
+  const tiedTeams = candidates
+    .map(getBestRunnerValue)
+    .sort()
+    .join("|");
+  const games = candidates[0]?.games ?? 0;
+  const points = candidates[0]?.points ?? 0;
+  return `${categoryId}|best-runner|${games}:${points}|${tiedTeams}`;
+}
+
+function getBestRunnerSelection(tieKey) {
+  const selections = readBestRunnerSelections();
+  return selections[tieKey] || "";
+}
+
+function setBestRunnerSelection(tieKey, value) {
+  const selections = readBestRunnerSelections();
+  selections[tieKey] = value;
+  bestRunnerSelectionsMemory = selections;
+  try {
+    window.localStorage?.setItem(BEST_RUNNER_SELECTION_KEY, JSON.stringify(selections));
+  } catch (error) {
+  }
+}
+
+function slugifyScorePath(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "") || "value";
+}
+
+function scoreFileFor(category) {
+  return `SCORES/${slugifyScorePath(category.event)}__division_${slugifyScorePath(category.division)}.json`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatTime(date = new Date()) {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function updateRefreshCountdown() {
+  const countdownId = selectedCategory ? "detailRefreshCountdown" : "homeRefreshCountdown";
+  const countdown = document.getElementById(countdownId);
+  if (!countdown) return;
+
+  const seconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+  countdown.textContent = `Next refresh in ${seconds}s`;
+}
+
+function resetRefreshCountdown() {
+  nextRefreshAt = Date.now() + refreshMs;
+  updateRefreshCountdown();
+}
+
+function normalizeRefreshMs(value) {
+  const seconds = Number.parseInt(value, 10);
+  if (!Number.isFinite(seconds)) return DEFAULT_REFRESH_MS;
+  return Math.max(1, Math.min(300, seconds)) * 1000;
+}
+
+async function loadRefreshSettings() {
+  try {
+    const response = await fetch("live_score_settings.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("Refresh settings not available.");
+    const settings = await response.json();
+    refreshMs = normalizeRefreshMs(settings.refreshSeconds);
+  } catch (error) {
+    refreshMs = DEFAULT_REFRESH_MS;
+  }
+}
+
+function setError(message) {
+  const errorBox = document.getElementById("errorBox");
+  errorBox.textContent = message || "";
+  document.body.classList.toggle("has-error", Boolean(message));
+}
+
+async function fetchScoreFile(category) {
+  const response = await fetch(scoreFileFor(category), { cache: "no-store" });
+  if (response.status === 404) {
+    return { event: category.event, division: category.division, pools: {} };
+  }
+  if (!response.ok) {
+    throw new Error(`Could not load ${category.title} ${category.division}`);
+  }
+  return response.json();
+}
+
+async function fetchTournamentData() {
+  if (!tournamentDataPromise) {
+    tournamentDataPromise = fetch("tournament_data.json", { cache: "no-store" })
+      .then(response => {
+        if (response.status === 404) return null;
+        if (!response.ok) throw new Error("Could not load tournament_data.json");
+        return response.json();
+      })
+      .catch(() => null);
+  }
+
+  return tournamentDataPromise;
+}
+
+function getTournamentCategory(category, tournamentData) {
+  const categories = Array.isArray(tournamentData?.categories) ? tournamentData.categories : [];
+  return categories.find(item => item.event === category.event && item.division === category.division) || null;
+}
+
+function getTournamentPools(category, tournamentData) {
+  const tournamentCategory = getTournamentCategory(category, tournamentData);
+  return Array.isArray(tournamentCategory?.pools) ? tournamentCategory.pools : [];
+}
+
+function latestEntriesByPool(scoreFile, category, tournamentData) {
+  const pools = scoreFile && scoreFile.pools && typeof scoreFile.pools === "object" ? scoreFile.pools : {};
+  const scorePools = Object.entries(pools)
+    .map(([poolName, entries]) => ({
+      poolName,
+      entries: Array.isArray(entries) ? entries : [],
+      entry: Array.isArray(entries) && entries.length ? entries[entries.length - 1] : null
+    }));
+  const scorePoolMap = new Map(scorePools.map(pool => [pool.poolName, pool]));
+  const tournamentPools = getTournamentPools(category, tournamentData);
+
+  tournamentPools.forEach(pool => {
+    const existing = scorePoolMap.get(pool.pool);
+    const tournamentEntry = {
+      event: category.event,
+      division: category.division,
+      pool: pool.pool,
+      format: pool.teamsPerPool || pool.teams.length,
+      teams: Array.isArray(pool.teams) ? pool.teams : [],
+      scores: []
+    };
+
+    if (existing?.entry) {
+      scorePoolMap.set(pool.pool, {
+        ...existing,
+        entry: {
+          ...existing.entry,
+          format: pool.teamsPerPool || existing.entry.format,
+          teams: Array.isArray(existing.entry.teams) && existing.entry.teams.length
+            ? existing.entry.teams
+            : tournamentEntry.teams
+        }
+      });
+    } else {
+      scorePoolMap.set(pool.pool, {
+        poolName: pool.pool,
+        entries: existing?.entries || [],
+        entry: tournamentEntry
+      });
+    }
+  });
+
+  return [...scorePoolMap.values()]
+    .filter(pool => pool.entry || pool.entries.length > 0 || (tournamentPools.length === 0 && ["A", "B", "C", "D"].includes(pool.poolName)));
+}
+
+function latestRoundEntry(scoreFile, roundKey, matchKey) {
+  const entries = scoreFile?.rounds?.[roundKey]?.[matchKey];
+  return Array.isArray(entries) && entries.length ? entries[entries.length - 1] : null;
+}
+
+function getKnockoutEntries(scoreFile) {
+  return {
+    semiFinal: {
+      SF1: latestRoundEntry(scoreFile, ROUND_KEYS.semiFinal, "SF1"),
+      SF2: latestRoundEntry(scoreFile, ROUND_KEYS.semiFinal, "SF2")
+    },
+    final: {
+      F: latestRoundEntry(scoreFile, ROUND_KEYS.final, "F")
+    }
+  };
+}
+
+function getTeamName(team, fallback) {
+  if (typeof team === "string" && team.trim()) return team.trim();
+  if (team && typeof team.name === "string" && team.name.trim()) return team.name.trim();
+  return fallback;
+}
+
+function buildScoreMap(entry) {
+  const map = new Map();
+  const expectedSets = Number(entry?.setsPerMatch) || 0;
+  (entry?.scores || []).forEach(score => {
+    const key = `${score.team}-${score.opponent}`;
+    const record = map.get(key) || { games: 0, points: 0, sets: [], expectedSets };
+    const hasGames = score.games !== null && score.games !== undefined && score.games !== "";
+    const hasPoints = score.points !== null && score.points !== undefined && score.points !== "";
+    const games = Number(score.games) || 0;
+    const points = Number(score.points) || 0;
+    record.games += games;
+    record.points += points;
+    record.expectedSets = Math.max(record.expectedSets || 0, expectedSets);
+    record.sets.push({ set: Number(score.set) || 0, games, points, complete: hasGames && hasPoints });
+    map.set(key, record);
+  });
+  return map;
+}
+
+function teamTotalsFromScores(entry, teamIndex) {
+  let games = 0;
+  let points = 0;
+  let pointsConceded = 0;
+  (entry?.scores || []).forEach(score => {
+    if (Number(score.team) === teamIndex) {
+      games += Number(score.games) || 0;
+      points += Number(score.points) || 0;
+    }
+    if (Number(score.opponent) === teamIndex) {
+      pointsConceded += Number(score.points) || 0;
+    }
+  });
+  return { games, points, pointsConceded };
+}
+
+function getTieGroupKey(entry, tieRank, tiedGroup) {
+  const tiedSeeds = tiedGroup.map(team => team.seed).sort((a, b) => a - b);
+  const scoreVersion = entry?.savedAt || (entry?.scores || [])
+    .filter(score => tiedSeeds.includes(Number(score.team)) || tiedSeeds.includes(Number(score.opponent)))
+    .map(score => [
+      Number(score.team) || 0,
+      Number(score.opponent) || 0,
+      Number(score.set) || 0,
+      Number(score.games) || 0,
+      Number(score.points) || 0
+    ].join("."))
+    .sort()
+    .join("_");
+  return `${tieRank}:${tiedSeeds.join("-")}:${scoreVersion || "current"}`;
+}
+
+function getMatchResult(scoreMap, firstTeam, secondTeam) {
+  const firstScore = scoreMap.get(`${firstTeam}-${secondTeam}`) || { games: 0, points: 0, sets: [], expectedSets: 0 };
+  const secondScore = scoreMap.get(`${secondTeam}-${firstTeam}`) || { games: 0, points: 0, sets: [], expectedSets: 0 };
+  const expectedSets = Math.max(firstScore.expectedSets || 0, secondScore.expectedSets || 0, firstScore.sets?.length || 0, secondScore.sets?.length || 0);
+  const neededGames = expectedSets ? Math.floor(expectedSets / 2) + 1 : 1;
+  const completedSets = new Set(
+    (firstScore.sets || [])
+      .filter(firstSet => {
+        const setNumber = Number(firstSet.set) || 0;
+        const secondSet = (secondScore.sets || []).find(item => Number(item.set) === setNumber);
+        return setNumber && firstSet.complete && secondSet?.complete;
+      })
+      .map(item => Number(item.set))
+  );
+  const allExpectedSetsComplete = expectedSets > 0 && completedSets.size >= expectedSets;
+  const matchDecided = firstScore.games >= neededGames || secondScore.games >= neededGames;
+  const played = allExpectedSetsComplete || matchDecided;
+  const started = Boolean(firstScore.games || firstScore.points || secondScore.games || secondScore.points);
+  let winner = null;
+
+  if (played) {
+    if (firstScore.games > secondScore.games) {
+      winner = firstTeam;
+    } else if (secondScore.games > firstScore.games) {
+      winner = secondTeam;
+    }
+  }
+
+  return {
+    started,
+    played,
+    winner,
+    firstGames: firstScore.games,
+    secondGames: secondScore.games,
+    firstPoints: firstScore.points,
+    secondPoints: secondScore.points
+  };
+}
+
+function getHeadToHeadSort(a, b, scoreMap) {
+  const result = getMatchResult(scoreMap, a.seed, b.seed);
+  if (!result.played) return 0;
+
+  if (result.firstPoints !== result.secondPoints) {
+    const winner = result.firstPoints > result.secondPoints ? a.seed : b.seed;
+    return winner === a.seed ? -1 : 1;
+  }
+
+  return 0;
+}
+
+function compareStandingMetrics(a, b, scoreMap) {
+  const aDiff = a.points - a.pointsConceded;
+  const bDiff = b.points - b.pointsConceded;
+  return (
+    b.games - a.games ||
+    bDiff - aDiff ||
+    getHeadToHeadSort(a, b, scoreMap)
+  );
+}
+
+function hasAnyPoolResult(entry) {
+  return (entry?.scores || []).some(score => (Number(score.games) || 0) > 0 || (Number(score.points) || 0) > 0);
+}
+
+function buildStandings(entry) {
+  const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+  const scoreMap = buildScoreMap(entry);
+  const hasPoolResult = hasAnyPoolResult(entry);
+  const poolName = entry?.pool || "";
+  const standings = teams.map((team, index) => {
+    const teamIndex = index + 1;
+    const fallbackTotals = teamTotalsFromScores(entry, teamIndex);
+    let matchesWon = 0;
+    let played = 0;
+
+    for (let opponent = 1; opponent <= teams.length; opponent++) {
+      if (opponent === teamIndex) continue;
+
+      const result = getMatchResult(scoreMap, teamIndex, opponent);
+      if (result.played) played += 1;
+      if (result.winner === teamIndex) matchesWon += 1;
+    }
+
+    return {
+      seed: teamIndex,
+      name: getTeamName(team, `Team ${teamIndex}`),
+      source: typeof team === "object" && team ? team.source : "",
+      games: Number(team?.totalGames ?? fallbackTotals.games) || 0,
+      points: Number(team?.totalPoints ?? fallbackTotals.points) || 0,
+      pointsConceded: Number(team?.totalPointsConceded ?? fallbackTotals.pointsConceded) || 0,
+      matchesWon,
+      played: countPlayedMatches(entry, teamIndex)
+    };
+  });
+
+  const sortedStandings = standings.sort((a, b) => hasPoolResult ? compareStandingMetrics(a, b, scoreMap) : 0);
+  if (!hasPoolResult) {
+    return sortedStandings.map(team => ({ ...team, standing: 0, tiedStanding: false }));
+  }
+
+  const rankedStandings = [];
+  let index = 0;
+
+  while (index < sortedStandings.length) {
+    const tiedGroup = [sortedStandings[index]];
+    let nextIndex = index + 1;
+
+    while (
+      nextIndex < sortedStandings.length &&
+      compareStandingMetrics(sortedStandings[index], sortedStandings[nextIndex], scoreMap) === 0
+    ) {
+      tiedGroup.push(sortedStandings[nextIndex]);
+      nextIndex += 1;
+    }
+
+    if (tiedGroup.length > 1) {
+      const tieRank = rankedStandings.length + 1;
+      const tieGroupKey = getTieGroupKey(entry, tieRank, tiedGroup);
+      const selectedSeed = getTieBreakSelection(poolName, tieGroupKey);
+      const selectedInGroup = tiedGroup.some(team => team.seed === selectedSeed);
+      const orderedGroup = selectedInGroup
+        ? [...tiedGroup].sort((a, b) => (b.seed === selectedSeed) - (a.seed === selectedSeed))
+        : tiedGroup;
+
+      orderedGroup.forEach((team, groupIndex) => {
+        rankedStandings.push({
+          ...team,
+          standing: "TIE",
+          tiedStanding: true,
+          tieGroup: tieGroupKey,
+          tieResolved: selectedInGroup,
+          tieSelected: team.seed === selectedSeed,
+          resolvedStanding: tieRank + groupIndex
+        });
+      });
+    } else {
+      rankedStandings.push({
+        ...tiedGroup[0],
+        standing: rankedStandings.length + 1,
+        tiedStanding: false
+      });
+    }
+
+    index = nextIndex;
+  }
+
+  return rankedStandings;
+}
+
+function countPlayedMatches(entry, teamIndex) {
+  const opponents = new Set();
+  const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+  const scoreMap = buildScoreMap(entry);
+
+  for (let opponent = 1; opponent <= teams.length; opponent++) {
+    if (opponent !== teamIndex && getMatchResult(scoreMap, teamIndex, opponent).played) {
+      opponents.add(opponent);
+    }
+  }
+
+  return opponents.size;
+}
+
+function describePoolState(entry) {
+  if (!entry) return { text: "Waiting", pending: true, className: "pending" };
+  if (isPoolComplete(entry)) return { text: "Finished", pending: false, className: "finished" };
+  return hasAnyPoolResult(entry)
+    ? { text: "Live", pending: false, className: "" }
+    : { text: "Ready", pending: true, className: "pending" };
+}
+
+function getSetPointValue(score, set) {
+  const setScore = (score.sets || []).find(item => Number(item.set) === set);
+  return Number(setScore?.points) || 0;
+}
+
+function formatGamePointScores(firstScore, secondScore) {
+  const setNumbers = [...new Set([
+    ...(firstScore.sets || []).map(item => Number(item.set) || 0),
+    ...(secondScore.sets || []).map(item => Number(item.set) || 0)
+  ])].filter(Boolean).sort((a, b) => a - b);
+
+  return setNumbers
+    .map(set => `G${set}: ${getSetPointValue(firstScore, set)}-${getSetPointValue(secondScore, set)}`)
+    .join(" · ");
+}
+
+function getHeadToHeadNameClasses(firstGames, secondGames) {
+  const first = Number(firstGames) || 0;
+  const second = Number(secondGames) || 0;
+
+  if (first === second) {
+    return { first: "h2h-tie-name", second: "h2h-tie-name" };
+  }
+
+  return first > second
+    ? { first: "h2h-winner-name", second: "" }
+    : { first: "", second: "h2h-winner-name" };
+}
+
+function renderPoolMatchRow(match) {
+  const classes = getHeadToHeadNameClasses(match.firstGames, match.secondGames);
+  return `
+        <div class="pool-match">
+          <strong class="${classes.first}">${escapeHtml(match.firstName)}</strong>
+          <span class="score-chip detailed">
+            <span class="game-points">${escapeHtml(match.gamePoints)}</span>
+            <span class="score-total">${escapeHtml(`Games ${match.totalGames} &middot; Points ${match.totalPoints}`)}</span>
+          </span>
+          <strong class="${classes.second}">${escapeHtml(match.secondName)}</strong>
+        </div>
+      `;
+}
+
+function buildPoolMatches(entry) {
+  if (!entry) return "";
+  const teams = Array.isArray(entry.teams) ? entry.teams : [];
+  const scoreMap = buildScoreMap(entry);
+  const matches = [];
+
+  for (let first = 1; first <= teams.length; first++) {
+    for (let second = first + 1; second <= teams.length; second++) {
+      const firstScore = scoreMap.get(`${first}-${second}`) || { games: 0, points: 0 };
+      const secondScore = scoreMap.get(`${second}-${first}`) || { games: 0, points: 0 };
+      const hasResult = firstScore.games || firstScore.points || secondScore.games || secondScore.points;
+      if (!hasResult) continue;
+
+      matches.push({
+        firstName: getTeamName(teams[first - 1], `Team ${first}`),
+        secondName: getTeamName(teams[second - 1], `Team ${second}`),
+        gamePoints: formatGamePointScores(firstScore, secondScore),
+        firstGames: firstScore.games,
+        secondGames: secondScore.games,
+        totalGames: `${firstScore.games}-${secondScore.games}`,
+        totalPoints: `${firstScore.points}-${secondScore.points}`
+      });
+    }
+  }
+
+  if (!matches.length) return "";
+  return `
+    <div class="pool-matches">
+      ${matches.map(match => `
+        <div class="pool-match">
+          <strong class="${getHeadToHeadNameClasses(match.firstGames, match.secondGames).first}">${escapeHtml(match.firstName)}</strong>
+          <span class="score-chip detailed">
+            <span class="game-points">${escapeHtml(match.gamePoints)}</span>
+            <span class="score-total">${escapeHtml(`Games ${match.totalGames} · Points ${match.totalPoints}`)}</span>
+          </span>
+          <strong class="${getHeadToHeadNameClasses(match.firstGames, match.secondGames).second}">${escapeHtml(match.secondName)}</strong>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function getDisplayPoolName(pool) {
+  return pool.poolName || pool.entry?.pool || "";
+}
+
+function renderStandingValue(poolName, team, canResolveTie = true) {
+  if (!team.tiedStanding) return escapeHtml(team.standing);
+  if (!canResolveTie) return "TIE";
+  const categoryId = selectedCategory?.id || "all";
+  const radioName = `tie-${categoryId}-${poolName}-${team.tieGroup}`;
+  return `
+    <label class="tie-choice">
+      <input
+        class="tie-break-radio"
+        type="radio"
+        name="${escapeHtml(radioName)}"
+        value="${escapeHtml(team.seed)}"
+        data-pool="${escapeHtml(poolName)}"
+        data-tie-group="${escapeHtml(team.tieGroup)}"
+        aria-label="Select ${escapeHtml(team.name)} as Pool ${escapeHtml(poolName)} tie winner"
+        ${team.tieSelected ? "checked" : ""}
+      >
+      <span>TIE</span>
+    </label>
+  `;
+}
+
+function getTieRowClass(team) {
+  if (!team.tiedStanding) return "";
+  return team.tieResolved ? "resolved-tie" : "unresolved-tie";
+}
+
+function isDecidedQualifier(team, cutoff) {
+  return !team.tiedStanding && Number(team.standing) > 0 && Number(team.standing) <= cutoff;
+}
+
+function renderPoolCard(pool, options = {}) {
+  const state = describePoolState(pool.entry);
+  const { showHeader = true } = options;
+  const poolName = getDisplayPoolName(pool);
+  const poolFinished = isPoolComplete(pool.entry);
+  const standings = pool.entry ? buildStandings(pool.entry) : [];
+  const teamCount = standings.length || (Array.isArray(pool.entry?.teams) ? pool.entry.teams.length : 0);
+  const poolTitle = teamCount ? `Pool ${poolName} (${teamCount} ${teamCount === 1 ? "Team" : "Teams"})` : `Pool ${poolName}`;
+  const rows = standings.length
+    ? standings.map((team, index) => `
+      <tr class="${getTieRowClass(team)}">
+        <td><span class="rank ${isDecidedQualifier(team, 2) ? "qualifier" : ""}">${escapeHtml(`${poolName}${team.seed}`)}</span></td>
+        <td><span class="team-name">${escapeHtml(team.name)}</span></td>
+        <td>${team.matchesWon}</td>
+        <td>${team.games}</td>
+        <td>${team.points} / ${team.pointsConceded}</td>
+        <td>${renderStandingValue(poolName, team, poolFinished)}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="6">No teams saved for this pool yet.</td></tr>`;
+
+  return `
+    <article class="pool-card">
+      ${showHeader ? `<div class="pool-card-head">
+        <div class="pool-name">${escapeHtml(poolTitle)}</div>
+        <div class="pool-state ${state.className || ""}">${state.text}</div>
+      </div>` : ""}
+      <div class="standings-scroll">
+        <table class="standings">
+          <thead>
+            <tr><th>Team#</th><th>Team</th><th>MW</th><th>GW</th><th>TPts / TPtc</th><th>Standing</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${buildPoolMatches(pool.entry)}
+    </article>
+  `;
+}
+
+function isPoolComplete(entry) {
+  const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+  if (teams.length < 2) return false;
+
+  const scoreMap = buildScoreMap(entry);
+  for (let first = 1; first <= teams.length; first++) {
+    for (let second = first + 1; second <= teams.length; second++) {
+      if (!getMatchResult(scoreMap, first, second).played) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function getDecidedPoolWinner(entry) {
+  const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+  if (teams.length < 2) return null;
+
+  const scoreMap = buildScoreMap(entry);
+  for (let teamIndex = 1; teamIndex <= teams.length; teamIndex++) {
+    let wins = 0;
+
+    for (let opponent = 1; opponent <= teams.length; opponent++) {
+      if (opponent === teamIndex) continue;
+      const result = getMatchResult(scoreMap, teamIndex, opponent);
+      if (result.played && result.winner === teamIndex) wins += 1;
+    }
+
+    if (wins >= teams.length - 1) {
+      const standings = buildStandings(entry);
+      return standings.find(team => team.seed === teamIndex) || null;
+    }
+  }
+
+  return null;
+}
+
+function arePoolsComplete(pools) {
+  return pools.length > 0 && pools.every(pool => isPoolComplete(pool.entry));
+}
+
+function getPoolCompletionMap(pools) {
+  return new Map(pools.map(pool => [getDisplayPoolName(pool), isPoolComplete(pool.entry)]));
+}
+
+function renderStageColumn(title, note, body, options = {}) {
+  const { showHeader = true } = options;
+  return `
+    <section class="stage-column">
+      ${showHeader ? `<div class="stage-header">
+        <div class="stage-title">${title}</div>
+        <div class="stage-note">${escapeHtml(note)}</div>
+      </div>` : ""}
+      <div class="knockout-list">${body}</div>
+    </section>
+  `;
+}
+
+function renderStageSummaryCard(item) {
+  return `
+    <div class="stage-summary-item">
+      <div class="stage-title">${item.title}</div>
+      <div class="stage-note">${escapeHtml(item.note)}</div>
+    </div>
+  `;
+}
+
+function renderStandardStageFlow(items) {
+  const stageFlow = document.getElementById("stageFlow");
+  stageFlow.className = "stage-flow";
+  const fallbackIds = ["poolList", "middleList", "finalList"];
+  stageFlow.innerHTML = items.map((item, index) => {
+    const targetId = item.targetId || fallbackIds[index] || `stageList${index + 1}`;
+    const listClass = item.listClass || (targetId === "poolList" ? "pool-list" : "knockout-list");
+    return `
+      <div class="stage-group">
+        ${renderStageSummaryCard(item)}
+        <section class="stage-column">
+          <div id="${escapeHtml(targetId)}" class="${escapeHtml(listClass)}"></div>
+        </section>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderStageSummary(items) {
+  const summary = document.getElementById("stageSummary");
+  summary.className = "stage-summary show";
+  summary.innerHTML = items.map(renderStageSummaryCard).join("");
+}
+
+function hideStageSummary() {
+  const summary = document.getElementById("stageSummary");
+  summary.className = "stage-summary";
+  summary.innerHTML = "";
+}
+
+function renderPoolStageColumn(pool) {
+  const poolName = getDisplayPoolName(pool);
+  const complete = isPoolComplete(pool.entry);
+  const state = describePoolState(pool.entry);
+  const note = complete ? "Pool matches complete." : state.pending ? "Waiting for pool match results." : "Pool matches in progress.";
+  return renderStageColumn(`Pool ${escapeHtml(poolName)}`, note, renderPoolCard(pool, { showHeader: false }));
+}
+
+function buildRankedPools(pools) {
+  return pools
+    .filter(pool => pool.entry)
+    .map(pool => ({
+      poolName: pool.poolName,
+      standings: buildStandings(pool.entry)
+    }));
+}
+
+function getPoolByName(pools, poolName) {
+  return pools.find(pool => getDisplayPoolName(pool) === poolName) || null;
+}
+
+function isSuperPoolName(poolName) {
+  return SUPER_POOL_ASSIGNMENTS.some(assignment => assignment.poolName === poolName);
+}
+
+function getPreliminaryPools(category, pools) {
+  if (category.middle !== "Super-pool") return pools;
+  return pools.filter(pool => !isSuperPoolName(getDisplayPoolName(pool)));
+}
+
+function getPoolSeed(rankedPools, poolName, rank) {
+  const pool = rankedPools.find(item => item.poolName === poolName);
+  const team = pool?.standings?.[rank - 1];
+  if (!team) return null;
+  const suffix = rank === 1 ? "st" : rank === 2 ? "nd" : rank === 3 ? "rd" : "th";
+  const label = rank === 1
+    ? `Winner of Pool ${poolName}`
+    : rank === 2
+      ? `Runner-up of Pool ${poolName}`
+      : `${rank}${suffix} Pool ${poolName}`;
+  return { ...team, pool: poolName, label, pendingTie: Boolean(team.tiedStanding && !team.tieResolved) };
+}
+
+function getBestRunners(rankedPools, count) {
+  const candidates = rankedPools
+    .map(pool => {
+      const team = pool.standings[1];
+      return team ? { ...team, pool: pool.poolName, label: `Best runner-up from Pool ${pool.poolName}`, pendingLabel: "Best runner-up", bestRunner: true, pendingTie: Boolean(team.tiedStanding && !team.tieResolved) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.games - a.games || b.points - a.points);
+
+  if (count === 1 && candidates.length > 1) {
+    const topCandidate = candidates[0];
+    const tiedCandidates = candidates.filter(candidate => (
+      candidate.games === topCandidate.games && candidate.points === topCandidate.points
+    ));
+
+    if (tiedCandidates.length > 1) {
+      const tieKey = getBestRunnerTieKey(tiedCandidates);
+      const selectedValue = getBestRunnerSelection(tieKey);
+      const selectedCandidate = tiedCandidates.find(candidate => getBestRunnerValue(candidate) === selectedValue);
+
+      if (!selectedCandidate) {
+        return [{
+          name: "Best runner-up",
+          label: "",
+          pendingLabel: "Best runner-up",
+          bestRunner: true,
+          bestRunnerTie: true,
+          pendingTie: true,
+          tieKey,
+          tieCandidates: tiedCandidates
+        }];
+      }
+
+      return [{
+        ...selectedCandidate,
+        bestRunnerTie: true,
+        tieKey,
+        tieCandidates: tiedCandidates,
+        tieResolved: true,
+        tieSelected: true
+      }];
+    }
+  }
+
+  return candidates.slice(0, count);
+}
+
+function getStageSeeds(category, pools) {
+  const rankedPools = buildRankedPools(pools);
+
+  if (category.middle === "Super-pool") {
+    return SUPER_POOL_ASSIGNMENTS
+      .flatMap(assignment => assignment.sourcePools)
+      .map(pool => getPoolSeed(rankedPools, pool, 1));
+  }
+
+  if (!category.flow.includes("SF")) {
+    if (category.flow.startsWith("1P")) {
+      return [
+        getPoolSeed(rankedPools, "A", 1),
+        getPoolSeed(rankedPools, "A", 2)
+      ];
+    }
+    return ["A", "B"].map(pool => getPoolSeed(rankedPools, pool, 1));
+  }
+
+  if (category.flow.startsWith("2P")) {
+    return [
+      getPoolSeed(rankedPools, "A", 1),
+      getPoolSeed(rankedPools, "B", 2),
+      getPoolSeed(rankedPools, "B", 1),
+      getPoolSeed(rankedPools, "A", 2)
+    ];
+  }
+
+  if (category.flow.startsWith("3P")) {
+    const winners = ["A", "B", "C"].map(pool => getPoolSeed(rankedPools, pool, 1));
+    const bestRunner = winners.every(Boolean) ? getBestRunners(rankedPools, 1)[0] : null;
+    return [...winners, bestRunner];
+  }
+
+  return [
+    getPoolSeed(rankedPools, "A", 1),
+    getPoolSeed(rankedPools, "D", 1),
+    getPoolSeed(rankedPools, "B", 1),
+    getPoolSeed(rankedPools, "C", 1)
+  ];
+}
+
+function pairTeams(teams) {
+  const pairs = [];
+  for (let index = 0; index < teams.length; index += 2) {
+    pairs.push([teams[index], teams[index + 1]]);
+  }
+  return pairs;
+}
+
+function getPlayerNamesForOrbit(pairName) {
+  const names = String(pairName || "Winner")
+    .split("/")
+    .map(name => name.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  return names.length ? names : [String(pairName || "Winner")];
+}
+
+function renderWinnerTrophy(team) {
+  const orbitNames = getPlayerNamesForOrbit(team?.name);
+  const secondName = orbitNames[1] || orbitNames[0];
+  return `
+    <div class="winner-trophy-stage">
+      <div class="winner-trophy-orbit" aria-label="Winner ${escapeHtml(team?.name || "")}">
+        <div class="winner-sprinkles" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="winner-confetti-shower" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="winner-trophy" aria-hidden="true">
+          <svg viewBox="0 0 96 96" role="img" focusable="false">
+            <path fill="#f2b84b" d="M28 12h40v11h12c0 17-7 28-21 32-2 6-6 10-11 11v9h17v9H31v-9h17v-9c-5-1-9-5-11-11-14-4-21-15-21-32h12V12Zm6 8v23c0 12 6 20 14 20s14-8 14-20V20H34Zm34 11v12c5-3 8-7 9-12h-9Zm-49 0c1 5 4 9 9 12V31h-9Z"/>
+            <path fill="#fff3b0" d="M38 20h20v5H38z" opacity=".72"/>
+            <path fill="#b87916" d="M31 84h34v5H31z" opacity=".9"/>
+          </svg>
+        </div>
+        <div class="winner-trophy-orbit-ring">
+          <div class="winner-name-stack">
+            <span>${escapeHtml(orbitNames[0])}</span>
+            <span>${escapeHtml(secondName)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="winner-trophy-label">Winners</div>
+    </div>
+  `;
+}
+
+function renderDetailedScorePair(teamA, teamB, scoreDetails) {
+  const classes = scoreDetails.isFinal && scoreDetails.winnerIndex
+    ? {
+        first: Number(scoreDetails.winnerIndex) === 1 ? "final-winner-name" : "final-runner-name",
+        second: Number(scoreDetails.winnerIndex) === 2 ? "final-winner-name" : "final-runner-name"
+      }
+    : getHeadToHeadNameClasses(scoreDetails.firstGames, scoreDetails.secondGames);
+  const showVersus = String(scoreDetails.state || "").toLowerCase() !== "finished";
+  return `
+    <div class="match-teams">
+      <div class="pool-match knockout-score-pair ${showVersus ? "with-vs" : ""}">
+        <strong class="${classes.first}">${escapeHtml(teamA?.name || "TBC")}</strong>
+        ${showVersus ? '<span class="knockout-vs" aria-label="versus">VS</span>' : ""}
+        <span class="score-chip detailed">
+          <span class="game-points">${escapeHtml(scoreDetails.gamePoints)}</span>
+          <span class="score-total">${escapeHtml(`Games ${scoreDetails.totalGames} · Points ${scoreDetails.totalPoints}`)}</span>
+        </span>
+        <strong class="${classes.second}">${escapeHtml(teamB?.name || "TBC")}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function renderMatchCard(title, teamA, teamB, state = "Pending", scoreDetails = null) {
+  const isPending = state.toLowerCase() === "pending";
+  const stateClass = isPending ? "pending" : state.toLowerCase() === "finished" ? "finished" : "";
+  const hasDetailedScore = scoreDetails && typeof scoreDetails === "object";
+  const displayScoreDetails = hasDetailedScore ? { ...scoreDetails, state, isFinal: /^Finals?$/i.test(title) } : null;
+  const finalWinner = displayScoreDetails?.isFinal && displayScoreDetails.winnerIndex
+    ? (Number(displayScoreDetails.winnerIndex) === 1 ? teamA : teamB)
+    : null;
+  return `
+    <article class="match-card">
+      <div class="match-head">
+        <div class="match-name">${escapeHtml(title)}</div>
+        <div class="match-state ${stateClass}">${escapeHtml(state)}</div>
+      </div>
+      ${hasDetailedScore ? renderDetailedScorePair(teamA, teamB, displayScoreDetails) : `
+        <div class="match-teams">
+          <div class="match-team">
+            <span>${escapeHtml(teamA?.name || "TBC")}</span>
+            <span class="seed">${escapeHtml(teamA?.label || "")}</span>
+          </div>
+          <div class="match-versus" aria-label="versus">VS</div>
+          <div class="match-team">
+            <span>${escapeHtml(teamB?.name || "TBC")}</span>
+            <span class="seed">${escapeHtml(teamB?.label || "")}</span>
+          </div>
+        </div>
+      `}
+      ${finalWinner ? renderWinnerTrophy(finalWinner) : ""}
+    </article>
+  `;
+}
+
+function summarizeKnockoutEntry(entry) {
+  if (!entry || !Array.isArray(entry.teams) || entry.teams.length < 2) return null;
+
+  const scoreMap = buildScoreMap(entry);
+  const firstScore = scoreMap.get("1-2") || { games: 0, points: 0, sets: [] };
+  const secondScore = scoreMap.get("2-1") || { games: 0, points: 0, sets: [] };
+  const result = getMatchResult(scoreMap, 1, 2);
+  const scoreDetails = result.started
+    ? {
+        gamePoints: formatGamePointScores(firstScore, secondScore),
+        firstGames: firstScore.games,
+        secondGames: secondScore.games,
+        totalGames: `${firstScore.games}-${secondScore.games}`,
+        totalPoints: `${firstScore.points}-${secondScore.points}`,
+        winnerIndex: result.winner
+      }
+    : null;
+
+  return {
+    teams: [
+      { name: getTeamName(entry.teams[0], "Team 1"), label: entry.match || entry.pool || "" },
+      { name: getTeamName(entry.teams[1], "Team 2"), label: entry.match || entry.pool || "" }
+    ],
+    winnerIndex: result.winner,
+    state: result.played ? (result.winner ? "Finished" : "Live") : (result.started ? "Live" : "Pending"),
+    scoreDetails
+  };
+}
+
+function renderKnockoutMatchCard(title, entry, fallbackA, fallbackB) {
+  const summary = summarizeKnockoutEntry(entry);
+  if (!summary) return renderMatchCard(title, fallbackA, fallbackB, "Pending");
+
+  return renderMatchCard(
+    title,
+    summary.teams[0] || fallbackA,
+    summary.teams[1] || fallbackB,
+    summary.state,
+    summary.scoreDetails
+  );
+}
+
+function getKnockoutWinner(entry, fallbackName) {
+  const summary = summarizeKnockoutEntry(entry);
+  if (!summary?.winnerIndex) return { name: fallbackName, label: "", finalized: false };
+
+  return {
+    ...summary.teams[summary.winnerIndex - 1],
+    label: fallbackName,
+    finalized: true
+  };
+}
+
+function getSlotOnlyTeam(team) {
+  return team ? { name: team.pendingLabel || team.label || "TBC", label: "" } : null;
+}
+
+function getSemiFinalPlaceholderName(category, index) {
+  if (category.flow.startsWith("2P")) {
+    return [
+      "Winner of Pool A",
+      "Runner-up of Pool B",
+      "Winner of Pool B",
+      "Runner-up of Pool A"
+    ][index] || "TBC";
+  }
+
+  if (category.flow.startsWith("3P")) {
+    return [
+      "Winner of Pool A",
+      "Winner of Pool B",
+      "Winner of Pool C",
+      "Best runner-up"
+    ][index] || "TBC";
+  }
+
+  return [
+    "Winner of Pool A",
+    "Winner of Pool D",
+    "Winner of Pool B",
+    "Winner of Pool C"
+  ][index] || "TBC";
+}
+
+function fillSemiFinalPlaceholders(category, teams) {
+  return teams.map((team, index) => team || {
+    name: getSemiFinalPlaceholderName(category, index),
+    label: "",
+    finalized: false
+  });
+}
+
+function isStageSeedFinalized(team, poolCompletionMap, allPoolsComplete) {
+  if (!team) return false;
+  if (team.pendingTie) return false;
+  if (team.bestRunner) return allPoolsComplete;
+  return Boolean(poolCompletionMap.get(team.pool));
+}
+
+function revealFinalizedStageSeeds(teams, poolCompletionMap, allPoolsComplete) {
+  return teams.map(team => (
+    isStageSeedFinalized(team, poolCompletionMap, allPoolsComplete)
+      ? team
+      : getSlotOnlyTeam(team)
+  ));
+}
+
+function buildSuperPools(stageSeeds, allPools, poolCompletionMap) {
+  return SUPER_POOL_ASSIGNMENTS.map(assignment => {
+    const existingPool = getPoolByName(allPools, assignment.poolName);
+    const existingEntry = existingPool?.entry || null;
+    const teams = assignment.sourcePools.map((sourcePool, index) => {
+      const seed = stageSeeds.find(team => team.pool === sourcePool);
+      const existingTeam = existingEntry?.teams?.[index];
+      const finalized = seed && isStageSeedFinalized(seed, poolCompletionMap, true);
+
+      return {
+        name: finalized ? seed.name : getTeamName(existingTeam, `Winner of Pool ${sourcePool}`),
+        source: `Winner of Pool ${sourcePool}`
+      };
+    });
+
+    return {
+      poolName: assignment.poolName,
+      sourcePools: assignment.sourcePools,
+      entry: {
+        ...(existingEntry || {}),
+        pool: assignment.poolName,
+        format: teams.length,
+        teams,
+        scores: Array.isArray(existingEntry?.scores) ? existingEntry.scores : []
+      }
+    };
+  });
+}
+
+function renderSuperPoolCard(pool) {
+  const winnerDecided = Boolean(getDecidedPoolWinner(pool.entry));
+  const state = winnerDecided
+    ? { text: "Finished", pending: false, className: "finished" }
+    : describePoolState(pool.entry);
+  const standings = buildStandings(pool.entry);
+  const poolFinished = isPoolComplete(pool.entry) || winnerDecided;
+  const sourceText = pool.sourcePools.map(sourcePool => `Pool ${sourcePool}`).join(", ");
+  const rows = standings.length
+    ? standings.map((team, index) => `
+      <tr class="${getTieRowClass(team)}">
+        <td><span class="rank ${isDecidedQualifier(team, 1) ? "qualifier" : ""}">${escapeHtml(`${pool.poolName}${team.seed}`)}</span></td>
+        <td><span class="team-name">${escapeHtml(team.name)}</span></td>
+        <td>${escapeHtml(team.source || "")}</td>
+        <td>${team.games}</td>
+        <td>${team.points} / ${team.pointsConceded}</td>
+        <td>${renderStandingValue(pool.poolName, team, poolFinished)}</td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="6">Super-pool qualifiers will appear here when pool winners are confirmed.</td></tr>`;
+
+  return `
+    <article class="pool-card">
+      <div class="pool-card-head">
+        <div class="pool-name">Super-pool ${escapeHtml(pool.poolName)} (${escapeHtml(sourceText)} winners)</div>
+        <div class="pool-state ${state.className || ""}">${state.text}</div>
+      </div>
+      <div class="standings-scroll">
+        <table class="standings">
+          <thead>
+            <tr><th>Seed</th><th>Team</th><th>From</th><th>GW</th><th>TPts / TPtc</th><th>Standing</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${buildPoolMatches(pool.entry)}
+    </article>
+  `;
+}
+
+function renderBestRunnerTieCard(stageSeeds) {
+  const tieSeed = stageSeeds.find(team => team?.bestRunnerTie && Array.isArray(team.tieCandidates));
+  if (!tieSeed) return "";
+  const selectedValue = getBestRunnerSelection(tieSeed.tieKey);
+
+  return `
+    <div class="best-runner-tie-card">
+      <div class="best-runner-tie-title">Best runner-up tie</div>
+      <div class="best-runner-tie-note">Games won and total points are tied. Select one runner-up to promote to the semi final.</div>
+      <div class="best-runner-tie-options">
+        ${tieSeed.tieCandidates.map(candidate => {
+          const value = getBestRunnerValue(candidate);
+          const selected = value === selectedValue;
+          return `
+            <label class="best-runner-choice ${selected ? "selected" : ""} ${selectedValue ? "resolved-tie" : "unresolved-tie"}">
+              <input
+                class="best-runner-radio"
+                type="radio"
+                name="${escapeHtml(tieSeed.tieKey)}"
+                value="${escapeHtml(value)}"
+                data-tie-key="${escapeHtml(tieSeed.tieKey)}"
+                ${selected ? "checked" : ""}
+              >
+              <strong>${escapeHtml(candidate.name)}</strong>
+              <span>${escapeHtml(`Pool ${candidate.pool} - Games ${candidate.games}, Points ${candidate.points}${selected ? " - Selected" : ""}`)}</span>
+            </label>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function getSuperPoolFinalist(pool) {
+  if (!pool?.entry) {
+    return { name: `Winner of Super-pool ${pool?.poolName || ""}`.trim(), label: "", finalized: false };
+  }
+
+  const winner = isPoolComplete(pool.entry)
+    ? buildStandings(pool.entry)[0]
+    : getDecidedPoolWinner(pool.entry);
+
+  if (!winner || (winner.tiedStanding && !winner.tieResolved)) {
+    return { name: `Winner of Super-pool ${pool.poolName}`, label: "", finalized: false };
+  }
+
+  return {
+    ...winner,
+    label: `Winner of Super-pool ${pool.poolName}`,
+    finalized: true
+  };
+}
+
+function renderMiddleStage(category, stageSeeds, poolCompletionMap = new Map(), allPoolsComplete = true, superPools = [], knockoutEntries = {}) {
+  if (category.middle === "Super-pool") {
+    const title = escapeHtml(category.middle);
+    const note = "Super-pool X has Pool A, B, C winners. Super-pool Y has Pool D, E, F winners. Same ranking rule applies.";
+    if (!superPools.length) {
+      return {
+        title,
+        note,
+        html: `<div class="empty-card">Super-pool places will appear here when pool winners are confirmed.</div>`
+      };
+    }
+    return {
+      title,
+      note,
+      html: superPools.map(renderSuperPoolCard).join("")
+    };
+  }
+
+  if (category.flow.includes("> F") && !category.flow.includes("SF")) {
+    const directNote = category.flow.startsWith("1P")
+      ? "Top two teams from Pool A feed straight into the final lane."
+      : "Pool winners feed straight into the final lane.";
+    return {
+      title: escapeHtml(category.middle),
+      note: directNote,
+      html: `<div class="empty-card">This category goes from pool play directly to the final.</div>`
+    };
+  }
+
+  const title = escapeHtml(category.middle);
+  const note = "Pending semi-final pairings are based on the current pool standings.";
+  const semiTeams = fillSemiFinalPlaceholders(
+    category,
+    revealFinalizedStageSeeds(stageSeeds.slice(0, 4), poolCompletionMap, allPoolsComplete)
+  );
+  const pairs = pairTeams(semiTeams);
+  const bestRunnerTieCard = allPoolsComplete ? renderBestRunnerTieCard(stageSeeds) : "";
+
+  if (!semiTeams.length) {
+    return {
+      title,
+      note,
+      html: `<div class="empty-card">Semi-final places will appear here when pool scores are saved.</div>`
+    };
+  }
+
+  return {
+    title,
+    note,
+    html: bestRunnerTieCard + pairs.map((pair, index) => {
+      const matchKey = `SF${index + 1}`;
+      return renderKnockoutMatchCard(`Semi Final ${index + 1}`, knockoutEntries.semiFinal?.[matchKey], pair[0], pair[1]);
+    }).join("")
+  };
+}
+
+function renderFinalStage(category, stageSeeds, previousStageComplete = true, poolCompletionMap = new Map(), allPoolsComplete = true, superPools = [], knockoutEntries = {}) {
+  const finalEntry = knockoutEntries.final?.F;
+
+  if (category.middle === "Super-pool") {
+    const finalists = SUPER_POOL_ASSIGNMENTS.map(assignment => (
+      getSuperPoolFinalist(superPools.find(pool => pool.poolName === assignment.poolName))
+    ));
+    const finalistsReady = finalists.every(finalist => finalist.finalized);
+    return finalEntry
+      ? renderKnockoutMatchCard("Final", finalEntry, finalists[0], finalists[1])
+      : renderMatchCard("Final", finalists[0], finalists[1], finalistsReady ? "Ready" : "Pending");
+  }
+
+  if (!category.flow.includes("SF")) {
+    const finalSeeds = stageSeeds.slice(0, 2);
+    const finalists = revealFinalizedStageSeeds(finalSeeds, poolCompletionMap, allPoolsComplete);
+    const finalistsReady = finalSeeds.length >= 2 && finalSeeds.every(team => isStageSeedFinalized(team, poolCompletionMap, allPoolsComplete));
+    return finalEntry
+      ? renderKnockoutMatchCard("Finals", finalEntry, finalists[0], finalists[1])
+      : renderMatchCard("Finals", finalists[0], finalists[1], finalistsReady ? "Ready" : "Pending");
+  }
+
+  const finalists = [
+    getKnockoutWinner(knockoutEntries.semiFinal?.SF1, "Winner Semi Final 1"),
+    getKnockoutWinner(knockoutEntries.semiFinal?.SF2, "Winner Semi Final 2")
+  ];
+  const finalistsReady = finalists.every(finalist => finalist.finalized);
+
+  return finalEntry
+    ? renderKnockoutMatchCard("Final", finalEntry, finalists[0], finalists[1])
+    : renderMatchCard("Final", finalists[0], finalists[1], finalistsReady ? "Ready" : "Pending");
+}
+
+function createStageCounts(label) {
+  return { label, ready: 0, pending: 0, live: 0, finished: 0 };
+}
+
+function normalizeStageStatus(state) {
+  const text = String(state || "").toLowerCase();
+  if (text === "finished") return "finished";
+  if (text === "live") return "live";
+  if (text === "ready") return "ready";
+  return "pending";
+}
+
+function addStageStatus(counts, state) {
+  counts[normalizeStageStatus(state)] += 1;
+}
+
+function getEntryState(entry) {
+  const summary = summarizeKnockoutEntry(entry);
+  return summary?.state || "Pending";
+}
+
+function areStageSeedsReady(teams, poolCompletionMap, allPoolsComplete) {
+  return teams.length > 0 && teams.every(team => isStageSeedFinalized(team, poolCompletionMap, allPoolsComplete));
+}
+
+function summarizeSuperPoolStage(stageSeeds, allPools, poolCompletionMap) {
+  const counts = createStageCounts("SP");
+  const superPools = buildSuperPools(stageSeeds, allPools, poolCompletionMap);
+
+  SUPER_POOL_ASSIGNMENTS.forEach(assignment => {
+    const pool = superPools.find(item => item.poolName === assignment.poolName);
+    if (pool?.entry && hasAnyPoolResult(pool.entry)) {
+      addStageStatus(counts, getDecidedPoolWinner(pool.entry) ? "Finished" : describePoolState(pool.entry).text);
+      return;
+    }
+
+    const sourcesReady = assignment.sourcePools.every(sourcePool => {
+      const seed = stageSeeds.find(team => team?.pool === sourcePool);
+      return isStageSeedFinalized(seed, poolCompletionMap, true);
+    });
+    addStageStatus(counts, sourcesReady ? "Ready" : "Pending");
+  });
+
+  return counts;
+}
+
+function summarizeSemiFinalStage(category, stageSeeds, poolCompletionMap, allPoolsComplete, knockoutEntries) {
+  const counts = createStageCounts("SF");
+  const semiSeeds = stageSeeds.slice(0, 4);
+
+  ["SF1", "SF2"].forEach((matchKey, index) => {
+    const entry = knockoutEntries.semiFinal?.[matchKey];
+    if (entry && hasAnyPoolResult(entry)) {
+      addStageStatus(counts, getEntryState(entry));
+      return;
+    }
+
+    const pair = semiSeeds.slice(index * 2, index * 2 + 2);
+    addStageStatus(counts, areStageSeedsReady(pair, poolCompletionMap, allPoolsComplete) ? "Ready" : "Pending");
+  });
+
+  return counts;
+}
+
+function summarizeFinalStage(category, stageSeeds, poolCompletionMap, allPoolsComplete, superPoolCounts, knockoutEntries, allPools) {
+  const counts = createStageCounts("F");
+  const finalEntry = knockoutEntries.final?.F;
+
+  if (finalEntry && hasAnyPoolResult(finalEntry)) {
+    addStageStatus(counts, getEntryState(finalEntry));
+    return counts;
+  }
+
+  if (category.middle === "Super-pool") {
+    const superPools = buildSuperPools(stageSeeds, allPools, poolCompletionMap);
+    const finalistsReady = SUPER_POOL_ASSIGNMENTS.every(assignment => {
+      const finalist = getSuperPoolFinalist(superPools.find(pool => pool.poolName === assignment.poolName));
+      return finalist.finalized;
+    });
+    addStageStatus(counts, finalistsReady ? "Ready" : "Pending");
+    return counts;
+  }
+
+  if (!category.flow.includes("SF")) {
+    const finalSeeds = stageSeeds.slice(0, 2);
+    addStageStatus(counts, areStageSeedsReady(finalSeeds, poolCompletionMap, allPoolsComplete) ? "Ready" : "Pending");
+    return counts;
+  }
+
+  const finalistsReady = [
+    getKnockoutWinner(knockoutEntries.semiFinal?.SF1, "Winner Semi Final 1"),
+    getKnockoutWinner(knockoutEntries.semiFinal?.SF2, "Winner Semi Final 2")
+  ].every(finalist => finalist.finalized);
+  addStageStatus(counts, finalistsReady ? "Ready" : "Pending");
+  return counts;
+}
+
+function renderStageCounts(stageCounts) {
+  const labels = [
+    ["pending", "Pending"],
+    ["ready", "Ready"],
+    ["live", "Live"],
+    ["finished", "Finished"]
+  ];
+
+  return `
+    <div class="tile-stage-board">
+      ${stageCounts.map(stage => `
+        <div class="tile-stage-row">
+          <div class="tile-stage-label">${escapeHtml(stage.label)}</div>
+          ${labels.map(([key, label]) => `
+            <div class="tile-stage-count status-${key}">
+              <strong>${stage[key]}</strong>
+              <span>${label}</span>
+            </div>
+          `).join("")}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function formatTeamsPerPool(preliminaryPools, category) {
+  const counts = preliminaryPools
+    .map(pool => Array.isArray(pool.entry?.teams) ? pool.entry.teams.length : 0)
+    .filter(Boolean);
+  const uniqueCounts = [...new Set(counts)].sort((a, b) => a - b);
+
+  if (uniqueCounts.length) return uniqueCounts.join("/");
+
+  const poolCount = preliminaryPools.length || 0;
+  if (poolCount && category.teams) {
+    const average = category.teams / poolCount;
+    return Number.isInteger(average) ? String(average) : average.toFixed(1);
+  }
+
+  return "0";
+}
+
+function renderCategoryInfo(summary) {
+  return `
+    <div class="tile-category-info">
+      <div class="tile-info-item"><strong>${summary.poolCount}</strong><span>Pools</span></div>
+      <div class="tile-info-item"><strong>${summary.totalTeams}</strong><span>Teams</span></div>
+      <div class="tile-info-item"><strong>${escapeHtml(summary.teamsPerPool)}</strong><span>Teams/Pool</span></div>
+    </div>
+  `;
+}
+
+function summarizeScoreFile(scoreFile, category, tournamentData) {
+  const pools = latestEntriesByPool(scoreFile, category, tournamentData);
+  const preliminaryPools = getPreliminaryPools(category, pools);
+  const allPools = pools.length ? pools : ["A", "B", "C", "D"].map(poolName => ({ poolName, entries: [], entry: null }));
+  const poolCount = preliminaryPools.length;
+  const totalTeams = preliminaryPools.reduce((sum, pool) => {
+    const teamCount = Array.isArray(pool.entry?.teams) ? pool.entry.teams.length : 0;
+    return sum + teamCount;
+  }, 0) || category.teams || 0;
+  const teamsPerPool = formatTeamsPerPool(preliminaryPools, category);
+  const stageSeeds = getStageSeeds(category, preliminaryPools);
+  const poolCompletionMap = getPoolCompletionMap(preliminaryPools);
+  const poolStageComplete = arePoolsComplete(preliminaryPools);
+  const knockoutEntries = getKnockoutEntries(scoreFile);
+  const poolCounts = createStageCounts("P");
+  preliminaryPools.forEach(pool => addStageStatus(poolCounts, describePoolState(pool.entry).text));
+  const stageCounts = [poolCounts];
+
+  let superPoolCounts = null;
+  if (category.middle === "Super-pool") {
+    superPoolCounts = summarizeSuperPoolStage(stageSeeds, allPools, poolCompletionMap);
+    stageCounts.push(superPoolCounts);
+  } else if (category.flow.includes("SF")) {
+    stageCounts.push(summarizeSemiFinalStage(category, stageSeeds, poolCompletionMap, poolStageComplete, knockoutEntries));
+  }
+
+  stageCounts.push(summarizeFinalStage(category, stageSeeds, poolCompletionMap, poolStageComplete, superPoolCounts, knockoutEntries, allPools));
+  const updated = pools
+    .map(pool => pool.entry?.savedAt)
+    .filter(Boolean)
+    .sort()
+    .pop();
+  return { poolCount, totalTeams, teamsPerPool, stageCounts, updated };
+}
+
+async function renderHome() {
+  document.body.classList.remove("detail");
+  setError("");
+  const grid = document.getElementById("categoryGrid");
+  const tournamentData = await fetchTournamentData();
+  const cards = await Promise.all(CATEGORIES.map(async category => {
+    try {
+      const scoreFile = await fetchScoreFile(category);
+      const summary = summarizeScoreFile(scoreFile, category, tournamentData);
+      const updatedText = summary.updated ? new Date(summary.updated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Waiting for scores";
+      return {
+        category,
+        html: `
+        <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
+          <div class="tile-head">
+            <div>
+              <div class="tile-title">${escapeHtml(category.title)}</div>
+              <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+            </div>
+            <div class="tile-badge">${escapeHtml(category.flow)}</div>
+          </div>
+          ${renderCategoryInfo(summary)}
+          ${renderStageCounts(summary.stageCounts)}
+          <div class="tile-meta">
+            <span>Scheduled Start Time: ${escapeHtml(category.start)}</span>
+            <span>Last Score update: ${escapeHtml(updatedText)}</span>
+          </div>
+        </a>
+      `};
+    } catch (error) {
+      return {
+        category,
+        html: `
+        <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
+          <div class="tile-head">
+            <div>
+              <div class="tile-title">${escapeHtml(category.title)}</div>
+              <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+            </div>
+            <div class="tile-badge">${escapeHtml(category.flow)}</div>
+          </div>
+          <div class="tile-status">Score file is not available yet.</div>
+        </a>
+      `};
+    }
+  }));
+
+  const groups = cards.reduce((eventGroups, card) => {
+    if (!eventGroups.has(card.category.event)) {
+      eventGroups.set(card.category.event, {
+        accent: card.category.accent,
+        cards: []
+      });
+    }
+    eventGroups.get(card.category.event).cards.push(card.html);
+    return eventGroups;
+  }, new Map());
+
+  grid.innerHTML = Array.from(groups, ([event, group]) => `
+    <section class="category-row" aria-label="${escapeHtml(event)} categories" style="--accent:${group.accent}">
+      <h2 class="category-row-heading">${escapeHtml(event)}</h2>
+      <div class="category-row-cards">${group.cards.join("")}</div>
+    </section>
+  `).join("");
+  document.getElementById("homeRefresh").textContent = formatTime();
+}
+
+async function renderDetail(category) {
+  document.body.classList.add("detail");
+  setError("");
+  document.documentElement.style.setProperty("--accent", category.accent);
+  document.getElementById("detailTitle").textContent = `${category.title} - ${category.grade}`;
+  const directToFinal = category.flow.includes("> F") && !category.flow.includes("SF") && category.middle !== "Super-pool";
+  document.getElementById("detailCopy").textContent = directToFinal
+    ? `${category.flow.replaceAll(">", "to")} flow. Live board from pool standings to final.`
+    : `${category.flow.replaceAll(">", "to")} flow. Live board from pool standings through ${category.middle.toLowerCase()} and final.`;
+
+  try {
+    const [scoreFile, tournamentData] = await Promise.all([
+      fetchScoreFile(category),
+      fetchTournamentData()
+    ]);
+    const pools = latestEntriesByPool(scoreFile, category, tournamentData).sort((a, b) => a.poolName.localeCompare(b.poolName));
+    const allPools = pools.length ? pools : ["A", "B", "C", "D"].map(poolName => ({ poolName, entries: [], entry: null }));
+    const visiblePools = getPreliminaryPools(category, allPools);
+    const stageSeeds = getStageSeeds(category, visiblePools);
+    const poolCompletionMap = getPoolCompletionMap(visiblePools);
+    const poolStageComplete = arePoolsComplete(visiblePools);
+    const knockoutEntries = getKnockoutEntries(scoreFile);
+    const superPools = category.middle === "Super-pool"
+      ? buildSuperPools(stageSeeds, allPools, poolCompletionMap)
+      : [];
+
+    const stageItems = [
+      {
+        title: `Pool <span>${escapeHtml(visiblePools.length)} pools</span>`,
+        note: RANKING_RULE_TEXT,
+        targetId: "poolList",
+        listClass: "pool-list"
+      },
+      {
+        title: "Final",
+        note: directToFinal
+          ? "Pool winners populate as scores are confirmed."
+          : "Finalists populate from the previous stage as the draw is confirmed.",
+        targetId: "finalList",
+        listClass: "knockout-list"
+      }
+    ];
+
+    if (!directToFinal) {
+      const middleStage = renderMiddleStage(category, stageSeeds, poolCompletionMap, poolStageComplete, superPools, knockoutEntries);
+      stageItems.splice(1, 0, {
+        title: middleStage.title,
+        note: middleStage.note,
+        targetId: "middleList",
+        listClass: "knockout-list",
+        html: middleStage.html
+      });
+    }
+
+    hideStageSummary();
+    renderStandardStageFlow(stageItems);
+    document.getElementById("poolList").innerHTML = visiblePools.map(renderPoolCard).join("");
+    if (!directToFinal) {
+      document.getElementById("middleList").innerHTML = stageItems[1].html;
+    }
+    document.getElementById("finalList").innerHTML = renderFinalStage(category, stageSeeds, poolStageComplete, poolCompletionMap, poolStageComplete, superPools, knockoutEntries);
+    document.getElementById("detailRefresh").textContent = formatTime();
+    resetRefreshCountdown();
+  } catch (error) {
+    setError("Scores could not be loaded. Open this page through the local scoring server or check the score JSON files.");
+    document.getElementById("detailRefresh").textContent = "Load failed";
+    resetRefreshCountdown();
+  }
+}
+
+async function refresh() {
+  if (selectedCategory) {
+    await renderDetail(selectedCategory);
+  } else {
+    await renderHome();
+  }
+}
+
+async function refreshAndSchedule() {
+  if (refreshTimer) {
+    window.clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+
+  await loadRefreshSettings();
+  await refresh();
+  refreshTimer = window.setTimeout(refreshAndSchedule, refreshMs);
+  resetRefreshCountdown();
+}
+
+if (!selectedCategory && params.has("category")) {
+  setError("Unknown category. Showing all live categories instead.");
+}
+
+document.addEventListener("change", async event => {
+  const input = event.target?.closest?.(".tie-break-radio");
+  const bestRunnerInput = event.target?.closest?.(".best-runner-radio");
+
+  if (input) {
+    const action = getTieActionFromInput(input);
+    if (!liveTieAdminAuthorized) {
+      await requestTieAdminApproval(action);
+      return;
+    }
+    applyTieAction(action);
+    return;
+  }
+
+  if (bestRunnerInput) {
+    const action = getTieActionFromInput(bestRunnerInput);
+    if (!liveTieAdminAuthorized) {
+      await requestTieAdminApproval(action);
+      return;
+    }
+    applyTieAction(action);
+    return;
+  }
+});
+
+document.addEventListener("click", async event => {
+  const input = getTieInputFromEventTarget(event.target);
+  if (!input || liveTieAdminAuthorized) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  await requestTieAdminApproval(getTieActionFromInput(input));
+}, true);
+
+document.addEventListener("keydown", async event => {
+  if (![" ", "Enter"].includes(event.key) || liveTieAdminAuthorized) return;
+  const input = getTieInputFromEventTarget(event.target);
+  if (!input) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  await requestTieAdminApproval(getTieActionFromInput(input));
+}, true);
+
+document.getElementById("tieAdminForm")?.addEventListener("submit", approveTieAdminSelection);
+document.getElementById("tieAdminCancel")?.addEventListener("click", () => {
+  closeTieAdminModal();
+  refresh();
+});
+document.getElementById("tieLockOk")?.addEventListener("click", () => {
+  closeTieLockModal();
+  refresh();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && document.getElementById("tieLockModal")?.classList.contains("show")) {
+    closeTieLockModal();
+    refresh();
+    return;
+  }
+  if (event.key === "Escape" && document.getElementById("tieAdminModal")?.classList.contains("show")) {
+    closeTieAdminModal();
+    refresh();
+  }
+});
+
+refreshAndSchedule();
+resetRefreshCountdown();
+countdownTimer = window.setInterval(updateRefreshCountdown, 1000);
+</script>
+</body>
+</html>
