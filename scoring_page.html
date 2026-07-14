@@ -1,0 +1,4191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex Sports - Badminton Scoring</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(26,26,46,0.96);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 1.1rem;
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .round-match-banner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+            min-height: 36px;
+            padding: 7px 18px;
+            border: 1px solid rgba(242,184,75,0.5);
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(242,184,75,0.24), rgba(233,69,96,0.18));
+            color: #ffe2a3;
+            font-size: 0.98rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+        }
+
+        .admin-actions {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .logout-btn {
+            min-height: 34px;
+            padding: 7px 12px;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font: inherit;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: rgba(233,69,96,0.22);
+            border-color: rgba(233,69,96,0.5);
+        }
+
+        /* Tournament Info Section */
+        .tournament-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-group {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .info-group input, .info-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .info-group input:focus, .info-group select:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 2px rgba(233,69,96,0.2);
+        }
+
+        .info-group select {
+            background: rgba(39,174,96,0.1);
+            border-color: rgba(39,174,96,0.3);
+            color: #fff;
+        }
+
+        .live-refresh-control {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .live-refresh-control button {
+            min-height: 42px;
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            color: #fff;
+            font: inherit;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .live-refresh-control button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .live-refresh-note {
+            margin-top: 7px;
+            color: #aaa;
+            font-size: 0.72rem;
+            line-height: 1.35;
+        }
+
+        .radio-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .radio-option {
+            display: flex !important;
+            align-items: center;
+            gap: 8px;
+            margin: 0 !important;
+            color: #fff !important;
+            font-size: 0.84rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
+            text-transform: none !important;
+            cursor: pointer;
+        }
+
+        .radio-option input {
+            width: 16px;
+            height: 16px;
+            accent-color: #e94560;
+            flex-shrink: 0;
+        }
+
+        select option {
+            background: #fff;
+            color: #1a1a2e;
+        }
+
+        select option:checked {
+            background: #c8f7d0;
+            color: #fff;
+        }
+
+        /* Scoring Table */
+        .scoring-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow-x: hidden;
+            margin-bottom: 25px;
+        }
+
+        .scoring-section h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .score-entry-heading {
+            display: block;
+        }
+
+        .score-entry-title-context {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 38px;
+            margin: 0 0 14px;
+            padding: 9px 14px;
+            border: 1px solid rgba(52,152,219,0.42);
+            border-left: 6px solid #3498db;
+            border-right: 6px solid #3498db;
+            border-radius: 8px;
+            background: linear-gradient(90deg, rgba(11,42,74,0.86), rgba(52,152,219,0.22));
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0;
+            text-align: center;
+            text-transform: none;
+        }
+
+        .score-entry-context {
+            display: flex;
+            justify-content: center;
+            margin: 0 0 14px;
+        }
+
+        .score-entry-context span {
+            min-width: min(360px, 100%);
+            padding: 9px 18px;
+            border: 1px solid rgba(233,69,96,0.42);
+            border-left: 6px solid #e94560;
+            border-right: 6px solid #e94560;
+            border-radius: 8px;
+            background: linear-gradient(90deg, rgba(233,69,96,0.22), rgba(52,152,219,0.16));
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-align: center;
+            text-transform: uppercase;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+        }
+
+        .score-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .score-table col.slot-col { width: 74px; }
+        .score-table col.team-name-col { width: 190px; }
+        .score-table col.set-col { width: 42px; }
+        .score-table col.score-col { width: calc((100% - 476px) / var(--score-cols)); }
+        .score-table col.total-games-col { width: 82px; }
+        .score-table col.total-points-won-col { width: 88px; }
+        .score-table col.total-points-conceded-col { width: 88px; }
+        .score-table col.total-points-diff-col { width: 72px; }
+
+        .score-table th {
+            background: rgba(233,69,96,0.2);
+            padding: 9px 4px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-table th.vs-header {
+            text-transform: none;
+        }
+
+        .score-table .vs-label {
+            color: #fff;
+        }
+
+        .score-table .vs-team-label {
+            color: #e94560;
+        }
+
+        .score-table .vs-team-name {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #f39c12;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .score-table td {
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            vertical-align: middle;
+        }
+
+        .score-table .team-cell {
+            text-align: left;
+            padding-left: 12px;
+            font-weight: 600;
+            width: 190px;
+            min-width: 190px;
+            max-width: 190px;
+            background: rgba(255,255,255,0.03);
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: normal;
+            line-height: 1.28;
+        }
+
+        .score-table .set-label {
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .score-table .slot-num {
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .score-input {
+            width: 100%;
+            min-width: 0;
+            padding: 6px 4px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: #e94560;
+            background: rgba(233,69,96,0.1);
+        }
+
+        .score-input.has-value {
+            background: rgba(39,174,96,0.1);
+            border-color: rgba(39,174,96,0.3);
+            color: #fff;
+        }
+
+        td.best-of-three-omitted {
+            visibility: hidden;
+        }
+
+        tr.best-of-three-row-omitted .set-label {
+            visibility: hidden;
+        }
+
+        .score-input.invalid,
+        .score-input.games.invalid,
+        .score-input.points.invalid {
+            border: 2px solid #f1c40f;
+            box-shadow: 0 0 0 3px rgba(241,196,15,0.24);
+        }
+
+        #maxPoint.invalid {
+            border: 2px solid #f1c40f;
+            box-shadow: 0 0 0 3px rgba(241,196,15,0.24);
+        }
+
+        .score-input.deuce-invalid,
+        .score-input.points.deuce-invalid {
+            border: 2px solid var(--deuce-highlight, #3498db);
+            box-shadow: 0 0 0 3px var(--deuce-highlight-glow, rgba(52,152,219,0.24));
+        }
+
+        .score-input.games {
+            width: 100%;
+            min-width: 0;
+            background: rgba(39,174,96,0.1);
+            border-color: rgba(39,174,96,0.3);
+        }
+
+        .score-input.games:focus {
+            border-color: #27ae60;
+        }
+
+        .total-cell {
+            font-weight: bold;
+            color: #f39c12;
+            background: rgba(243,156,18,0.1) !important;
+        }
+
+        .diagonal-cell {
+            background: rgba(255,255,255,0.02) !important;
+            position: relative;
+        }
+
+        .diagonal-cell::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 5px,
+                rgba(255,255,255,0.03) 5px,
+                rgba(255,255,255,0.03) 6px
+            );
+        }
+
+        /* Opponent highlight flash */
+        .score-input.opponent-highlight {
+            border: 2px solid #f39c12;
+            box-shadow: 0 0 0 3px rgba(243,156,18,0.3);
+            animation: flashBorder 0.8s ease-in-out infinite;
+        }
+
+        @keyframes flashBorder {
+            0%, 100% { border-color: #f39c12; box-shadow: 0 0 0 3px rgba(243,156,18,0.3); }
+            50% { border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.3); }
+        }
+
+        /* Team Names Input */
+        .teams-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+
+        .teams-section h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 12px;
+        }
+
+        .team-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-number {
+            background: rgba(233,69,96,0.12);
+            color: #e94560;
+            min-width: 64px;
+            height: 28px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .team-input-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .team-input-group input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .team-input-group.locked-name .team-number {
+            background: rgba(149,165,166,0.18);
+            color: #bdc3c7;
+        }
+
+        .team-input-group.locked-name input {
+            border-color: rgba(189,195,199,0.34);
+            background: rgba(149,165,166,0.16);
+            color: #cfd6dc;
+            cursor: not-allowed;
+            opacity: 0.82;
+        }
+
+        .team-input-group.locked-name input:focus {
+            border-color: rgba(189,195,199,0.34);
+            box-shadow: none;
+        }
+
+        .team-input-group input.invalid {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 2px rgba(231,76,60,0.2);
+        }
+
+        .team-input-group.placeholder-team {
+            padding: 8px;
+            border: 2px solid rgba(241,196,15,0.82);
+            border-radius: 8px;
+            background: rgba(241,196,15,0.12);
+            box-shadow: 0 0 0 3px rgba(241,196,15,0.16);
+        }
+
+        .team-input-group.placeholder-team .team-number {
+            background: rgba(241,196,15,0.24);
+            color: #f1c40f;
+        }
+
+        .team-input-group.placeholder-team input {
+            border-color: #f1c40f;
+            background: rgba(241,196,15,0.12);
+            color: #fff3b0;
+            font-weight: 800;
+        }
+
+        .teams-section.loading .teams-grid {
+            display: none;
+        }
+
+        .tournament-loading-panel {
+            padding: 18px;
+            border: 1px solid rgba(233,69,96,0.28);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            color: #f8f9fa;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .teams-section:not(.loading) .tournament-loading-panel {
+            display: none;
+        }
+
+        /* Tiebreaker Section */
+        .tiebreaker-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(243,156,18,0.3);
+            margin-bottom: 25px;
+        }
+
+        .tiebreaker-section h3 {
+            color: #f39c12;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .tiebreaker-group {
+            background: rgba(243,156,18,0.08);
+            border: 1px solid rgba(243,156,18,0.2);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .tiebreaker-group-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #ffe0a2;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .tiebreaker-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tiebreaker-option:hover {
+            background: rgba(243,156,18,0.12);
+            border-color: rgba(243,156,18,0.4);
+        }
+
+        .tiebreaker-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #f39c12;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .tiebreaker-option label {
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tiebreaker-option.unresolved label {
+            animation: tieBlink 1s ease-in-out infinite;
+        }
+
+        @keyframes tieBlink {
+            0%, 100% { color: #fff; text-shadow: none; }
+            50% { color: #f39c12; text-shadow: 0 0 8px rgba(243,156,18,0.6); }
+        }
+
+        .tiebreaker-option .tie-stats {
+            margin-left: auto;
+            font-size: 0.72rem;
+            color: #8a9ab5;
+        }
+
+        .tiebreaker-option.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .tiebreaker-option.selected {
+            background: rgba(39,174,96,0.12);
+            border-color: rgba(39,174,96,0.4);
+        }
+
+        .tiebreaker-option.selected label {
+            color: #2ecc71;
+            animation: none;
+        }
+
+        .btn-tiebreaker-submit {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-tiebreaker-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(243,156,18,0.4);
+        }
+
+        .btn-tiebreaker-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-tiebreaker-reset {
+            padding: 10px 20px;
+            border: 1px solid rgba(231,76,60,0.4);
+            border-radius: 8px;
+            background: rgba(231,76,60,0.12);
+            color: #e74c3c;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-tiebreaker-reset:hover {
+            background: rgba(231,76,60,0.25);
+            border-color: rgba(231,76,60,0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Tied row highlight in score table */
+        .score-table tr.tie-highlight td {
+            background: rgba(243,156,18,0.08) !important;
+            border-color: rgba(243,156,18,0.25);
+        }
+
+        .score-table tr.tie-highlight td.team-cell {
+            animation: tieBlink 1s ease-in-out infinite;
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            color: #fff;
+        }
+
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(233,69,96,0.4); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-clear {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-clear:hover { background: rgba(255,255,255,0.2); }
+
+        .btn-calc {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+        }
+
+        .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(39,174,96,0.4); }
+
+        .btn-load {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            color: #fff;
+        }
+
+        .btn-load:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(41,128,185,0.4); }
+        .btn-load:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Status Messages */
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .status.success { display: block; background: rgba(39,174,96,0.2); color: #2ecc71; border: 1px solid rgba(39,174,96,0.3); }
+        .status.error { display: block; background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+        .status.loading { display: block; background: rgba(52,152,219,0.2); color: #3498db; border: 1px solid rgba(52,152,219,0.3); }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(420px, 100%);
+            background: #fff;
+            color: #1a1a2e;
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+            text-align: center;
+        }
+
+        .modal-box h4 {
+            color: #e94560;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-box p {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 18px;
+        }
+
+        .modal-box button {
+            min-width: 90px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            background: #e94560;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Match Schedule */
+        .schedule-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+        }
+
+        .schedule-section h3 { color: #e94560; margin-bottom: 15px; }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .match-slot {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .match-slot .match-num { font-size: 0.7rem; color: #aaa; margin-bottom: 5px; }
+        .match-slot .match-teams { font-weight: 600; color: #f39c12; }
+
+        /* Rules */
+        .rules-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .rules-section h3 { color: #e94560; margin-bottom: 12px; }
+        .rules-section ul { list-style: none; padding: 0; }
+        .rules-section li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        .rules-section li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #e94560;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.3rem; }
+            .header { padding-top: 66px; }
+            .admin-actions {
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .teams-grid { grid-template-columns: 1fr; }
+            .score-input { width: 100%; min-width: 0; padding: 5px 2px; font-size: 0.7rem; }
+            .score-input.games { width: 100%; min-width: 0; }
+            .score-table { font-size: 0.75rem; }
+            .score-table col.slot-col { width: 58px; }
+            .score-table col.team-name-col { width: 150px; }
+            .score-table col.set-col { width: 36px; }
+            .score-table col.score-col { width: calc((100% - 380px) / var(--score-cols)); }
+            .score-table col.total-games-col { width: 66px; }
+            .score-table col.total-points-won-col { width: 70px; }
+            .score-table col.total-points-conceded-col { width: 70px; }
+            .score-table col.total-points-diff-col { width: 58px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="admin-actions">
+                <button class="logout-btn" type="button" id="logoutButton">Logout</button>
+            </div>
+            <h1>🏸 HOTSHOT BC SUMMER TOURNAMENT 2026</h1>
+        <h2>Tournament Score Entry</h2>
+            <div class="round-match-banner" id="roundMatchBanner">POOL MATCH</div>
+        </div>
+
+        <!-- Tournament Info -->
+        <div class="tournament-info">
+            <div class="info-group">
+                <label>Day / Date</label>
+                <input type="date" id="tournamentDate">
+            </div>
+            <div class="info-group">
+                <label>Event</label>
+                <select id="eventType">
+                    <option value="Men's Doubles">Men's Doubles</option>
+                    <option value="Women's Doubles">Women's Doubles</option>
+                    <option value="Mixed Doubles">Mixed Doubles</option>
+                    <option value="Men's Singles">Men's Singles</option>
+                    <option value="Women's Singles">Women's Singles</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Division</label>
+                <select id="division">
+                    <option value="1-3">1-3</option>
+                    <option value="4-5">4-5</option>
+                    <option value="6-7">6-7</option>
+                    <option value="8-9">8-9</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>Round</label>
+                <select id="roundType">
+                    <option value="Pool" selected>Pool</option>
+                    <option value="Super-pool">Super-pool</option>
+                    <option value="Semi Final">Semi Final</option>
+                    <option value="Final">Final</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label id="poolLabel">Pool</label>
+                <select id="pool">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>TEAMS PER POOL</label>
+                <select id="format" onchange="updateTeamSlots()">
+                    <option value="2">2 Team</option>
+                    <option value="3">3 Team</option>
+                    <option value="4" selected>4 Team</option>
+                    <option value="5">5 Team</option>
+                    <option value="6">6 Team</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>SETS PER MATCH</label>
+                <select id="setsPerMatch" onchange="handleSetsPerMatchChange()">
+                    <option value="1">1 Set</option>
+                    <option value="2" selected>2 Sets</option>
+                    <option value="3">3 Sets</option>
+                </select>
+            </div>
+            <div class="info-group">
+                <label>GAME POINT</label>
+                <select id="gamePoint" onchange="handleGamePointChange()">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21" selected>21</option>
+                </select>
+            </div>
+            <div class="info-group" id="maxPointGroup">
+                <label>MAX GAME POINT</label>
+                <input type="number" id="maxPoint" value="30" min="1" max="30" oninput="updatePointRange()" onchange="updatePointRange()">
+            </div>
+            <div class="info-group">
+                <label>MATCH STYLE</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="matchStyle" value="with-deuce" onchange="handleMatchStyleChange()">
+                        WITH DEUCE/SETTING
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="matchStyle" value="without-deuce" onchange="handleMatchStyleChange()" checked>
+                        WITHOUT DEUCE/SETTING
+                    </label>
+                </div>
+            </div>
+            <div class="info-group">
+                <label>LIVE SCORE REFRESH</label>
+                <div class="live-refresh-control">
+                    <input type="number" id="liveRefreshSeconds" value="15" min="1" max="300" step="1">
+                    <button type="button" id="saveLiveRefreshBtn" onclick="saveLiveRefreshSettings()">Save</button>
+                </div>
+                <div class="live-refresh-note">Applies to every category live score page.</div>
+            </div>
+        </div>
+
+        <!-- Team Names -->
+        <div class="teams-section loading" id="teamsSection">
+            <h3>📋 Team / Partnership Names</h3>
+            <div class="tournament-loading-panel" id="tournamentLoadingPanel">Loading tournament data...</div>
+            <div class="teams-grid">
+                <div class="team-input-group" id="team1group">
+                    <span class="team-number">TEAM 1</span>
+                    <input type="text" id="team1" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team2group">
+                    <span class="team-number">TEAM 2</span>
+                    <input type="text" id="team2" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team3group">
+                    <span class="team-number">TEAM 3</span>
+                    <input type="text" id="team3" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team4group">
+                    <span class="team-number">TEAM 4</span>
+                    <input type="text" id="team4" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team5group" style="display:none;">
+                    <span class="team-number">TEAM 5</span>
+                    <input type="text" id="team5" placeholder="Player 1 / Player 2">
+                </div>
+                <div class="team-input-group" id="team6group" style="display:none;">
+                    <span class="team-number">TEAM 6</span>
+                    <input type="text" id="team6" placeholder="Player 1 / Player 2">
+                </div>
+            </div>
+        </div>
+
+        <!-- Scoring Table -->
+        <div class="scoring-section">
+            <h3 class="score-entry-heading">
+                <span>📊 Score Entry — Round Robin</span>
+            </h3>
+            <p style="color:#aaa; font-size:0.8rem; margin-bottom:12px;">Select Games Won (0 or 1) and Points scored in each set. Totals auto-calculate.</p>
+            <div class="score-entry-title-context" id="scoreEntryTitleContext" aria-live="polite">
+                MD 4-5 | Pool A
+            </div>
+            <table class="score-table" id="scoreTable">
+                <colgroup id="scoreCols">
+                    <!-- Generated by JavaScript -->
+                </colgroup>
+                <thead id="scoreHead">
+                    <!-- Generated by JavaScript -->
+                </thead>
+                <tbody id="scoreBody">
+                    <!-- Generated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tiebreaker Section -->
+        <div class="tiebreaker-section" id="tiebreakerSection" style="display:none;">
+            <h3>⚖️ Tiebreaker — Promote to Next Level</h3>
+            <p style="color:#aaa;font-size:0.8rem;margin-bottom:12px;">Teams below are tied on all metrics. Select one team to promote to the next level.</p>
+            <div id="tiebreakerContent"></div>
+        </div>
+
+        <!-- Match Schedule -->
+        <div class="schedule-section">
+            <h3 id="totalMatchesHeading">Total Scheduled Matches: 0</h3>
+            <div class="schedule-grid" id="matchSchedule">
+                <!-- Generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="rules-section">
+            <h3>📖 Rules</h3>
+            <ul>
+                <li>4 Partner Group Format - All Players play each other in 2 Sets - up to 21 Points - No Setting</li>
+                <li>5 or 6 Partner Group Format - All Players play each other in 2 Sets - up to 21 Points - No Setting</li>
+                <li><strong>Winner Decided:</strong> First by Total Games Won</li>
+                <li>If even - Then on Point Difference (Points Won minus Points Conceded)</li>
+                <li>If even - On Head to Head Points Scored</li>
+                <li>Where only One Section in Division - Top is Winner, Second is Runner-Up</li>
+                <li>Where Two Sections in Division - Top Partnership Only from each into a Final</li>
+                <li>Final - A Standard 3 Set Match - Setting is Permitted in Final</li>
+            </ul>
+        </div>
+
+        <!-- Status -->
+        <div class="status" id="statusMsg"></div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn btn-calc" onclick="calculateTotals()">🧮 Refresh Totals</button>
+            <button class="btn btn-load" id="loadTournamentBtn" onclick="loadTournamentData()">📥 Load Tournament Data</button>
+            <button class="btn btn-submit" id="submitBtn" onclick="submitScores()">📤 Save Scores</button>
+            <button class="btn btn-clear" onclick="clearScores()">🗑️ Clear Scores</button>
+        </div>
+
+        <div class="modal-overlay" id="teamNameModal">
+            <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="teamNameModalTitle">
+                <h4 id="teamNameModalTitle">Team Name Limit</h4>
+                <p id="teamNameModalMessage">Not more than 2 players can be entered.</p>
+                <button type="button" id="teamNameModalOk" onclick="confirmTeamNamePopup()">OK</button>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="messageModal">
+            <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="messageModalTitle">
+                <h4 id="messageModalTitle">Message</h4>
+                <p id="messageModalText"></p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button type="button" id="messageModalCancel" onclick="cancelMessageBox()" style="display:none;background:#555;">Cancel</button>
+                    <button type="button" id="messageModalOk" onclick="closeMessageBox()">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURATION - Local server saves score JSON files
+        // ============================================================
+        const SAVE_URL = '/save';
+        const TOURNAMENT_DATA_URL = '/load-tournament-data';
+        const LIVE_REFRESH_SETTINGS_URL = '/live-score-settings';
+        // ============================================================
+        let teamNamePopupInput = null;
+        let teamNamePopupCleanup = null;
+        let isLoadingSavedScores = false;
+        let tournamentData = null;
+        let lastPlaceholderTeamWarningKey = '';
+        let loadedScoreVersion = null;
+        let scoreEntryBlockedByConflict = false;
+        let manualTeamOverrides = {};
+        const AUTO_LOGOUT_MS = 15 * 60 * 1000;
+        let autoLogoutTimer = null;
+        let statusHideTimer = null;
+        const ROUND_POOL = 'Pool';
+        const ROUND_SUPER_POOL = 'Super-pool';
+        const ROUND_SEMI_FINAL = 'Semi Final';
+        const ROUND_FINAL = 'Final';
+        const SEMI_FINAL_MATCHES = ['SF1', 'SF2'];
+        const FINAL_MATCHES = ['F'];
+        const DEFAULT_LIVE_REFRESH_SECONDS = 15;
+        const TIE_BREAK_SELECTION_KEY = 'vertexLiveScoreTieBreaks';
+        const BEST_RUNNER_SELECTION_KEY = 'vertexLiveScoreBestRunnerBreaks';
+        const TEAM_NAME_ALLOWED_CHAR_PATTERN = /^[\p{L}\p{M}\p{N} /.'\u2019\u2018\-\u2010\u2011\u2012\u2013\u2014]*$/u;
+        const TEAM_NAME_ALLOWED_SINGLE_CHAR_PATTERN = /^[\p{L}\p{M}\p{N} /.'\u2019\u2018\-\u2010\u2011\u2012\u2013\u2014]$/u;
+        const TEAM_NAME_ALLOWED_MESSAGE = 'Team names can use letters including accents/diacritics, numbers, spaces, hyphens (-), full stops (.), apostrophes, and one forward slash (/) between two players.';
+        let tieBreakSelectionsMemory = {};
+        let bestRunnerSelectionsMemory = {};
+
+        function getTodayDateValue() {
+            const today = new Date();
+            today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+            return today.toISOString().slice(0, 10);
+        }
+
+        function setTournamentDateToToday() {
+            document.getElementById('tournamentDate').value = getTodayDateValue();
+        }
+
+        const SCHEDULES = {
+            4: [
+                { match: 1, teams: [1, 2] },
+                { match: 2, teams: [3, 4] },
+                { match: 3, teams: [1, 3] },
+                { match: 4, teams: [2, 4] },
+                { match: 5, teams: [1, 4] },
+                { match: 6, teams: [2, 3] }
+            ],
+            5: [
+                { match: 1, teams: [1, 2] },
+                { match: 2, teams: [3, 4] },
+                { match: 3, teams: [1, 5] },
+                { match: 4, teams: [2, 3] },
+                { match: 5, teams: [4, 5] },
+                { match: 6, teams: [1, 3] },
+                { match: 7, teams: [2, 4] },
+                { match: 8, teams: [3, 5] },
+                { match: 9, teams: [2, 5] },
+                { match: 10, teams: [1, 4] }
+            ],
+            6: [
+                { match: 1, teams: [1, 2] }, { match: 2, teams: [1, 6] },
+                { match: 3, teams: [3, 4] }, { match: 4, teams: [3, 5] },
+                { match: 5, teams: [5, 6] }, { match: 6, teams: [2, 4] },
+                { match: 7, teams: [1, 3] }, { match: 8, teams: [1, 4] },
+                { match: 9, teams: [4, 5] }, { match: 10, teams: [3, 6] },
+                { match: 11, teams: [2, 6] }, { match: 12, teams: [2, 5] },
+                { match: 13, teams: [1, 5] }, { match: 14, teams: [2, 3] },
+                { match: 15, teams: [4, 6] }
+            ]
+        };
+        // 3-partner schedule
+        SCHEDULES[3] = [
+            { match: 1, teams: [1, 2] },
+            { match: 2, teams: [1, 3] },
+            { match: 3, teams: [2, 3] }
+        ];
+        const SUPER_POOL_ASSIGNMENTS = [
+            { pool: 'X', sourcePools: ['A', 'B', 'C'] },
+            { pool: 'Y', sourcePools: ['D', 'E', 'F'] }
+        ];
+
+        function clearAutoLogoutTimer() {
+            if (autoLogoutTimer) {
+                clearTimeout(autoLogoutTimer);
+                autoLogoutTimer = null;
+            }
+        }
+
+        function resetAutoLogoutTimer() {
+            clearAutoLogoutTimer();
+            autoLogoutTimer = setTimeout(() => {
+                window.location.href = '/admin-logout';
+            }, AUTO_LOGOUT_MS);
+        }
+
+        function initializeAdminControls() {
+            const logoutButton = document.getElementById('logoutButton');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    window.location.href = '/admin-logout';
+                });
+            }
+
+            ['click', 'keydown', 'mousemove', 'mousedown', 'scroll', 'touchstart', 'change'].forEach(eventName => {
+                window.addEventListener(eventName, resetAutoLogoutTimer, { passive: true });
+            });
+            window.addEventListener('pagehide', () => {
+                try {
+                    navigator.sendBeacon('/admin-logout');
+                } catch (error) {
+                }
+            });
+            resetAutoLogoutTimer();
+        }
+
+        function normalizeLiveRefreshSeconds(value) {
+            const seconds = parseInt(value, 10);
+            if (Number.isNaN(seconds)) return DEFAULT_LIVE_REFRESH_SECONDS;
+            return Math.max(1, Math.min(300, seconds));
+        }
+
+        async function loadLiveRefreshSettings() {
+            const input = document.getElementById('liveRefreshSeconds');
+            if (!input) return;
+
+            try {
+                const response = await fetch(LIVE_REFRESH_SETTINGS_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Refresh setting could not be loaded.');
+                const settings = await response.json();
+                input.value = String(normalizeLiveRefreshSeconds(settings.refreshSeconds));
+            } catch (error) {
+                input.value = String(DEFAULT_LIVE_REFRESH_SECONDS);
+            }
+        }
+
+        async function saveLiveRefreshSettings() {
+            const input = document.getElementById('liveRefreshSeconds');
+            const button = document.getElementById('saveLiveRefreshBtn');
+            const refreshSeconds = normalizeLiveRefreshSeconds(input?.value);
+
+            if (input) input.value = String(refreshSeconds);
+            if (button) button.disabled = true;
+            showStatus(`Saving live score refresh timer as ${refreshSeconds} seconds...`, 'loading');
+
+            try {
+                const response = await fetch(LIVE_REFRESH_SETTINGS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshSeconds })
+                });
+                const result = await response.json();
+                if (response.status === 401 || handleAuthError(result)) {
+                    return;
+                }
+                if (!response.ok || result.status !== 'success') {
+                    throw new Error(result.message || 'Refresh setting could not be saved.');
+                }
+
+                showStatus(`Live score pages will refresh every ${result.refreshSeconds} seconds.`, 'success');
+                scheduleHideStatus(5000);
+            } catch (error) {
+                showStatus('Cannot save live score refresh timer: ' + error.message, 'error');
+            } finally {
+                if (button) button.disabled = false;
+            }
+        }
+
+        function updateTeamSlots() {
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 1; i <= 6; i++) {
+                const group = document.getElementById(`team${i}group`);
+                if (group) group.style.display = i <= format ? 'flex' : 'none';
+            }
+            generateScoreTable();
+            generateSchedule();
+            validateTeamNames(false);
+        }
+
+        function getPointRange() {
+            const gamePointSelect = document.getElementById('gamePoint');
+            const maxInput = document.getElementById('maxPoint');
+            const min = 0;
+            let gamePoint = parseInt(gamePointSelect.value, 10);
+            let max = parseInt(maxInput.value, 10);
+
+            if (Number.isNaN(gamePoint)) gamePoint = 21;
+            if (Number.isNaN(max)) max = 30;
+
+            gamePoint = Math.max(1, Math.min(21, gamePoint));
+            max = Math.max(gamePoint, Math.min(30, max));
+            if (min > max) max = min;
+
+            gamePointSelect.value = String(gamePoint);
+            maxInput.value = max;
+            return { min, max, gamePoint };
+        }
+
+        function buildSelectOptions(min, max, placeholder) {
+            let options = `<option value="">${placeholder}</option>`;
+            for (let value = min; value <= max; value++) {
+                options += `<option value="${value}">${value}</option>`;
+            }
+            return options;
+        }
+
+        function getSelectedMatchStyle() {
+            return document.querySelector('input[name="matchStyle"]:checked')?.value || 'without-deuce';
+        }
+
+        function setSelectedMatchStyle(style) {
+            const safeStyle = style === 'with-deuce' ? 'with-deuce' : 'without-deuce';
+            const input = document.querySelector(`input[name="matchStyle"][value="${safeStyle}"]`);
+            if (input) input.checked = true;
+            updateMatchStyleFields();
+        }
+
+        function updateMatchStyleFields() {
+            const maxPointGroup = document.getElementById('maxPointGroup');
+            if (!maxPointGroup) return;
+
+            maxPointGroup.style.display = getSelectedMatchStyle() === 'with-deuce' ? '' : 'none';
+        }
+
+        function setDefaultMaxGamePointForDeuce() {
+            if (getSelectedMatchStyle() !== 'with-deuce') return;
+
+            const gamePoint = parseInt(document.getElementById('gamePoint').value, 10) || 21;
+            const maxPoint = Math.min(30, gamePoint + 5);
+            document.getElementById('maxPoint').value = String(maxPoint);
+        }
+
+        function getPointRangeForGameValue(gameValue, options = {}) {
+            const { opponentPointValue = null } = options;
+            const { min, max, gamePoint } = getPointRange();
+
+            if (getSelectedMatchStyle() === 'without-deuce') {
+                if (gameValue === '1') return { min: gamePoint, max: gamePoint, fixedValue: String(gamePoint) };
+                if (gameValue === '0') return { min, max: Math.max(min, gamePoint - 1), fixedValue: null };
+                return { min, max: gamePoint, fixedValue: null };
+            }
+
+            if (gameValue === '1') return { min: gamePoint, max, fixedValue: null };
+            if (gameValue === '0' && Number.isFinite(opponentPointValue)) {
+                const pointGap = opponentPointValue === max ? 1 : 2;
+                return { min, max: Math.max(min, Math.min(max, opponentPointValue - pointGap)), fixedValue: null };
+            }
+            return { min, max, fixedValue: null };
+        }
+
+        function setPointSelectOptions(pointSelect, gameValue, options = {}) {
+            const { resetForGameChange = false, opponentPointValue = null } = options;
+            const previousValue = pointSelect.value;
+            const { min, max, fixedValue } = getPointRangeForGameValue(gameValue, { opponentPointValue });
+            pointSelect.innerHTML = buildSelectOptions(min, max, 'P');
+
+            if (resetForGameChange && getSelectedMatchStyle() === 'with-deuce') {
+                pointSelect.value = '';
+            } else if (fixedValue !== null) {
+                pointSelect.value = fixedValue;
+            } else if (previousValue !== '' && parseInt(previousValue, 10) >= min && parseInt(previousValue, 10) <= max) {
+                pointSelect.value = previousValue;
+            }
+
+            updateScoreDropdownStyle(pointSelect);
+        }
+
+        function getPointScoreParts(select) {
+            const match = select.id.match(/^p_(\d+)_(\d+)_(\d+)$/);
+            if (!match) return null;
+
+            return {
+                team: Number(match[1]),
+                opponent: Number(match[2]),
+                set: Number(match[3])
+            };
+        }
+
+        function getOppositePointSelect(score) {
+            return document.getElementById(`p_${score.opponent}_${score.team}_${score.set}`);
+        }
+
+        function getOppositeGameSelect(score) {
+            return document.getElementById(`g_${score.opponent}_${score.team}_${score.set}`);
+        }
+
+        function getOpponentPointValueForLoser(score, gameValue) {
+            if (getSelectedMatchStyle() !== 'with-deuce' || gameValue !== '0') return null;
+
+            const oppositeGameSelect = getOppositeGameSelect(score);
+            const oppositePointSelect = getOppositePointSelect(score);
+            const opponentPointValue = parseInt(oppositePointSelect?.value, 10);
+
+            return oppositeGameSelect?.value === '1' && Number.isFinite(opponentPointValue)
+                ? opponentPointValue
+                : null;
+        }
+
+        function updatePointSelectForGameSelect(gameSelect, options = {}) {
+            const score = getGameScoreParts(gameSelect);
+            if (!score) return;
+
+            const pointSelect = document.getElementById(`p_${score.team}_${score.opponent}_${score.set}`);
+            if (!pointSelect) return;
+
+            setPointSelectOptions(pointSelect, gameSelect.value, {
+                ...options,
+                opponentPointValue: getOpponentPointValueForLoser(score, gameSelect.value)
+            });
+        }
+
+        function updatePointSelectForPointSelect(pointSelect) {
+            const score = getPointScoreParts(pointSelect);
+            if (!score) return;
+
+            const gameSelect = document.getElementById(`g_${score.team}_${score.opponent}_${score.set}`);
+            const gameValue = gameSelect?.value || '';
+            setPointSelectOptions(pointSelect, gameValue, {
+                opponentPointValue: getOpponentPointValueForLoser(score, gameValue)
+            });
+
+            if (getSelectedMatchStyle() === 'with-deuce' && gameValue === '1') {
+                const oppositeGameSelect = getOppositeGameSelect(score);
+                if (oppositeGameSelect) updatePointSelectForGameSelect(oppositeGameSelect);
+            }
+        }
+
+        function updateAllPointDropdowns() {
+            document.querySelectorAll('.score-input.points').forEach(updatePointSelectForPointSelect);
+        }
+
+        function updatePointRange() {
+            updateMatchStyleFields();
+            markMaxPointInvalid(false);
+            getPointRange();
+            updateAllPointDropdowns();
+            calculateTotals(false);
+        }
+
+        function handleMatchStyleChange() {
+            updateMatchStyleFields();
+            setDefaultMaxGamePointForDeuce();
+            updatePointRange();
+        }
+
+        function handleGamePointChange() {
+            setDefaultMaxGamePointForDeuce();
+            updatePointRange();
+        }
+
+        function refreshMatchStyleDefaults() {
+            updateMatchStyleFields();
+            setDefaultMaxGamePointForDeuce();
+            if (document.getElementById('scoreBody')?.children.length) {
+                updatePointRange();
+            }
+        }
+
+        function applyRoundScoringDefaults() {
+            const round = getSelectedRound();
+            const settings = getRoundScoringDefaults(round);
+            const setsSelect = document.getElementById('setsPerMatch');
+            const formatSelect = document.getElementById('format');
+            const expectedFormat = getExpectedFormatForSelectedRound();
+            const shouldRegenerateTable = (
+                (setsSelect && setsSelect.value !== settings.setsPerMatch) ||
+                (formatSelect && String(formatSelect.value) !== String(expectedFormat))
+            );
+
+            updateRoundMatchBanner();
+            if (formatSelect) formatSelect.value = String(expectedFormat);
+            if (setsSelect) setsSelect.value = settings.setsPerMatch;
+            document.getElementById('gamePoint').value = settings.gamePoint;
+            document.getElementById('maxPoint').value = settings.maxPoint;
+            setSelectedMatchStyle(settings.matchStyle);
+            if (shouldRegenerateTable && document.getElementById('scoreBody')?.children.length) {
+                generateScoreTable();
+            }
+            updatePointRange();
+        }
+
+        function getRoundScoringDefaults(round = getSelectedRound()) {
+            const isKnockoutRound = round === ROUND_SEMI_FINAL || round === ROUND_FINAL;
+            return {
+                setsPerMatch: isKnockoutRound ? '3' : '2',
+                gamePoint: '15',
+                maxPoint: isKnockoutRound ? '20' : '15',
+                matchStyle: isKnockoutRound ? 'with-deuce' : 'without-deuce'
+            };
+        }
+
+        function getExpectedFormatForSelectedRound(fallbackFormat = null) {
+            const round = getSelectedRound();
+            const formData = getSelectedTournamentPoolData();
+            if (formData) {
+                return formData.teamsPerPool || formData.teams?.length || fallbackFormat || 4;
+            }
+            if (round === ROUND_SEMI_FINAL || round === ROUND_FINAL) return 2;
+            if (round === ROUND_SUPER_POOL) return 3;
+            return fallbackFormat || parseInt(document.getElementById('format')?.value, 10) || 4;
+        }
+
+        function isScoreTableShapeCurrent() {
+            const settings = getRoundScoringDefaults();
+            const expectedFormat = String(getExpectedFormatForSelectedRound());
+            return (
+                String(document.getElementById('format')?.value || '') === expectedFormat &&
+                String(document.getElementById('setsPerMatch')?.value || '') === settings.setsPerMatch &&
+                String(document.getElementById('gamePoint')?.value || '') === settings.gamePoint &&
+                String(document.getElementById('maxPoint')?.value || '') === settings.maxPoint &&
+                getSelectedMatchStyle() === settings.matchStyle
+            );
+        }
+
+        function ensureScoreTableShapeBeforeSave() {
+            if (isScoreTableShapeCurrent()) return true;
+
+            applyRoundScoringDefaults();
+            showStatus('The score table was refreshed for the selected round. Please enter the scores again and save.', 'error');
+            showMessageBox('Score Table Refreshed', 'The table settings did not match the selected round, so it was refreshed first. Please enter the scores again and click SAVE SCORES.');
+            return false;
+        }
+
+        function getSetsPerMatch() {
+            return parseInt(document.getElementById('setsPerMatch').value, 10) || 2;
+        }
+
+        function getSetLabel(set) {
+            const labels = {
+                1: '1st',
+                2: '2nd',
+                3: '3rd'
+            };
+
+            return labels[set] || `${set}th`;
+        }
+
+        function generateScoreTable() {
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            generateScoreHeader(format);
+
+            const tbody = document.getElementById('scoreBody');
+            tbody.innerHTML = '';
+
+            for (let row = 1; row <= format; row++) {
+                for (let set = 1; set <= setsPerMatch; set++) {
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-team-row', row);
+                    const rowHeaderCells = set === 1 ? `
+                        <td class="slot-num" rowspan="${setsPerMatch}">TEAM ${row}</td>
+                        <td class="team-cell" rowspan="${setsPerMatch}" id="teamLabel${row}"></td>
+                    ` : '';
+                    const totalCells = set === 1 ? `
+                        <td class="total-cell" rowspan="${setsPerMatch}" id="totalGames${row}">0</td>
+                        <td class="total-cell" rowspan="${setsPerMatch}" id="totalPointsWon${row}">0</td>
+                        <td class="total-cell" rowspan="${setsPerMatch}" id="totalPointsConceded${row}">0</td>
+                        <td class="total-cell" rowspan="${setsPerMatch}" id="totalPointsDiff${row}">0</td>
+                    ` : '';
+
+                    tr.innerHTML = `
+                        ${rowHeaderCells}
+                        <td class="set-label">${getSetLabel(set)}</td>
+                        ${generateScoreCells(row, set, format)}
+                        ${totalCells}
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+
+            updateTeamLabels();
+            document.querySelectorAll('.score-input').forEach(updateScoreDropdownStyle);
+            document.querySelectorAll('.score-input').forEach(select => {
+                select.addEventListener('focus', () => highlightOpponentCells(select));
+                select.addEventListener('blur', () => {
+                    setTimeout(() => {
+                        const active = document.activeElement;
+                        if (!active || !active.classList.contains('score-input')) {
+                            clearOpponentHighlights();
+                        }
+                    }, 100);
+                });
+            });
+            updateBestOfThreeOmissions();
+        }
+
+        function generateScoreHeader(format) {
+            function escapeHeaderHtml(str) {
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+            const table = document.getElementById('scoreTable');
+            const colgroup = document.getElementById('scoreCols');
+            const thead = document.getElementById('scoreHead');
+            let matchupHeaders = '';
+            let scoreHeaders = '';
+            let scoreColumns = '';
+
+            for (let team = 1; team <= format; team++) {
+                const fullName = (document.getElementById(`team${team}`)?.value || '').trim() || `Team ${team}`;
+                const firstNames = fullName.split('/').map(p => p.trim().split(' ')[0]).join(' / ') || `Team ${team}`;
+                matchupHeaders += `<th class="vs-header" colspan="2"><span class="vs-label">vs</span> <span class="vs-team-label">TEAM ${team}</span><br><span class="vs-team-name" id="vsTeamName${team}">${escapeHeaderHtml(firstNames)}</span></th>`;
+                scoreHeaders += '<th>GAME</th><th>POINT</th>';
+                scoreColumns += '<col class="score-col"><col class="score-col">';
+            }
+
+            table.style.setProperty('--score-cols', format * 2);
+            colgroup.innerHTML = `
+                <col class="slot-col">
+                <col class="team-name-col">
+                <col class="set-col">
+                ${scoreColumns}
+                <col class="total-games-col">
+                <col class="total-points-won-col">
+                <col class="total-points-conceded-col">
+                <col class="total-points-diff-col">
+            `;
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Team #</th>
+                    <th>Team</th>
+                    <th>Set</th>
+                    ${matchupHeaders}
+                    <th>Total Games Won</th>
+                    <th>Total Pts Won</th>
+                    <th>Total Pts Conc.</th>
+                    <th>Pt Diff</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    ${scoreHeaders}
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            `;
+        }
+
+        function generateScoreCells(teamRow, set, format) {
+            let cells = '';
+            const gameOptions = buildSelectOptions(0, 1, 'G');
+            const pointRange = getPointRangeForGameValue('');
+            const pointOptions = buildSelectOptions(pointRange.min, pointRange.max, 'P');
+
+            for (let col = 1; col <= format; col++) {
+                if (col === teamRow) {
+                    cells += `<td class="diagonal-cell"></td><td class="diagonal-cell"></td>`;
+                } else {
+                    cells += `
+                        <td><select class="score-input games" id="g_${teamRow}_${col}_${set}" onchange="handleScoreSelectChange(this)">${gameOptions}</select></td>
+                        <td><select class="score-input points" id="p_${teamRow}_${col}_${set}" onchange="handleScoreSelectChange(this)">${pointOptions}</select></td>
+                    `;
+                }
+            }
+            return cells;
+        }
+
+        const DEUCE_HIGHLIGHT_COLORS = [
+            { border: '#3498db', glow: 'rgba(52,152,219,0.24)' },
+            { border: '#e67e22', glow: 'rgba(230,126,34,0.24)' },
+            { border: '#9b59b6', glow: 'rgba(155,89,182,0.24)' },
+            { border: '#1abc9c', glow: 'rgba(26,188,156,0.24)' },
+            { border: '#e84393', glow: 'rgba(232,67,147,0.24)' },
+            { border: '#f39c12', glow: 'rgba(243,156,18,0.26)' },
+            { border: '#00cec9', glow: 'rgba(0,206,201,0.24)' },
+            { border: '#fd79a8', glow: 'rgba(253,121,168,0.24)' }
+        ];
+
+        function clearDeuceHighlights() {
+            document.querySelectorAll('.score-input.deuce-invalid').forEach(select => {
+                select.classList.remove('deuce-invalid');
+                select.style.removeProperty('--deuce-highlight');
+                select.style.removeProperty('--deuce-highlight-glow');
+            });
+        }
+
+        function getDeuceHighlightIndex(row, col, set) {
+            const format = parseInt(document.getElementById('format').value) || 4;
+            return (((row - 1) * format + (col - 1)) * getSetsPerMatch() + (set - 1));
+        }
+
+        function applyDeuceHighlight(fields, row, col, set) {
+            const color = DEUCE_HIGHLIGHT_COLORS[getDeuceHighlightIndex(row, col, set) % DEUCE_HIGHLIGHT_COLORS.length];
+            fields.filter(Boolean).forEach(select => {
+                select.classList.add('deuce-invalid');
+                select.style.setProperty('--deuce-highlight', color.border);
+                select.style.setProperty('--deuce-highlight-glow', color.glow);
+            });
+        }
+
+        function updateScoreDropdownStyle(select) {
+            select.classList.toggle('has-value', select.value !== '');
+            if ((select.classList.contains('points') || select.classList.contains('games')) && select.value !== '') {
+                select.classList.remove('invalid');
+            }
+        }
+
+        function markMaxPointInvalid(isInvalid) {
+            document.getElementById('maxPoint')?.classList.toggle('invalid', isInvalid);
+        }
+
+        function getGameScoreParts(select) {
+            const match = select.id.match(/^g_(\d+)_(\d+)_(\d+)$/);
+            if (!match) return null;
+
+            return {
+                team: Number(match[1]),
+                opponent: Number(match[2]),
+                set: Number(match[3])
+            };
+        }
+
+        function getOppositeGameValue(value) {
+            if (value === '0') return '1';
+            if (value === '1') return '0';
+            return '';
+        }
+
+        function syncOppositeGameSelect(select) {
+            if (!select.classList.contains('games')) return;
+
+            const score = getGameScoreParts(select);
+            if (!score) return;
+
+            const oppositeSelect = document.getElementById(`g_${score.opponent}_${score.team}_${score.set}`);
+            if (!oppositeSelect) return;
+
+            oppositeSelect.value = getOppositeGameValue(select.value);
+            updateScoreDropdownStyle(oppositeSelect);
+            updatePointSelectForGameSelect(oppositeSelect, { resetForGameChange: true });
+        }
+
+        function syncAllGamePairs() {
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+
+            for (let row = 1; row <= format; row++) {
+                for (let col = row + 1; col <= format; col++) {
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const firstSelect = document.getElementById(`g_${row}_${col}_${set}`);
+                        const secondSelect = document.getElementById(`g_${col}_${row}_${set}`);
+                        if (!firstSelect || !secondSelect) continue;
+
+                        if (firstSelect.value !== '') {
+                            secondSelect.value = getOppositeGameValue(firstSelect.value);
+                        } else if (secondSelect.value !== '') {
+                            firstSelect.value = getOppositeGameValue(secondSelect.value);
+                        }
+
+                        updateScoreDropdownStyle(firstSelect);
+                        updateScoreDropdownStyle(secondSelect);
+                        updatePointSelectForGameSelect(firstSelect);
+                        updatePointSelectForGameSelect(secondSelect);
+                    }
+                }
+            }
+        }
+
+        function isBestOfThreeKnockoutRound() {
+            const round = getSelectedRound();
+            return getSetsPerMatch() >= 3 && (round === ROUND_SEMI_FINAL || round === ROUND_FINAL);
+        }
+
+        function getSetWinner(firstTeam, secondTeam, set) {
+            const firstGame = document.getElementById(`g_${firstTeam}_${secondTeam}_${set}`)?.value;
+            const secondGame = document.getElementById(`g_${secondTeam}_${firstTeam}_${set}`)?.value;
+            if (firstGame === '1' || secondGame === '0') return firstTeam;
+            if (secondGame === '1' || firstGame === '0') return secondTeam;
+            return null;
+        }
+
+        function shouldOmitThirdSet(firstTeam, secondTeam) {
+            if (!isBestOfThreeKnockoutRound()) return false;
+            const firstSetWinner = getSetWinner(firstTeam, secondTeam, 1);
+            const secondSetWinner = getSetWinner(firstTeam, secondTeam, 2);
+            return Boolean(firstSetWinner && secondSetWinner && firstSetWinner === secondSetWinner);
+        }
+
+        function setScoreSelectOmitted(select, isOmitted) {
+            if (!select) return;
+            const cell = select.closest('td');
+            cell?.classList.toggle('best-of-three-omitted', isOmitted);
+            select.disabled = isOmitted;
+            if (isOmitted) {
+                select.value = '';
+                select.classList.remove('invalid', 'has-value', 'deuce-invalid');
+                select.style.removeProperty('--deuce-highlight');
+                select.style.removeProperty('--deuce-highlight-glow');
+            } else {
+                updateScoreDropdownStyle(select);
+            }
+        }
+
+        function setThirdSetPairOmitted(firstTeam, secondTeam, isOmitted) {
+            [
+                `g_${firstTeam}_${secondTeam}_3`,
+                `p_${firstTeam}_${secondTeam}_3`,
+                `g_${secondTeam}_${firstTeam}_3`,
+                `p_${secondTeam}_${firstTeam}_3`
+            ].forEach(id => setScoreSelectOmitted(document.getElementById(id), isOmitted));
+        }
+
+        function updateOmittedThirdSetRows() {
+            document.querySelectorAll('#scoreBody tr').forEach(row => {
+                const controls = Array.from(row.querySelectorAll('.score-input'));
+                const isThirdSetRow = row.querySelector('.set-label')?.textContent.trim() === getSetLabel(3);
+                const allControlsOmitted = controls.length > 0 && controls.every(control => control.disabled);
+                row.classList.toggle('best-of-three-row-omitted', isThirdSetRow && allControlsOmitted);
+            });
+        }
+
+        function updateBestOfThreeOmissions() {
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            if (setsPerMatch < 3) return;
+
+            for (let first = 1; first <= format; first++) {
+                for (let second = first + 1; second <= format; second++) {
+                    setThirdSetPairOmitted(first, second, shouldOmitThirdSet(first, second));
+                }
+            }
+
+            updateOmittedThirdSetRows();
+        }
+
+        function handleScoreSelectChange(select) {
+            const hadDeuceHighlights = document.querySelectorAll('.score-input.deuce-invalid').length > 0;
+            syncOppositeGameSelect(select);
+            updateScoreDropdownStyle(select);
+            if (select.classList.contains('games')) {
+                updatePointSelectForGameSelect(select, { resetForGameChange: true });
+            } else if (select.classList.contains('points')) {
+                updatePointSelectForPointSelect(select);
+            }
+            updateBestOfThreeOmissions();
+            calculateTotals(false);
+            if (hadDeuceHighlights) {
+                validateDeucePointRules(false);
+            }
+            highlightOpponentCells(select);
+        }
+
+        function highlightOpponentCells(select) {
+            clearOpponentHighlights();
+            const match = select.id.match(/^[gp]_(\d+)_(\d+)_(\d+)$/);
+            if (!match) return;
+            const row = match[1];
+            const col = match[2];
+            const setsPerMatch = getSetsPerMatch();
+            for (let set = 1; set <= setsPerMatch; set++) {
+                const gSelf = document.getElementById(`g_${row}_${col}_${set}`);
+                const pSelf = document.getElementById(`p_${row}_${col}_${set}`);
+                const gOpponent = document.getElementById(`g_${col}_${row}_${set}`);
+                const pOpponent = document.getElementById(`p_${col}_${row}_${set}`);
+                if (gSelf) gSelf.classList.add('opponent-highlight');
+                if (pSelf) pSelf.classList.add('opponent-highlight');
+                if (gOpponent) gOpponent.classList.add('opponent-highlight');
+                if (pOpponent) pOpponent.classList.add('opponent-highlight');
+            }
+        }
+
+        function clearOpponentHighlights() {
+            document.querySelectorAll('.score-input.opponent-highlight').forEach(el => {
+                el.classList.remove('opponent-highlight');
+            });
+        }
+
+        function isValidTeamName(value) {
+            const trimmed = value.trim();
+            if (!trimmed) return true;
+
+            if (!TEAM_NAME_ALLOWED_CHAR_PATTERN.test(trimmed)) return false;
+
+            const slashCount = (trimmed.match(/\//g) || []).length;
+            if (slashCount > 1) return false;
+
+            return trimmed.split('/').every(name => name.trim().length > 0);
+        }
+
+        function validateTeamNames(showMessage = false) {
+            const format = parseInt(document.getElementById('format').value);
+            let firstInvalid = null;
+
+            for (let i = 1; i <= format; i++) {
+                const input = document.getElementById(`team${i}`);
+                const isValid = input && isValidTeamName(input.value);
+                if (input) input.classList.toggle('invalid', !isValid);
+                if (!isValid && !firstInvalid) firstInvalid = input;
+            }
+
+            if (firstInvalid && showMessage) {
+                showStatus(TEAM_NAME_ALLOWED_MESSAGE, 'error');
+                showMessageBox('Check Team Names', TEAM_NAME_ALLOWED_MESSAGE);
+                firstInvalid.focus();
+                return false;
+            }
+
+            return !firstInvalid;
+        }
+
+        function validateGameFields(showMessage = false) {
+            const missingGameFields = Array.from(document.querySelectorAll('.score-input.games'))
+                .filter(select => !select.disabled && select.value === '');
+
+            document.querySelectorAll('.score-input.games').forEach(select => {
+                select.classList.toggle('invalid', !select.disabled && select.value === '');
+            });
+
+            if (missingGameFields.length && showMessage) {
+                showStatus('Game values are missing. Please select a GAME value for every score cell before saving.', 'error');
+                showMessageBox('Missing Game Values', 'Some GAME fields are still set to G. Please select the GAME value for every score cell before saving.');
+                missingGameFields[0].focus();
+                return false;
+            }
+
+            return missingGameFields.length === 0;
+        }
+
+        function validatePointFields(showMessage = false) {
+            const missingPointFields = Array.from(document.querySelectorAll('.score-input.points'))
+                .filter(select => !select.disabled && select.value === '');
+
+            document.querySelectorAll('.score-input.points').forEach(select => {
+                select.classList.toggle('invalid', !select.disabled && select.value === '');
+            });
+
+            if (missingPointFields.length && showMessage) {
+                showStatus('Point values are missing. Please select a POINT value for every score cell before saving.', 'error');
+                showMessageBox('Missing Point Values', 'Some POINT fields are still set to P. Please select the POINT value for every score cell before saving.');
+                missingPointFields[0].focus();
+                return false;
+            }
+
+            return missingPointFields.length === 0;
+        }
+
+        function getScorePairFields(firstTeam, secondTeam, set) {
+            return {
+                firstGame: document.getElementById(`g_${firstTeam}_${secondTeam}_${set}`),
+                firstPoint: document.getElementById(`p_${firstTeam}_${secondTeam}_${set}`),
+                secondGame: document.getElementById(`g_${secondTeam}_${firstTeam}_${set}`),
+                secondPoint: document.getElementById(`p_${secondTeam}_${firstTeam}_${set}`)
+            };
+        }
+
+        function isScoreSideBlank(gameField, pointField) {
+            return (!gameField || gameField.value === '') && (!pointField || pointField.value === '');
+        }
+
+        function isScoreSideComplete(gameField, pointField) {
+            return Boolean(gameField && pointField && gameField.value !== '' && pointField.value !== '');
+        }
+
+        function getSavedScoreValue(select) {
+            if (!select || select.value === '') return null;
+            const value = parseInt(select.value, 10);
+            return Number.isFinite(value) ? value : null;
+        }
+
+        function clearScorePairValidationHighlights() {
+            document.querySelectorAll('.score-input.invalid').forEach(select => {
+                select.classList.remove('invalid');
+            });
+        }
+
+        function validatePairedScoreFields(showMessage = false) {
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            const invalidPairs = [];
+            clearScorePairValidationHighlights();
+
+            for (let first = 1; first <= format; first++) {
+                for (let second = first + 1; second <= format; second++) {
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const fields = getScorePairFields(first, second, set);
+                        const allFields = [fields.firstGame, fields.firstPoint, fields.secondGame, fields.secondPoint];
+                        if (allFields.some(field => field?.disabled)) continue;
+
+                        const firstBlank = isScoreSideBlank(fields.firstGame, fields.firstPoint);
+                        const secondBlank = isScoreSideBlank(fields.secondGame, fields.secondPoint);
+                        const bothBlank = firstBlank && secondBlank;
+                        if (bothBlank) continue;
+
+                        const firstComplete = isScoreSideComplete(fields.firstGame, fields.firstPoint);
+                        const secondComplete = isScoreSideComplete(fields.secondGame, fields.secondPoint);
+                        if (firstComplete && secondComplete) continue;
+
+                        invalidPairs.push({ fields: allFields.filter(Boolean), first, second, set });
+                    }
+                }
+            }
+
+            invalidPairs.forEach(pair => {
+                pair.fields.forEach(field => {
+                    if (!field.disabled && field.value === '') field.classList.add('invalid');
+                });
+            });
+
+            if (invalidPairs.length && showMessage) {
+                const firstInvalid = invalidPairs.flatMap(pair => pair.fields).find(field => !field.disabled && field.value === '');
+                showStatus('Incomplete score pair. If one team has a GAME/POINT value for a set, the opponent side must also have GAME and POINT selected.', 'error');
+                showMessageBox('Incomplete Score Pair', 'You can leave unused set scores as G and P. But once either team has a score for a set, both teams in that same set must have GAME and POINT selected.');
+                firstInvalid?.focus();
+                return false;
+            }
+
+            return invalidPairs.length === 0;
+        }
+
+        function isScoreSheetBlank() {
+            const activeScoreInputs = Array.from(document.querySelectorAll('.score-input.games, .score-input.points'))
+                .filter(select => !select.disabled);
+            return activeScoreInputs.length > 0 && activeScoreInputs.every(select => select.value === '');
+        }
+
+        function validateMaxGamePointForDeuce(showMessage = false) {
+            if (getSelectedMatchStyle() !== 'with-deuce') {
+                markMaxPointInvalid(false);
+                return true;
+            }
+
+            const gamePoint = parseInt(document.getElementById('gamePoint').value, 10) || 21;
+            const maxPoint = parseInt(document.getElementById('maxPoint').value, 10) || 0;
+            const requiredMaxPoint = gamePoint + 2;
+            const isValid = maxPoint >= requiredMaxPoint;
+            markMaxPointInvalid(!isValid);
+
+            if (!isValid && showMessage) {
+                showStatus(`MAX GAME POINT must be at least ${requiredMaxPoint} for WITH DEUCE/SETTING.`, 'error');
+                showMessageBox('Check Max Game Point', `For WITH DEUCE/SETTING, MAX GAME POINT must be at least 2 points higher than GAME POINT. Minimum required value is ${requiredMaxPoint}.`);
+                document.getElementById('maxPoint')?.focus();
+                return false;
+            }
+
+            return isValid;
+        }
+
+        function validateDeucePointRules(showMessage = false) {
+            if (getSelectedMatchStyle() !== 'with-deuce') return true;
+
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            const { gamePoint, max: maxPoint } = getPointRange();
+            const invalidPairs = [];
+            clearDeuceHighlights();
+
+            for (let row = 1; row <= format; row++) {
+                for (let col = row + 1; col <= format; col++) {
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const firstGame = document.getElementById(`g_${row}_${col}_${set}`);
+                        const secondGame = document.getElementById(`g_${col}_${row}_${set}`);
+                        const firstPoint = document.getElementById(`p_${row}_${col}_${set}`);
+                        const secondPoint = document.getElementById(`p_${col}_${row}_${set}`);
+
+                        if (!firstGame || !secondGame || !firstPoint || !secondPoint) continue;
+                        if (firstGame.disabled || secondGame.disabled || firstPoint.disabled || secondPoint.disabled) continue;
+                        if (
+                            isScoreSideBlank(firstGame, firstPoint) &&
+                            isScoreSideBlank(secondGame, secondPoint)
+                        ) continue;
+
+                        const firstWon = firstGame.value === '1';
+                        const secondWon = secondGame.value === '1';
+                        const firstPoints = parseInt(firstPoint.value, 10);
+                        const secondPoints = parseInt(secondPoint.value, 10);
+                        const winnerPoints = firstWon ? firstPoints : secondWon ? secondPoints : null;
+                        const loserPoints = firstWon ? secondPoints : secondWon ? firstPoints : null;
+                        const winnerField = firstWon ? firstPoint : secondWon ? secondPoint : null;
+                        const loserField = firstWon ? secondPoint : secondWon ? firstPoint : null;
+                        const pointGap = winnerPoints - loserPoints;
+                        const crossedGamePoint = firstPoints > gamePoint || secondPoints > gamePoint;
+                        const validWinnerPoints = winnerPoints >= gamePoint && winnerPoints <= maxPoint;
+                        const validPointGap = crossedGamePoint
+                            ? pointGap === 2 || (winnerPoints === maxPoint && pointGap === 1)
+                            : (pointGap >= 2 || winnerPoints === maxPoint);
+                        const validScore = (firstWon || secondWon) && validWinnerPoints && winnerPoints > loserPoints && validPointGap;
+
+                        if (!validScore) {
+                            invalidPairs.push({ fields: [winnerField, loserField], row, col, set });
+                        }
+                    }
+                }
+            }
+
+            invalidPairs.forEach(pair => applyDeuceHighlight(pair.fields, pair.row, pair.col, pair.set));
+
+            if (invalidPairs.length && showMessage) {
+                showStatus('With deuce/setting, GAME winners must score from GAME POINT to MAX GAME POINT.', 'error');
+                showMessageBox('Check Deuce/Setting Scores', 'Each highlighted pair has its own color. For WITH DEUCE/SETTING, any team with GAME 1 must have POINT from GAME POINT through MAX GAME POINT. After either team crosses GAME POINT, the winner must lead by exactly 2, except a 1-point lead is allowed at MAX GAME POINT.');
+                invalidPairs.flatMap(pair => pair.fields).find(Boolean)?.focus();
+                return false;
+            }
+
+            return invalidPairs.length === 0;
+        }
+
+        function removeInvalidTeamNameCharacters(value) {
+            return Array.from(value)
+                .filter(char => TEAM_NAME_ALLOWED_SINGLE_CHAR_PATTERN.test(char))
+                .join('');
+        }
+
+        function removeExtraSlashes(value) {
+            let slashSeen = false;
+            let cleaned = '';
+
+            for (const char of value) {
+                if (char === '/') {
+                    if (slashSeen) continue;
+                    slashSeen = true;
+                }
+                cleaned += char;
+            }
+
+            return cleaned;
+        }
+
+        function cleanTeamName(value) {
+            return removeExtraSlashes(removeInvalidTeamNameCharacters(value));
+        }
+
+        function showTeamNamePopup(input, message, cleanup) {
+            const modal = document.getElementById('teamNameModal');
+            if (modal.classList.contains('show')) return;
+
+            teamNamePopupInput = input;
+            teamNamePopupCleanup = cleanup;
+            document.getElementById('teamNameModalMessage').textContent = message;
+            modal.classList.add('show');
+            document.getElementById('teamNameModalOk').focus();
+        }
+
+        function confirmTeamNamePopup() {
+            const modal = document.getElementById('teamNameModal');
+            modal.classList.remove('show');
+
+            if (teamNamePopupInput) {
+                teamNamePopupInput.value = teamNamePopupCleanup
+                    ? teamNamePopupCleanup(teamNamePopupInput.value)
+                    : cleanTeamName(teamNamePopupInput.value);
+                teamNamePopupInput.focus();
+                if (getSelectedRound() === ROUND_POOL) rememberManualTeamOverride();
+                teamNamePopupInput = null;
+                teamNamePopupCleanup = null;
+            }
+
+            updateTeamLabels();
+            validateTeamNames(false);
+        }
+
+        function handleTeamNameInput(input) {
+            if (getSelectedRound() !== ROUND_POOL) {
+                updateTeamLabels();
+                return;
+            }
+
+            const slashCount = (input.value.match(/\//g) || []).length;
+
+            if (slashCount > 1) {
+                showTeamNamePopup(input, 'Not more than 2 players can be entered.', cleanTeamName);
+                return;
+            }
+
+            if (!TEAM_NAME_ALLOWED_CHAR_PATTERN.test(input.value)) {
+                showTeamNamePopup(input, TEAM_NAME_ALLOWED_MESSAGE, cleanTeamName);
+                return;
+            }
+
+            rememberManualTeamOverride();
+            updateTeamLabels();
+            validateTeamNames(false);
+        }
+
+        function updateTeamLabels() {
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 1; i <= format; i++) {
+                const label = document.getElementById(`teamLabel${i}`);
+                const input = document.getElementById(`team${i}`);
+                if (label && input) {
+                    const teamName = input.value.trim() || 'Player 1 / Player 2';
+                    label.textContent = '';
+                    teamName.split('/').forEach((name, index) => {
+                        if (index > 0) label.appendChild(document.createElement('br'));
+                        label.appendChild(document.createTextNode(name.trim()));
+                    });
+                }
+                const vsLabel = document.getElementById(`vsTeamName${i}`);
+                if (vsLabel && input) {
+                    const fullName = input.value.trim() || `Team ${i}`;
+                    const firstNames = fullName.split('/').map(p => p.trim().split(' ')[0]).join(' / ');
+                    vsLabel.textContent = firstNames || `Team ${i}`;
+                }
+            }
+            updatePlaceholderTeamWarnings(false);
+        }
+
+        function getTeamOverrideContextKey() {
+            const event = document.getElementById('eventType')?.value || '';
+            const division = document.getElementById('division')?.value || '';
+            const round = getSelectedRound();
+            const pool = document.getElementById('pool')?.value || '';
+            return [event, division, round, pool].join('|');
+        }
+
+        function getCurrentTeamInputValues() {
+            const format = parseInt(document.getElementById('format')?.value, 10) || 0;
+            const values = [];
+            for (let i = 1; i <= format; i++) {
+                values.push(document.getElementById(`team${i}`)?.value || '');
+            }
+            return values;
+        }
+
+        function rememberManualTeamOverride() {
+            if (getSelectedRound() !== ROUND_POOL) return;
+            const key = getTeamOverrideContextKey();
+            if (!key.trim()) return;
+            manualTeamOverrides[key] = getCurrentTeamInputValues();
+        }
+
+        function getManualTeamOverrideForCurrentContext() {
+            if (getSelectedRound() !== ROUND_POOL) return [];
+            const values = manualTeamOverrides[getTeamOverrideContextKey()];
+            return Array.isArray(values) ? values : [];
+        }
+
+        function updateTeamNameEditability() {
+            const canEditNames = getSelectedRound() === ROUND_POOL && !scoreEntryBlockedByConflict;
+            document.querySelectorAll('[id^="team"]').forEach(input => {
+                if (input.tagName !== 'INPUT') return;
+                const group = input.closest('.team-input-group');
+                input.readOnly = !canEditNames;
+                input.title = canEditNames
+                    ? 'Pool-level player names can be edited here.'
+                    : 'Names for this round are carried forward from the qualifying saved round.';
+                group?.classList.toggle('locked-name', !canEditNames);
+            });
+        }
+
+        function isPlaceholderTeamName(value) {
+            const text = String(value || '').trim();
+            if (!text) return false;
+
+            return [
+                /^winner of pool\s+[a-z]$/i,
+                /^runner-up of pool\s+[a-z]$/i,
+                /^team\s+\d+\s+of pool\s+[a-z]$/i,
+                /^winner semi final\s+\d+$/i,
+                /^winner of semi final\s+\d+$/i,
+                /^semi final\s+\d+\s+-\s+team\s+\d+$/i,
+                /^finalist\s+\d+$/i,
+                /^winner of super-pool\s+[xy]$/i,
+                /^super-pool\s+[xy]\s+team\s+\d+$/i
+            ].some(pattern => pattern.test(text));
+        }
+
+        function getPlaceholderTeamInputs() {
+            const format = parseInt(document.getElementById('format').value) || 0;
+            const inputs = [];
+            for (let i = 1; i <= format; i++) {
+                const input = document.getElementById(`team${i}`);
+                if (input && isPlaceholderTeamName(input.value)) {
+                    inputs.push(input);
+                }
+            }
+            return inputs;
+        }
+
+        function updatePlaceholderTeamWarnings(showPopup = false) {
+            const placeholderInputs = getPlaceholderTeamInputs();
+            const placeholderIds = new Set(placeholderInputs.map(input => input.id));
+
+            document.querySelectorAll('.team-input-group').forEach(group => {
+                const input = group.querySelector('input[id^="team"]');
+                group.classList.toggle('placeholder-team', Boolean(input && placeholderIds.has(input.id)));
+            });
+
+            if (!showPopup || !placeholderInputs.length) return false;
+
+            const warningKey = placeholderInputs.map(input => `${input.id}:${input.value}`).join('|');
+            if (warningKey === lastPlaceholderTeamWarningKey) return true;
+            lastPlaceholderTeamWarningKey = warningKey;
+
+            const names = placeholderInputs.map(input => input.value.trim()).join(', ');
+            showMessageBox(
+                'Placeholder Team Names',
+                `Actual player names are not confirmed yet for: ${names}. These boxes are highlighted. Load/save the previous round results first, then reload this round to fill real names.`
+            );
+            return true;
+        }
+
+        function generateSchedule() {
+            const format = parseInt(document.getElementById('format').value);
+            const schedule = SCHEDULES[format] || [];
+            const container = document.getElementById('matchSchedule');
+            const heading = document.getElementById('totalMatchesHeading');
+            if (heading) {
+                heading.textContent = `Total Scheduled Matches: ${schedule.length}`;
+            }
+            container.innerHTML = '';
+
+            schedule.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'match-slot';
+                div.innerHTML = `
+                    <div class="match-num">Match ${m.match}</div>
+                    <div class="match-teams">TEAM ${m.teams[0]} v TEAM ${m.teams[1]}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calculateTotals(showMessage = true) {
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+
+            for (let row = 1; row <= format; row++) {
+                let totalGames = 0;
+                let totalPointsWon = 0;
+                let totalPointsConceded = 0;
+
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        const pOpponent = document.getElementById(`p_${col}_${row}_${set}`);
+                        if (gInput?.disabled || pInput?.disabled) continue;
+                        if (gInput && gInput.value) totalGames += parseInt(gInput.value) || 0;
+                        if (pInput && pInput.value) totalPointsWon += parseInt(pInput.value) || 0;
+                        if (pOpponent && pOpponent.value) totalPointsConceded += parseInt(pOpponent.value) || 0;
+                    }
+                }
+
+                document.getElementById(`totalGames${row}`).textContent = totalGames;
+                document.getElementById(`totalPointsWon${row}`).textContent = totalPointsWon;
+                document.getElementById(`totalPointsConceded${row}`).textContent = totalPointsConceded;
+                const diff = totalPointsWon - totalPointsConceded;
+                document.getElementById(`totalPointsDiff${row}`).textContent = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
+            }
+
+            if (showMessage) {
+                showStatus('Totals calculated!', 'success');
+                showMessageBox('Totals Calculated', 'Totals calculated successfully.');
+                scheduleHideStatus(5000);
+            }
+            updateTiebreakerSection();
+        }
+
+        function updateTiebreakerSection() {
+            const section = document.getElementById('tiebreakerSection');
+            const content = document.getElementById('tiebreakerContent');
+            if (!section || !content) return;
+
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            const entry = collectFormData();
+            entry.savedAt = entry.baseSavedAt || null;
+            const category = getSelectedScoreContext();
+            const poolName = document.getElementById('pool').value;
+
+            if (!hasEntryResult(entry)) {
+                section.style.display = 'none';
+                content.innerHTML = '';
+                document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
+                return;
+            }
+
+            const standings = buildEntryStandings(entry, category, poolName);
+            const tieGroups = [];
+            let currentGroup = [];
+
+            standings.forEach((team, index) => {
+                if (team.tiedStanding) {
+                    currentGroup.push(team);
+                } else {
+                    if (currentGroup.length > 1) tieGroups.push([...currentGroup]);
+                    currentGroup = [];
+                }
+            });
+            if (currentGroup.length > 1) tieGroups.push(currentGroup);
+
+            if (tieGroups.length === 0) {
+                section.style.display = 'none';
+                content.innerHTML = '';
+                document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
+                return;
+            }
+
+            section.style.display = 'block';
+            content.innerHTML = tieGroups.map((group, groupIndex) => {
+                const groupName = `tie_group_${groupIndex}`;
+                const selectedSeed = group.find(t => t.tieSelected)?.seed || null;
+                const isResolved = selectedSeed !== null;
+                return `
+                    <div class="tiebreaker-group" data-group="${groupIndex}">
+                        <div class="tiebreaker-group-title">⚖️ Tied Teams (Position ${group[0].resolvedStanding || '?'})</div>
+                        ${group.map(team => {
+                            const diff = team.points - team.pointsConceded;
+                            const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
+                            const isSelected = team.seed === selectedSeed;
+                            const isDisabled = isResolved || (selectedSeed && !isSelected);
+                            return `
+                                <div class="tiebreaker-option ${isSelected ? 'selected' : ''} ${!isResolved ? 'unresolved' : ''} ${isResolved && !isSelected ? 'disabled' : ''}">
+                                    <input type="checkbox" id="tie_${groupIndex}_${team.seed}" value="${team.seed}"
+                                        data-group="${groupIndex}"
+                                        ${isSelected ? 'checked' : ''}
+                                        ${isDisabled ? 'disabled' : ''}
+                                        onchange="handleTiebreakerCheck(this, ${groupIndex}, ${team.seed})">
+                                    <label for="tie_${groupIndex}_${team.seed}">${escapeHeaderHtml(team.name)}</label>
+                                    <span class="tie-stats">GW:${team.games} | Pts:${team.points}/${team.pointsConceded} | Diff:${diffStr}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                        <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <button class="btn-tiebreaker-submit" id="tiebreakerSubmitBtn_${groupIndex}" onclick="submitTiebreakerPromotion(${groupIndex})" ${(!selectedSeed || isResolved) ? 'disabled' : ''}>🏆 Submit Tiebreaker Promotion</button>
+                            ${isResolved ? `<button class="btn-tiebreaker-reset" onclick="resetTiebreakerPromotion(${groupIndex})">↩️ Reset Tiebreaker Promotion</button>` : ''}
+                            <span style="font-size:0.72rem;color:#f39c12;font-weight:700;">↑ Promote to Next Level</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Highlight tied team rows in score table
+            document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
+            const unresolvedSeeds = [];
+            tieGroups.forEach(group => {
+                const isResolved = group.some(t => t.tieSelected);
+                if (!isResolved) {
+                    group.forEach(t => unresolvedSeeds.push(t.seed));
+                }
+            });
+            unresolvedSeeds.forEach(seed => {
+                document.querySelectorAll(`.score-table tr[data-team-row="${seed}"]`).forEach(tr => {
+                    tr.classList.add('tie-highlight');
+                });
+            });
+        }
+
+        function escapeHeaderHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function handleTiebreakerCheck(checkbox, groupIndex, seed) {
+            const groupContainer = checkbox.closest('.tiebreaker-group');
+            const allCheckboxes = groupContainer.querySelectorAll('input[type="checkbox"]');
+            const submitBtn = document.getElementById(`tiebreakerSubmitBtn_${groupIndex}`);
+
+            if (checkbox.checked) {
+                // Disable all others in the group
+                allCheckboxes.forEach(cb => {
+                    if (cb !== checkbox) {
+                        cb.disabled = true;
+                        cb.closest('.tiebreaker-option').classList.add('disabled');
+                    }
+                });
+                checkbox.closest('.tiebreaker-option').classList.add('selected');
+                if (submitBtn) submitBtn.disabled = false;
+            } else {
+                // Re-enable all
+                allCheckboxes.forEach(cb => {
+                    cb.disabled = false;
+                    cb.closest('.tiebreaker-option').classList.remove('disabled');
+                    cb.closest('.tiebreaker-option').classList.remove('selected');
+                });
+                if (submitBtn) submitBtn.disabled = true;
+            }
+        }
+
+        function submitTiebreakerPromotion(groupIndex) {
+            const groupContainer = document.querySelector(`.tiebreaker-group[data-group="${groupIndex}"]`);
+            if (!groupContainer) return;
+
+            const checked = groupContainer.querySelector('input[type="checkbox"]:checked');
+            if (!checked) return;
+
+            const seed = parseInt(checked.value);
+            const teamLabel = checked.closest('.tiebreaker-option').querySelector('label').textContent;
+
+            showMessageBox(
+                'Confirm Tiebreaker Promotion',
+                `Are you sure you want to promote "${teamLabel}" to the next level?`,
+                () => {
+                    // On OK — save the selection
+                    const entry = collectFormData();
+                    entry.savedAt = entry.baseSavedAt || null;
+                    const category = getSelectedScoreContext();
+                    const poolName = document.getElementById('pool').value;
+                    const standings = buildEntryStandings(entry, category, poolName);
+
+                    const tieGroups = [];
+                    let currentGroup = [];
+                    standings.forEach(team => {
+                        if (team.tiedStanding) {
+                            currentGroup.push(team);
+                        } else {
+                            if (currentGroup.length > 1) tieGroups.push([...currentGroup]);
+                            currentGroup = [];
+                        }
+                    });
+                    if (currentGroup.length > 1) tieGroups.push(currentGroup);
+
+                    const group = tieGroups[groupIndex];
+                    if (!group) return;
+
+                    const tieGroupKey = group[0].tieGroup;
+                    const categoryId = getCategorySelectionId(category);
+                    const selections = readTieBreakSelections();
+                    selections[`${categoryId}|${poolName}|${tieGroupKey}`] = seed;
+                    tieBreakSelectionsMemory = selections;
+                    try {
+                        window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
+                    } catch (e) {}
+
+                    updateTiebreakerSection();
+                    showStatus(`✅ ${teamLabel} promoted to next level.`, 'success');
+                    scheduleHideStatus(5000);
+                },
+                { showCancel: true }
+            );
+        }
+
+        function resetTiebreakerPromotion(groupIndex) {
+            // First check if promoted team has played in next level
+            const entry = collectFormData();
+            entry.savedAt = entry.baseSavedAt || null;
+            const category = getSelectedScoreContext();
+            const poolName = document.getElementById('pool').value;
+            const standings = buildEntryStandings(entry, category, poolName);
+
+            const tieGroups = [];
+            let currentGroup = [];
+            standings.forEach(team => {
+                if (team.tiedStanding) {
+                    currentGroup.push(team);
+                } else {
+                    if (currentGroup.length > 1) tieGroups.push([...currentGroup]);
+                    currentGroup = [];
+                }
+            });
+            if (currentGroup.length > 1) tieGroups.push(currentGroup);
+
+            const group = tieGroups[groupIndex];
+            if (!group) return;
+
+            const promotedTeam = group.find(t => t.tieSelected);
+            if (!promotedTeam) return;
+
+            // Check next level rounds for any scores involving this team
+            readSelectedScoreFile().then(scoreFile => {
+                if (hasPromotedTeamPlayedNextLevel(scoreFile, category, poolName, promotedTeam)) {
+                    showMessageBox(
+                        'Cannot Reset Tiebreaker',
+                        `"${promotedTeam.name}" has already played in the next level. The tiebreaker promotion cannot be reset.`
+                    );
+                    return;
+                }
+
+                showMessageBox(
+                    'Reset Tiebreaker Promotion',
+                    'Are you sure you want to reset this tiebreaker? The promoted team will be removed and you will need to select again.',
+                    () => {
+                        const tieGroupKey = group[0].tieGroup;
+                        const categoryId = getCategorySelectionId(category);
+                        const selections = readTieBreakSelections();
+                        delete selections[`${categoryId}|${poolName}|${tieGroupKey}`];
+                        tieBreakSelectionsMemory = selections;
+                        try {
+                            window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
+                        } catch (e) {}
+
+                        updateTiebreakerSection();
+                        showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
+                        scheduleHideStatus(5000);
+                    },
+                    { showCancel: true }
+                );
+            }).catch(() => {
+                showMessageBox(
+                    'Reset Tiebreaker Promotion',
+                    'Are you sure you want to reset this tiebreaker? The promoted team will be removed and you will need to select again.',
+                    () => {
+                        const tieGroupKey = group[0].tieGroup;
+                        const categoryId = getCategorySelectionId(category);
+                        const selections = readTieBreakSelections();
+                        delete selections[`${categoryId}|${poolName}|${tieGroupKey}`];
+                        tieBreakSelectionsMemory = selections;
+                        try {
+                            window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
+                        } catch (e) {}
+
+                        updateTiebreakerSection();
+                        showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
+                        scheduleHideStatus(5000);
+                    },
+                    { showCancel: true }
+                );
+            });
+        }
+
+        function hasPromotedTeamPlayedNextLevel(scoreFile, category, poolName, promotedTeam) {
+            if (!scoreFile) return false;
+            const teamName = (promotedTeam.name || '').trim();
+            if (!teamName) return false;
+
+            function hasTeamScoresInEntry(entry) {
+                const teams = Array.isArray(entry.teams) ? entry.teams : [];
+                const teamIndex = teams.findIndex(t => {
+                    const name = (typeof t === 'string' ? t : (t?.name || '')).trim();
+                    return name === teamName;
+                });
+                if (teamIndex < 0) return false;
+                const scores = Array.isArray(entry.scores) ? entry.scores : [];
+                if (scores.length === 0) return false;
+                return scores.some(s => {
+                    const isInvolved = Number(s.team) === teamIndex + 1 || Number(s.opponent) === teamIndex + 1;
+                    if (!isInvolved) return false;
+                    const games = parseInt(s.games, 10);
+                    const points = parseInt(s.points, 10);
+                    return (games > 0 || points > 0);
+                });
+            }
+
+            function getLatest(entries) {
+                return Array.isArray(entries) && entries.length ? entries[entries.length - 1] : null;
+            }
+
+            // Check Super-pool entries (latest only)
+            const superPools = scoreFile.pools || {};
+            for (const spKey of ['X', 'Y']) {
+                const entries = Array.isArray(superPools[spKey]) ? superPools[spKey] : [];
+                const spEntries = entries.filter(e => (e.round || '') === ROUND_SUPER_POOL || ['X', 'Y'].includes(e.pool));
+                const latest = getLatest(spEntries);
+                if (latest && hasTeamScoresInEntry(latest)) return true;
+            }
+
+            // Check Semi Final entries (latest per match)
+            const semiFinals = scoreFile.rounds?.semiFinal || {};
+            for (const matchKey of Object.keys(semiFinals)) {
+                const latest = getLatest(semiFinals[matchKey]);
+                if (latest && hasTeamScoresInEntry(latest)) return true;
+            }
+
+            // Check Final entries (latest per match)
+            const finals = scoreFile.rounds?.final || {};
+            for (const matchKey of Object.keys(finals)) {
+                const latest = getLatest(finals[matchKey]);
+                if (latest && hasTeamScoresInEntry(latest)) return true;
+            }
+
+            return false;
+        }
+
+        function collectFormData(options = {}) {
+            const { clearEntry = false } = options;
+            syncAllGamePairs();
+            updateBestOfThreeOmissions();
+            const format = parseInt(document.getElementById('format').value);
+            const setsPerMatch = getSetsPerMatch();
+            const pointRange = getPointRange();
+            const round = getSelectedRound();
+            const data = {
+                date: document.getElementById('tournamentDate').value,
+                event: document.getElementById('eventType').value,
+                division: document.getElementById('division').value,
+                round: round,
+                pool: document.getElementById('pool').value,
+                match: isKnockoutRound(round) ? document.getElementById('pool').value : '',
+                format: format,
+                setsPerMatch: setsPerMatch,
+                courts: '',
+                matchStyle: getSelectedMatchStyle(),
+                gamePoint: parseInt(document.getElementById('gamePoint').value, 10) || 21,
+                minPoint: pointRange.min,
+                maxPoint: pointRange.max,
+                clearEntry: clearEntry,
+                baseSavedAt: loadedScoreVersion,
+                teams: [],
+                scores: []
+            };
+
+            for (let i = 1; i <= format; i++) {
+                data.teams.push(document.getElementById(`team${i}`).value);
+            }
+
+            for (let row = 1; row <= format; row++) {
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        if (gInput?.disabled || pInput?.disabled) continue;
+                        if (clearEntry) continue;
+                        data.scores.push({
+                            team: row,
+                            opponent: col,
+                            set: set,
+                            games: getSavedScoreValue(gInput),
+                            points: getSavedScoreValue(pInput)
+                        });
+                }
+            }
+        }
+
+            // Calculate totals
+            for (let row = 1; row <= format; row++) {
+                let totalGames = 0, totalPointsWon = 0, totalPointsConceded = 0;
+                for (let col = 1; col <= format; col++) {
+                    if (col === row) continue;
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const gInput = document.getElementById(`g_${row}_${col}_${set}`);
+                        const pInput = document.getElementById(`p_${row}_${col}_${set}`);
+                        const pOpponent = document.getElementById(`p_${col}_${row}_${set}`);
+                        if (gInput?.disabled || pInput?.disabled) continue;
+                        if (clearEntry) continue;
+                        const oppositeGame = document.getElementById(`g_${col}_${row}_${set}`);
+                        const oppositePoint = document.getElementById(`p_${col}_${row}_${set}`);
+                        if (
+                            isScoreSideBlank(gInput, pInput) &&
+                            isScoreSideBlank(oppositeGame, oppositePoint)
+                        ) continue;
+                        if (gInput && gInput.value) totalGames += parseInt(gInput.value) || 0;
+                        if (pInput && pInput.value) totalPointsWon += parseInt(pInput.value) || 0;
+                        if (pOpponent && pOpponent.value) totalPointsConceded += parseInt(pOpponent.value) || 0;
+                    }
+                }
+                data.teams[row - 1] = {
+                    name: document.getElementById(`team${row}`).value,
+                    totalGames: totalGames,
+                    totalPoints: totalPointsWon,
+                    totalPointsConceded: totalPointsConceded
+                };
+            }
+
+            return data;
+        }
+
+        function getSelectedScoreContext() {
+            const setsPerMatch = getSetsPerMatch();
+            const round = getSelectedRound();
+            const poolOrMatch = document.getElementById('pool').value;
+            return {
+                event: document.getElementById('eventType').value,
+                division: document.getElementById('division').value,
+                round: round,
+                pool: poolOrMatch,
+                match: isKnockoutRound(round) ? poolOrMatch : '',
+                setLabel: `${setsPerMatch} Set${setsPerMatch === 1 ? '' : 's'}`
+            };
+        }
+
+        function getSelectedScoreContextText() {
+            const context = getSelectedScoreContext();
+            const poolLabel = isKnockoutRound(context.round) ? 'Match' : context.round === ROUND_SUPER_POOL ? 'Super-pool' : 'Pool';
+            return `Event: ${context.event}, Division: ${context.division}, Round: ${context.round}, ${poolLabel}: ${context.pool}, Set: ${context.setLabel}`;
+        }
+
+        function slugifyScorePath(value) {
+            return String(value)
+                .toLowerCase()
+                .replace(/['"]/g, '')
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '') || 'value';
+        }
+
+        function getSelectedScoreFilePath() {
+            const context = getSelectedScoreContext();
+            return `SCORES/${slugifyScorePath(context.event)}__division_${slugifyScorePath(context.division)}.json`;
+        }
+
+        function getUniqueValues(items, key) {
+            return [...new Set(items.map(item => item[key]).filter(Boolean))];
+        }
+
+        function setSelectOptions(selectId, values, selectedValue) {
+            const select = document.getElementById(selectId);
+            const normalizedValues = [...new Set(values.filter(Boolean))];
+            select.innerHTML = normalizedValues
+                .map(value => `<option value="${value}">${value}</option>`)
+                .join('');
+
+            if (normalizedValues.includes(selectedValue)) {
+                select.value = selectedValue;
+            } else if (normalizedValues.length > 0) {
+                select.value = normalizedValues[0];
+            }
+        }
+
+        function getTournamentCategories() {
+            return tournamentData && Array.isArray(tournamentData.categories)
+                ? tournamentData.categories
+                : [];
+        }
+
+        function getSelectedTournamentCategory() {
+            const event = document.getElementById('eventType').value;
+            const division = document.getElementById('division').value;
+
+            return getTournamentCategories().find(category => (
+                category.event === event && category.division === division
+            ));
+        }
+
+        function getSelectedRound() {
+            return document.getElementById('roundType')?.value || ROUND_POOL;
+        }
+
+        function isKnockoutRound(round = getSelectedRound()) {
+            return round === ROUND_SEMI_FINAL || round === ROUND_FINAL;
+        }
+
+        function getRoundMatchOptions(round = getSelectedRound()) {
+            if (round === ROUND_SEMI_FINAL) return SEMI_FINAL_MATCHES;
+            if (round === ROUND_FINAL) return FINAL_MATCHES;
+            if (round === ROUND_SUPER_POOL) return SUPER_POOL_ASSIGNMENTS.map(item => item.pool);
+            return null;
+        }
+
+        function getAvailableRoundsForCategory(category) {
+            if (!category) return [ROUND_POOL];
+
+            const flow = getCategoryFlow(category);
+            if (flow.middle === ROUND_SUPER_POOL) {
+                return [ROUND_POOL, ROUND_SUPER_POOL, ROUND_FINAL];
+            }
+            if (flow.flow.includes('SF')) {
+                return [ROUND_POOL, ROUND_SEMI_FINAL, ROUND_FINAL];
+            }
+            if (flow.flow.includes('F')) {
+                return [ROUND_POOL, ROUND_FINAL];
+            }
+
+            return [ROUND_POOL];
+        }
+
+        function updateRoundOptions(preferredRound) {
+            const category = getSelectedTournamentCategory();
+            const currentRound = preferredRound || getSelectedRound();
+            setSelectOptions('roundType', getAvailableRoundsForCategory(category), currentRound);
+        }
+
+        function updatePoolLabel() {
+            const round = getSelectedRound();
+            const label = document.getElementById('poolLabel');
+            if (!label) return;
+
+            label.textContent = isKnockoutRound(round)
+                ? 'Match'
+                : round === ROUND_SUPER_POOL
+                    ? 'Super-pool'
+                    : 'Pool';
+        }
+
+        function updateRoundMatchBanner() {
+            const banner = document.getElementById('roundMatchBanner');
+            if (!banner) return;
+            banner.textContent = `${getSelectedRound()} Match`;
+            updateScoreEntryContextBanner();
+        }
+
+        function getScoreEntryContextLabel() {
+            const round = getSelectedRound();
+            const pool = document.getElementById('pool')?.value || 'A';
+
+            if (round === ROUND_SEMI_FINAL) {
+                const matchNumber = String(pool).match(/\d+/)?.[0] || '1';
+                return `Semi Final ${matchNumber}`;
+            }
+
+            if (round === ROUND_FINAL) {
+                return 'Final';
+            }
+
+            if (round === ROUND_SUPER_POOL) {
+                return `Super Pool ${pool}`;
+            }
+
+            return `Pool ${pool}`;
+        }
+
+        function getScoreEntryTitleContextLabel() {
+            const event = document.getElementById('eventType')?.value || '';
+            const division = document.getElementById('division')?.value || '';
+            const round = getSelectedRound();
+            const pool = document.getElementById('pool')?.value || 'A';
+            const eventShortName = {
+                "Men's Doubles": 'MD',
+                "Women's Doubles": 'WD',
+                'Mixed Doubles': 'XD',
+                "Men's Singles": 'MS',
+                "Women's Singles": 'WS'
+            }[event] || event;
+            let context = `Pool ${pool}`;
+
+            if (round === ROUND_SUPER_POOL) {
+                context = `Super Pool ${pool}`;
+            } else if (round === ROUND_SEMI_FINAL) {
+                context = `Semi Final ${String(pool).match(/\d+/)?.[0] || '1'}`;
+            } else if (round === ROUND_FINAL) {
+                context = 'Final';
+            }
+
+            return `${eventShortName} ${division} | ${context}`;
+        }
+
+        function updateScoreEntryContextBanner() {
+            const banner = document.getElementById('scoreEntryContextBanner');
+            const titleContext = document.getElementById('scoreEntryTitleContext');
+            if (banner) {
+                banner.textContent = getScoreEntryContextLabel();
+            }
+            if (titleContext) {
+                titleContext.textContent = getScoreEntryTitleContextLabel();
+            }
+        }
+
+        function isMd67Category(category) {
+            return category && category.event === "Men's Doubles" && category.division === '6-7';
+        }
+
+        function getSuperPoolData(category, pool) {
+            if (!isMd67Category(category)) return null;
+            const assignment = SUPER_POOL_ASSIGNMENTS.find(item => item.pool === pool);
+            if (!assignment) return null;
+
+            return {
+                pool: assignment.pool,
+                teamsPerPool: assignment.sourcePools.length,
+                teams: assignment.sourcePools.map(sourcePool => `Winner of Pool ${sourcePool}`)
+            };
+        }
+
+        function getKnockoutMatchData(round, match) {
+            if (round === ROUND_SEMI_FINAL) {
+                const matchNumber = match === 'SF2' ? 2 : 1;
+                return {
+                    pool: match,
+                    teamsPerPool: 2,
+                    teams: [`Semi Final ${matchNumber} - Team 1`, `Semi Final ${matchNumber} - Team 2`]
+                };
+            }
+
+            if (round === ROUND_FINAL) {
+                return {
+                    pool: match,
+                    teamsPerPool: 2,
+                    teams: ['Finalist 1', 'Finalist 2']
+                };
+            }
+
+            return null;
+        }
+
+        function getRoundFormData(round, match) {
+            if (round === ROUND_SUPER_POOL) {
+                const assignment = SUPER_POOL_ASSIGNMENTS.find(item => item.pool === match);
+                const sourcePools = assignment?.sourcePools || [];
+                return {
+                    pool: match,
+                    teamsPerPool: sourcePools.length || 3,
+                    teams: sourcePools.length
+                        ? sourcePools.map(sourcePool => `Winner of Pool ${sourcePool}`)
+                        : [`Super-pool ${match} Team 1`, `Super-pool ${match} Team 2`, `Super-pool ${match} Team 3`]
+                };
+            }
+
+            return getKnockoutMatchData(round, match);
+        }
+
+        function getSelectedTournamentPoolData() {
+            const round = getSelectedRound();
+            const match = document.getElementById('pool').value;
+            if (round !== ROUND_POOL) return getRoundFormData(round, match);
+
+            const category = getSelectedTournamentCategory();
+            const pool = match;
+            return category && Array.isArray(category.pools)
+                ? category.pools.find(item => item.pool === pool)
+                : null;
+        }
+
+        function updateTournamentEventOptions(preferredEvent) {
+            const categories = getTournamentCategories();
+            setSelectOptions('eventType', getUniqueValues(categories, 'event'), preferredEvent);
+        }
+
+        function updateTournamentDivisionOptions(preferredDivision) {
+            const event = document.getElementById('eventType').value;
+            const divisions = getUniqueValues(
+                getTournamentCategories().filter(category => category.event === event),
+                'division'
+            );
+            setSelectOptions('division', divisions, preferredDivision);
+        }
+
+        function updateTournamentPoolOptions(preferredPool) {
+            const category = getSelectedTournamentCategory();
+            const round = getSelectedRound();
+            const roundOptions = getRoundMatchOptions(round);
+            if (roundOptions) {
+                setSelectOptions('pool', roundOptions, preferredPool);
+                updatePoolLabel();
+                updateScoreEntryContextBanner();
+                return;
+            }
+
+            const pools = category && Array.isArray(category.pools)
+                ? category.pools.map(item => item.pool)
+                : ['A', 'B', 'C', 'D'];
+            setSelectOptions('pool', pools, preferredPool);
+            updatePoolLabel();
+            updateScoreEntryContextBanner();
+        }
+
+        async function applyTournamentPoolToForm() {
+            await ensureTournamentDataAvailable();
+            const round = getSelectedRound();
+            const formData = getSelectedTournamentPoolData();
+            if (!formData) return false;
+            const autoTeams = await getAutoTeamsForSelectedRound(formData);
+            const teams = round === ROUND_POOL
+                ? formData.teams
+                : autoTeams.length ? autoTeams : formData.teams;
+            const manualTeams = getManualTeamOverrideForCurrentContext();
+
+            document.getElementById('format').value = String(formData.teamsPerPool || formData.teams.length || 4);
+            updateTeamSlots();
+
+            for (let i = 1; i <= 6; i++) {
+                const input = document.getElementById(`team${i}`);
+                if (input) input.value = manualTeams.length ? (manualTeams[i - 1] || '') : (teams[i - 1] || '');
+            }
+
+            updateTeamLabels();
+            updateTeamNameEditability();
+            resetScoreFields();
+            validateTeamNames(false);
+            updatePlaceholderTeamWarnings(round !== ROUND_POOL);
+            return true;
+        }
+
+        function setTournamentLoadingState(isLoading) {
+
+
+            const section = document.getElementById('teamsSection');
+
+
+            if (section) section.classList.toggle('loading', Boolean(isLoading));
+
+
+        }
+
+
+
+        async function loadTournamentData() {
+
+
+            const btn = document.getElementById('loadTournamentBtn');
+
+
+            btn.disabled = true;
+
+
+            setTournamentLoadingState(true);
+
+
+            showStatus('Loading tournament data from VERTEX_Bracket_Posters.html...', 'loading');
+
+            try {
+                const currentEvent = document.getElementById('eventType').value;
+                const currentDivision = document.getElementById('division').value;
+                const currentRound = document.getElementById('roundType').value;
+                const currentPool = document.getElementById('pool').value;
+                const response = await fetch(TOURNAMENT_DATA_URL, { method: 'POST' });
+                const result = await response.json();
+
+                if (response.status === 401 || handleAuthError(result)) {
+                    return;
+                }
+
+                if (result.status !== 'success') {
+                    throw new Error(result.message || 'Tournament data could not be loaded.');
+                }
+
+                tournamentData = result.data;
+                updateTournamentEventOptions(currentEvent);
+                updateTournamentDivisionOptions(currentDivision);
+                updateRoundOptions(currentRound);
+                updateTournamentPoolOptions(currentPool);
+
+                const applied = await applyTournamentPoolToForm();
+                applyRoundScoringDefaults();
+                await loadSavedScores(false);
+
+                const category = getSelectedTournamentCategory();
+                const poolData = getSelectedTournamentPoolData();
+                const details = category && poolData
+                    ? `${category.event}, Division ${category.division}, Pool ${poolData.pool} (${poolData.teams.length} teams)`
+                    : 'the selected category';
+
+                showStatus(`Loaded tournament data for ${details}. JSON saved as ${result.file}.`, applied ? 'success' : 'loading');
+                scheduleHideStatus(5000);
+            } catch (error) {
+                showStatus('Cannot load tournament data: ' + error.message, 'error');
+                showMessageBox('Tournament Data Error', error.message);
+                console.error('Tournament data error:', error);
+            } finally {
+
+                setTournamentLoadingState(false);
+
+                btn.disabled = false;
+
+            }
+
+            }
+
+
+            async function readSavedScoresFromJson() {
+            const filePath = getSelectedScoreFilePath();
+            const response = await fetch(filePath, { cache: 'no-store' });
+
+            if (response.status === 404) {
+                return {
+                    status: 'success',
+                    file: filePath,
+                    pool: document.getElementById('pool').value,
+                    totalEntries: 0,
+                    entry: null
+                };
+            }
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    const result = await response.json().catch(() => ({ message: 'Admin login required.' }));
+                    handleAuthError(result);
+                    throw new Error('Admin login required.');
+                }
+                throw new Error(`Could not read ${filePath}.`);
+            }
+
+            const scoreText = await response.text();
+            let scoreFile;
+            try {
+                scoreFile = JSON.parse(scoreText);
+            } catch (error) {
+                throw new Error(`Could not parse ${filePath}. The score file may be damaged or the server returned a login/error page.`);
+            }
+            const round = getSelectedRound();
+            const pool = document.getElementById('pool').value;
+            const setsPerMatch = String(getSetsPerMatch());
+            const poolEntries = getSavedEntriesForRound(scoreFile, round, pool);
+            const matchingEntries = poolEntries.filter(entry => String(entry.setsPerMatch) === setsPerMatch);
+            const selectedEntries = matchingEntries.length ? matchingEntries : poolEntries;
+
+            return {
+                status: 'success',
+                file: filePath,
+                round,
+                pool,
+                setsPerMatch,
+                totalEntries: selectedEntries.length,
+                entry: selectedEntries.length > 0 ? selectedEntries[selectedEntries.length - 1] : null
+            };
+        }
+
+        function getSavedRoundKey(round) {
+            if (round === ROUND_SEMI_FINAL) return 'semiFinal';
+            if (round === ROUND_FINAL) return 'final';
+            return '';
+        }
+
+        function getSavedEntriesForRound(scoreFile, round, pool) {
+            if (isKnockoutRound(round)) {
+                const key = getSavedRoundKey(round);
+                const roundEntries = scoreFile && scoreFile.rounds && scoreFile.rounds[key];
+                return roundEntries && Array.isArray(roundEntries[pool]) ? roundEntries[pool] : [];
+            }
+
+            return scoreFile && scoreFile.pools && Array.isArray(scoreFile.pools[pool])
+                ? scoreFile.pools[pool].filter(entry => {
+                    const entryRound = entry.round || ROUND_POOL;
+                    return round === ROUND_SUPER_POOL
+                        ? entryRound === ROUND_SUPER_POOL || ['X', 'Y'].includes(entry.pool)
+                        : entryRound === ROUND_POOL || !entry.round;
+                })
+                : [];
+        }
+
+        async function ensureTournamentDataAvailable() {
+            if (tournamentData) return tournamentData;
+
+            try {
+                const response = await fetch('tournament_data.json', { cache: 'no-store' });
+                if (!response.ok) return null;
+                tournamentData = await response.json();
+                return tournamentData;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function readSelectedScoreFile() {
+            try {
+                const response = await fetch(getSelectedScoreFilePath(), { cache: 'no-store' });
+                return response.ok ? await response.json() : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function getLatestEntry(entries) {
+            return Array.isArray(entries) && entries.length ? entries[entries.length - 1] : null;
+        }
+
+        function getLatestPoolEntry(scoreFile, pool) {
+            return getLatestEntry(scoreFile?.pools?.[pool]);
+        }
+
+        function getLatestRoundEntry(scoreFile, round, match) {
+            const key = getSavedRoundKey(round);
+            return getLatestEntry(scoreFile?.rounds?.[key]?.[match]);
+        }
+
+        function getTeamDisplayName(team, fallback) {
+            if (typeof team === 'string' && team.trim()) return team.trim();
+            if (team && typeof team.name === 'string' && team.name.trim()) return team.name.trim();
+            return fallback;
+        }
+
+        function buildScoreMapForEntry(entry) {
+            const map = new Map();
+            const expectedSets = Number(entry?.setsPerMatch) || 0;
+            (entry?.scores || []).forEach(score => {
+                const key = `${score.team}-${score.opponent}`;
+                const record = map.get(key) || { games: 0, points: 0, sets: [], expectedSets };
+                const hasGames = score.games !== null && score.games !== undefined && score.games !== '';
+                const hasPoints = score.points !== null && score.points !== undefined && score.points !== '';
+                record.games += Number(score.games) || 0;
+                record.points += Number(score.points) || 0;
+                record.expectedSets = Math.max(record.expectedSets || 0, expectedSets);
+                record.sets.push({
+                    set: Number(score.set) || 0,
+                    games: Number(score.games) || 0,
+                    points: Number(score.points) || 0,
+                    complete: hasGames && hasPoints
+                });
+                map.set(key, record);
+            });
+            return map;
+        }
+
+        function getEntryMatchResult(entry, firstTeam, secondTeam) {
+            const scoreMap = buildScoreMapForEntry(entry);
+            const firstScore = scoreMap.get(`${firstTeam}-${secondTeam}`) || { games: 0, points: 0, sets: [], expectedSets: 0 };
+            const secondScore = scoreMap.get(`${secondTeam}-${firstTeam}`) || { games: 0, points: 0, sets: [], expectedSets: 0 };
+            const expectedSets = Math.max(firstScore.expectedSets || 0, secondScore.expectedSets || 0, firstScore.sets?.length || 0, secondScore.sets?.length || 0);
+            const neededGames = expectedSets ? Math.floor(expectedSets / 2) + 1 : 1;
+            const completedSets = new Set(
+                (firstScore.sets || [])
+                    .filter(firstSet => {
+                        const setNumber = Number(firstSet.set) || 0;
+                        const secondSet = (secondScore.sets || []).find(item => Number(item.set) === setNumber);
+                        return setNumber && firstSet.complete && secondSet?.complete;
+                    })
+                    .map(item => Number(item.set))
+            );
+            const allExpectedSetsComplete = expectedSets > 0 && completedSets.size >= expectedSets;
+            const matchDecided = firstScore.games >= neededGames || secondScore.games >= neededGames;
+            const played = allExpectedSetsComplete || matchDecided;
+            let winner = null;
+
+            if (played) {
+                if (firstScore.games > secondScore.games) winner = firstTeam;
+                if (secondScore.games > firstScore.games) winner = secondTeam;
+            }
+
+            return {
+                played,
+                winner,
+                firstPoints: firstScore.points,
+                secondPoints: secondScore.points
+            };
+        }
+
+        function hasEntryResult(entry) {
+            return (entry?.scores || []).some(score => (Number(score.games) || 0) > 0 || (Number(score.points) || 0) > 0);
+        }
+
+        function isEntryComplete(entry) {
+            const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+            if (teams.length < 2) return false;
+
+            for (let first = 1; first <= teams.length; first++) {
+                for (let second = first + 1; second <= teams.length; second++) {
+                    if (!getEntryMatchResult(entry, first, second).played) return false;
+                }
+            }
+
+            return true;
+        }
+
+        function getDecidedEntryStandingWinner(entry, category, poolName) {
+            const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+            if (teams.length < 2) return null;
+
+            for (let teamIndex = 1; teamIndex <= teams.length; teamIndex++) {
+                let wins = 0;
+
+                for (let opponent = 1; opponent <= teams.length; opponent++) {
+                    if (opponent === teamIndex) continue;
+                    const result = getEntryMatchResult(entry, teamIndex, opponent);
+                    if (result.played && result.winner === teamIndex) wins += 1;
+                }
+
+                if (wins >= teams.length - 1) {
+                    const standings = buildEntryStandings(entry, category, poolName);
+                    return standings.find(team => team.seed === teamIndex) || null;
+                }
+            }
+
+            return null;
+        }
+
+        function hasFilledScoreValue(score) {
+            return score?.games !== null && score?.games !== undefined && score?.games !== '' ||
+                score?.points !== null && score?.points !== undefined && score?.points !== '';
+        }
+
+        function hasScoresOutsideWinnerMatch(entry, winnerSeed) {
+            const winningSeed = Number(winnerSeed) || 0;
+            if (!winningSeed) return false;
+
+            return (entry?.scores || []).some(score => (
+                hasFilledScoreValue(score) &&
+                Number(score.team) !== winningSeed &&
+                Number(score.opponent) !== winningSeed
+            ));
+        }
+
+        async function ensureSuperPoolSaveAllowed(data) {
+            if (data.round !== ROUND_SUPER_POOL || !['X', 'Y'].includes(String(data.pool || '').toUpperCase())) {
+                return true;
+            }
+
+            const category = getSelectedTournamentCategory();
+            const scoreFile = await readSelectedScoreFile();
+            const latestEntry = getLatestPoolEntry(scoreFile, data.pool);
+            const decidedWinner = getDecidedEntryStandingWinner(latestEntry, category, data.pool);
+
+            if (decidedWinner && hasScoresOutsideWinnerMatch(data, decidedWinner.seed)) {
+                const message = `Super-pool ${data.pool} already has a decided winner: ${decidedWinner.name}. The remaining non-winner match should not be saved.`;
+                showStatus(message, 'error');
+                showMessageBox('Super-pool Winner Already Decided', message);
+                return false;
+            }
+
+            return true;
+        }
+
+        function getTeamTotalsFromEntry(entry, teamIndex) {
+            let games = 0;
+            let points = 0;
+            let pointsConceded = 0;
+            (entry?.scores || []).forEach(score => {
+                if (Number(score.team) === teamIndex) {
+                    games += Number(score.games) || 0;
+                    points += Number(score.points) || 0;
+                }
+                if (Number(score.opponent) === teamIndex) {
+                    pointsConceded += Number(score.points) || 0;
+                }
+            });
+            return { games, points, pointsConceded };
+        }
+
+        function compareStandingMetrics(a, b, entry) {
+            const headToHead = getEntryMatchResult(entry, a.seed, b.seed);
+            const headToHeadSort = headToHead.played && headToHead.firstPoints !== headToHead.secondPoints
+                ? (headToHead.firstPoints > headToHead.secondPoints ? -1 : 1)
+                : 0;
+
+            const aDiff = a.points - a.pointsConceded;
+            const bDiff = b.points - b.pointsConceded;
+            return b.games - a.games || bDiff - aDiff || headToHeadSort;
+        }
+
+        function readTieBreakSelections() {
+            try {
+                const storedSelections = window.localStorage?.getItem(TIE_BREAK_SELECTION_KEY);
+                if (storedSelections) {
+                    tieBreakSelectionsMemory = JSON.parse(storedSelections);
+                }
+            } catch (error) {
+            }
+
+            return { ...tieBreakSelectionsMemory };
+        }
+
+        function getTieBreakSelection(category, poolName, tieGroup) {
+            const selections = readTieBreakSelections();
+            return Number(selections[`${getCategorySelectionId(category)}|${poolName}|${tieGroup}`]) || null;
+        }
+
+        function getTieGroupKey(entry, tieRank, tiedGroup) {
+            const tiedSeeds = tiedGroup.map(team => team.seed).sort((a, b) => a - b);
+            return `${tieRank}:${tiedSeeds.join('-')}`;
+        }
+
+        function buildEntryStandings(entry, category, poolName) {
+            const teams = Array.isArray(entry?.teams) ? entry.teams : [];
+            const hasResult = hasEntryResult(entry);
+            const sortedStandings = teams.map((team, index) => {
+                const seed = index + 1;
+                const totals = getTeamTotalsFromEntry(entry, seed);
+                return {
+                    seed,
+                    name: getTeamDisplayName(team, `Team ${seed}`),
+                    games: Number(team?.totalGames ?? totals.games) || 0,
+                    points: Number(team?.totalPoints ?? totals.points) || 0,
+                    pointsConceded: Number(team?.totalPointsConceded ?? totals.pointsConceded) || 0
+                };
+            }).sort((a, b) => hasResult ? compareStandingMetrics(a, b, entry) : 0);
+
+            if (!hasResult || !category || !poolName) {
+                return sortedStandings.map((team, index) => ({
+                    ...team,
+                    standing: hasResult ? index + 1 : 0,
+                    tiedStanding: false
+                }));
+            }
+
+            const rankedStandings = [];
+            let index = 0;
+
+            while (index < sortedStandings.length) {
+                const tiedGroup = [sortedStandings[index]];
+                let nextIndex = index + 1;
+
+                while (
+                    nextIndex < sortedStandings.length &&
+                    compareStandingMetrics(sortedStandings[index], sortedStandings[nextIndex], entry) === 0
+                ) {
+                    tiedGroup.push(sortedStandings[nextIndex]);
+                    nextIndex += 1;
+                }
+
+                if (tiedGroup.length > 1) {
+                    const tieRank = rankedStandings.length + 1;
+                    const tieGroupKey = getTieGroupKey(entry, tieRank, tiedGroup);
+                    const selectedSeed = getTieBreakSelection(category, poolName, tieGroupKey);
+                    const selectedInGroup = tiedGroup.some(team => team.seed === selectedSeed);
+                    const orderedGroup = selectedInGroup
+                        ? [...tiedGroup].sort((a, b) => (b.seed === selectedSeed) - (a.seed === selectedSeed))
+                        : tiedGroup;
+
+                    orderedGroup.forEach((team, groupIndex) => {
+                        rankedStandings.push({
+                            ...team,
+                            standing: 'TIE',
+                            tiedStanding: true,
+                            tieGroup: tieGroupKey,
+                            tieResolved: selectedInGroup,
+                            tieSelected: team.seed === selectedSeed,
+                            resolvedStanding: tieRank + groupIndex
+                        });
+                    });
+                } else {
+                    rankedStandings.push({
+                        ...tiedGroup[0],
+                        standing: rankedStandings.length + 1,
+                        tiedStanding: false
+                    });
+                }
+
+                index = nextIndex;
+            }
+
+            return rankedStandings;
+        }
+
+        function getCategoryFlow(category) {
+            if (!category) return { flow: '', middle: ROUND_SEMI_FINAL };
+            if (category.event === "Men's Doubles" && category.division === '6-7') {
+                return { flow: '6P > SP > F', middle: ROUND_SUPER_POOL };
+            }
+            if (
+                (category.event === "Women's Doubles" && category.division === '6-7') ||
+                (category.event === 'Mixed Doubles' && category.division === '4-5')
+            ) {
+                return { flow: '2P > F', middle: 'Final qualifier' };
+            }
+            if (category.event === "Men's Doubles" && category.division === '2-3') {
+                return { flow: '2P > SF > F', middle: ROUND_SEMI_FINAL };
+            }
+
+            const poolCount = Array.isArray(category.pools) ? category.pools.length : 0;
+            if (poolCount === 1) return { flow: '1P > F', middle: 'Final qualifier' };
+            if (poolCount === 3) return { flow: '3P > SF > F', middle: ROUND_SEMI_FINAL };
+            if (poolCount >= 4) return { flow: '4P > SF > F', middle: ROUND_SEMI_FINAL };
+            return { flow: '2P > F', middle: 'Final qualifier' };
+        }
+
+        function buildRankedPoolsForCategory(category, scoreFile, options = {}) {
+            const { requireSavedEntries = false } = options;
+            return (category?.pools || []).map(pool => {
+                const savedEntry = getLatestPoolEntry(scoreFile, pool.pool);
+                const usableSavedEntry = savedEntry && (!requireSavedEntries || isEntryComplete(savedEntry)) ? savedEntry : null;
+                const entry = usableSavedEntry || (requireSavedEntries ? null : {
+                    event: category.event,
+                    division: category.division,
+                    pool: pool.pool,
+                    format: pool.teamsPerPool || pool.teams.length,
+                    teams: pool.teams || [],
+                    scores: []
+                });
+                return {
+                    poolName: pool.pool,
+                    standings: entry ? buildEntryStandings(entry, category, pool.pool) : []
+                };
+            });
+        }
+
+        function getPoolSeedForRound(rankedPools, poolName, rank) {
+            const pool = rankedPools.find(item => item.poolName === poolName);
+            const team = pool?.standings?.[rank - 1];
+            return team ? { ...team, pool: poolName } : null;
+        }
+
+        function readBestRunnerSelections() {
+            try {
+                const storedSelections = window.localStorage?.getItem(BEST_RUNNER_SELECTION_KEY);
+                if (storedSelections) {
+                    bestRunnerSelectionsMemory = JSON.parse(storedSelections);
+                }
+            } catch (error) {
+            }
+
+            return { ...bestRunnerSelectionsMemory };
+        }
+
+        function getCategorySelectionId(category) {
+            const eventCode = category.event === "Women's Doubles"
+                ? 'wd'
+                : category.event === 'Mixed Doubles'
+                    ? 'xd'
+                    : 'md';
+            const divisionId = String(category.division)
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '') || 'division';
+            return `${eventCode}-${divisionId}`;
+        }
+
+        function getBestRunnerValueForRound(team) {
+            return `${team.pool}:${team.seed}`;
+        }
+
+        function getBestRunnerTieKeyForRound(category, candidates) {
+            const tiedTeams = candidates
+                .map(getBestRunnerValueForRound)
+                .sort()
+                .join('|');
+            const games = candidates[0]?.games ?? 0;
+            const points = candidates[0]?.points ?? 0;
+            return `${getCategorySelectionId(category)}|best-runner|${games}:${points}|${tiedTeams}`;
+        }
+
+        function getBestRunnerSelectionForRound(category, candidates) {
+            const selections = readBestRunnerSelections();
+            return selections[getBestRunnerTieKeyForRound(category, candidates)] || '';
+        }
+
+        function getBestRunnersForRound(category, rankedPools, count) {
+            const candidates = rankedPools
+                .map(pool => {
+                    const team = pool.standings[1];
+                    return team ? { ...team, pool: pool.poolName } : null;
+                })
+                .filter(Boolean)
+                .sort((a, b) => b.games - a.games || b.points - a.points);
+
+            if (count === 1 && candidates.length > 1) {
+                const topCandidate = candidates[0];
+                const tiedCandidates = candidates.filter(candidate => (
+                    candidate.games === topCandidate.games && candidate.points === topCandidate.points
+                ));
+
+                if (tiedCandidates.length > 1) {
+                    const selectedValue = getBestRunnerSelectionForRound(category, tiedCandidates);
+                    const selectedCandidate = tiedCandidates.find(candidate => getBestRunnerValueForRound(candidate) === selectedValue);
+                    return selectedCandidate ? [selectedCandidate] : [];
+                }
+            }
+
+            return candidates.slice(0, count);
+        }
+
+        function getStageSeedsForCategory(category, scoreFile, options = {}) {
+            const rankedPools = buildRankedPoolsForCategory(category, scoreFile, options);
+            const { flow, middle } = getCategoryFlow(category);
+
+            if (middle === ROUND_SUPER_POOL) {
+                return SUPER_POOL_ASSIGNMENTS
+                    .flatMap(assignment => assignment.sourcePools)
+                    .map(pool => getPoolSeedForRound(rankedPools, pool, 1))
+                    .filter(Boolean);
+            }
+
+            if (!flow.includes('SF')) {
+                if (flow.startsWith('1P')) {
+                    return [
+                        getPoolSeedForRound(rankedPools, 'A', 1),
+                        getPoolSeedForRound(rankedPools, 'A', 2)
+                    ];
+                }
+                return ['A', 'B'].map(pool => getPoolSeedForRound(rankedPools, pool, 1));
+            }
+
+            if (flow.startsWith('2P')) {
+                return [
+                    getPoolSeedForRound(rankedPools, 'A', 1),
+                    getPoolSeedForRound(rankedPools, 'B', 2),
+                    getPoolSeedForRound(rankedPools, 'B', 1),
+                    getPoolSeedForRound(rankedPools, 'A', 2)
+                ];
+            }
+
+            if (flow.startsWith('3P')) {
+                const fixedWinners = ['A', 'B', 'C'].map(pool => getPoolSeedForRound(rankedPools, pool, 1));
+                const bestRunner = fixedWinners.every(Boolean) ? getBestRunnersForRound(category, rankedPools, 1)[0] : null;
+                return [...fixedWinners, bestRunner];
+            }
+
+            return [
+                getPoolSeedForRound(rankedPools, 'A', 1),
+                getPoolSeedForRound(rankedPools, 'D', 1),
+                getPoolSeedForRound(rankedPools, 'B', 1),
+                getPoolSeedForRound(rankedPools, 'C', 1)
+            ];
+        }
+
+        function getEntryWinnerName(entry, fallback) {
+            if (!entry || !isEntryComplete(entry)) return fallback;
+            const result = getEntryMatchResult(entry, 1, 2);
+            if (!result.winner) return fallback;
+            return getTeamDisplayName(entry.teams?.[result.winner - 1], fallback);
+        }
+
+        function getEntryStandingWinnerName(entry, category, poolName, fallback) {
+            if (!entry) return fallback;
+            const winner = isEntryComplete(entry)
+                ? buildEntryStandings(entry, category, poolName)[0]
+                : getDecidedEntryStandingWinner(entry, category, poolName);
+            if (!winner || (winner.tiedStanding && !winner.tieResolved)) return fallback;
+            return winner.name || fallback;
+        }
+
+        function getStageSeedLabel(team, fallback) {
+            if (!team) return fallback;
+            if (team.pool && team.seed) {
+                if (team.seed === 1) return `Winner of Pool ${team.pool}`;
+                if (team.seed === 2) return `Runner-up of Pool ${team.pool}`;
+                return `Team ${team.seed} of Pool ${team.pool}`;
+            }
+            return fallback;
+        }
+
+        function getSemiFinalFallbackLabels(category, selectedMatch) {
+            const flow = getCategoryFlow(category).flow;
+
+            if (flow.startsWith('2P')) {
+                return selectedMatch === 'SF2'
+                    ? ['Winner of Pool B', 'Runner-up of Pool A']
+                    : ['Winner of Pool A', 'Runner-up of Pool B'];
+            }
+
+            if (flow.startsWith('3P')) {
+                return selectedMatch === 'SF2'
+                    ? ['Winner of Pool C', 'Best runner-up']
+                    : ['Winner of Pool A', 'Winner of Pool B'];
+            }
+
+            return selectedMatch === 'SF2'
+                ? ['Winner of Pool B', 'Winner of Pool C']
+                : ['Winner of Pool A', 'Winner of Pool D'];
+        }
+
+        async function getAutoTeamsForSelectedRound(poolData) {
+            const round = getSelectedRound();
+            if (round === ROUND_POOL) return poolData?.teams || [];
+
+            const category = getSelectedTournamentCategory();
+            const scoreFile = await readSelectedScoreFile();
+            if (!category || !scoreFile) return poolData?.teams || [];
+
+            const selectedMatch = document.getElementById('pool').value;
+            const stageSeeds = getStageSeedsForCategory(category, scoreFile, { requireSavedEntries: true });
+
+            if (round === ROUND_SUPER_POOL) {
+                const assignment = SUPER_POOL_ASSIGNMENTS.find(item => item.pool === selectedMatch);
+                return assignment
+                    ? assignment.sourcePools.map(sourcePool => {
+                        const seed = stageSeeds.find(team => team.pool === sourcePool);
+                        return seed?.name || `Winner of Pool ${sourcePool}`;
+                    })
+                    : poolData?.teams || [];
+            }
+
+            if (round === ROUND_SEMI_FINAL) {
+                const matchIndex = selectedMatch === 'SF2' ? 1 : 0;
+                const fallbackLabels = getSemiFinalFallbackLabels(category, selectedMatch);
+                return [0, 1].map(offset => {
+                    const team = stageSeeds[matchIndex * 2 + offset];
+                    return team?.name || getStageSeedLabel(team, fallbackLabels[offset]);
+                });
+            }
+
+            if (round === ROUND_FINAL) {
+                const flow = getCategoryFlow(category);
+                if (flow.middle === ROUND_SUPER_POOL) {
+                    return ['X', 'Y'].map(pool => (
+                        getEntryStandingWinnerName(
+                            getLatestPoolEntry(scoreFile, pool),
+                            category,
+                            pool,
+                            `Winner of Super-pool ${pool}`
+                        )
+                    ));
+                }
+                if (!flow.flow.includes('SF')) {
+                    return [0, 1].map(index => {
+                        const team = stageSeeds[index];
+                        return team?.name || getStageSeedLabel(team, index === 0 ? 'Winner of Pool A' : 'Winner of Pool B');
+                    });
+                }
+                return [
+                    getEntryWinnerName(getLatestRoundEntry(scoreFile, ROUND_SEMI_FINAL, 'SF1'), 'Winner Semi Final 1'),
+                    getEntryWinnerName(getLatestRoundEntry(scoreFile, ROUND_SEMI_FINAL, 'SF2'), 'Winner Semi Final 2')
+                ];
+            }
+
+            return poolData?.teams || [];
+        }
+
+        function getSavedTeamName(team) {
+            if (typeof team === 'string') return team;
+            if (team && typeof team.name === 'string') return team.name;
+            return '';
+        }
+
+        function getCarriedForwardTeamName(currentName, savedName, fallbackName) {
+            const current = String(currentName || '').trim();
+            if (current && !isPlaceholderTeamName(current)) return current;
+            return savedName || fallbackName || '';
+        }
+
+        function resetScoreFields() {
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.disabled = false;
+                input.closest('td')?.classList.remove('best-of-three-omitted');
+            });
+            document.querySelectorAll('#scoreBody tr').forEach(row => row.classList.remove('best-of-three-row-omitted'));
+
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.value = '';
+                updateScoreDropdownStyle(input);
+            });
+
+            const format = parseInt(document.getElementById('format').value);
+            for (let i = 1; i <= format; i++) {
+                const totalGames = document.getElementById(`totalGames${i}`);
+                const totalPointsWon = document.getElementById(`totalPointsWon${i}`);
+                const totalPointsConceded = document.getElementById(`totalPointsConceded${i}`);
+                const totalPointsDiff = document.getElementById(`totalPointsDiff${i}`);
+                if (totalGames) totalGames.textContent = '0';
+                if (totalPointsWon) totalPointsWon.textContent = '0';
+                if (totalPointsConceded) totalPointsConceded.textContent = '0';
+                if (totalPointsDiff) totalPointsDiff.textContent = '0';
+            }
+        }
+
+        function setScoreEntryConflictBlocked(isBlocked) {
+            scoreEntryBlockedByConflict = isBlocked;
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.disabled = isBlocked;
+            });
+            document.querySelectorAll('[id^="team"]').forEach(input => {
+                if (input.tagName === 'INPUT') input.disabled = isBlocked;
+            });
+            const submitBtn = document.getElementById('submitBtn');
+            const clearBtn = document.getElementById('clearBtn') || document.querySelector('.btn-clear');
+            if (submitBtn) submitBtn.disabled = isBlocked;
+            if (clearBtn) clearBtn.disabled = isBlocked;
+            updateTeamNameEditability();
+        }
+
+        function setScoreSelectValue(id, value) {
+            const select = document.getElementById(id);
+            if (!select) return;
+
+            select.value = value === undefined || value === null || value === '' ? '' : String(value);
+            updateScoreDropdownStyle(select);
+        }
+
+        function applySavedScores(entry) {
+            isLoadingSavedScores = true;
+
+            try {
+                setScoreEntryConflictBlocked(false);
+                loadedScoreVersion = entry?.savedAt || null;
+                if (!entry) {
+                    resetScoreFields();
+                    updateTeamNameEditability();
+                    return;
+                }
+
+                setTournamentDateToToday();
+                const round = getSelectedRound();
+                const settings = getRoundScoringDefaults(round);
+                const tournamentPool = getSelectedTournamentPoolData();
+                if (tournamentPool) {
+                    document.getElementById('format').value = String(tournamentPool.teamsPerPool || tournamentPool.teams.length || 4);
+                } else if (entry.format) {
+                    document.getElementById('format').value = String(entry.format);
+                }
+                document.getElementById('setsPerMatch').value = settings.setsPerMatch;
+                document.getElementById('gamePoint').value = settings.gamePoint;
+                document.getElementById('maxPoint').value = settings.maxPoint;
+                setSelectedMatchStyle(settings.matchStyle);
+
+                updateTeamSlots();
+                updatePointRange();
+
+                const teams = Array.isArray(entry.teams) ? entry.teams : [];
+                const manualTeams = getManualTeamOverrideForCurrentContext();
+                const currentTeamNames = getCurrentTeamInputValues();
+                const shouldUseSavedTeamNames = getSelectedRound() !== ROUND_POOL;
+                if (shouldUseSavedTeamNames) {
+                    for (let i = 1; i <= 6; i++) {
+                        const input = document.getElementById(`team${i}`);
+                        if (input) input.value = manualTeams.length
+                            ? (manualTeams[i - 1] || '')
+                            : getCarriedForwardTeamName(
+                                currentTeamNames[i - 1],
+                                getSavedTeamName(teams[i - 1]),
+                                tournamentPool?.teams?.[i - 1]
+                            );
+                    }
+                } else {
+                    for (let i = 1; i <= 6; i++) {
+                        const input = document.getElementById(`team${i}`);
+                        if (input) input.value = manualTeams.length
+                            ? (manualTeams[i - 1] || '')
+                            : getSavedTeamName(teams[i - 1]) || tournamentPool?.teams?.[i - 1] || '';
+                    }
+                }
+
+                updateTeamLabels();
+                updateTeamNameEditability();
+                resetScoreFields();
+
+                if (Array.isArray(entry.scores)) {
+                    entry.scores.forEach(score => {
+                        setScoreSelectValue(`g_${score.team}_${score.opponent}_${score.set}`, score.games);
+                        setScoreSelectValue(`p_${score.team}_${score.opponent}_${score.set}`, score.points);
+                    });
+                }
+
+                syncAllGamePairs();
+                updateBestOfThreeOmissions();
+                updateAllPointDropdowns();
+                calculateTotals(false);
+                updatePlaceholderTeamWarnings(getSelectedRound() !== ROUND_POOL);
+            } finally {
+                isLoadingSavedScores = false;
+            }
+        }
+
+        async function loadSavedScores(showStatusMessage = false) {
+            if (isLoadingSavedScores) return;
+
+            try {
+                const result = await readSavedScoresFromJson();
+
+                if (result.status !== 'success') {
+                    throw new Error(result.message || 'Could not load saved scores.');
+                }
+
+                applySavedScores(result.entry);
+
+                if (showStatusMessage) {
+                    const context = getSelectedScoreContextText();
+                    const message = result.entry
+                        ? `Successfully loaded the scores for ${context}.`
+                        : `No scores found for this Event, Division, Pool and Set combination (${context}).`;
+                    showStatus(message, result.entry ? 'success' : 'loading');
+                    scheduleHideStatus(5000);
+                }
+            } catch (error) {
+                showStatus(`Cannot load saved scores: ${error.message}`, 'error');
+                console.error('Load error:', error);
+            }
+        }
+
+        function handleSetsPerMatchChange() {
+            generateScoreTable();
+            loadSavedScores(true);
+        }
+
+        async function handleRoundChange() {
+            updateTournamentPoolOptions();
+            await applyTournamentPoolToForm();
+            applyRoundScoringDefaults();
+            generateSchedule();
+            loadSavedScores(true);
+        }
+
+        async function submitScores() {
+            if (scoreEntryBlockedByConflict) {
+                showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
+                return;
+            }
+            if (!ensureScoreTableShapeBeforeSave()) return;
+            syncAllGamePairs();
+            updateBestOfThreeOmissions();
+            const shouldClearEntry = false;
+            if (!validateTeamNames(true)) return;
+            updatePlaceholderTeamWarnings(true);
+            if (!shouldClearEntry) {
+                if (!validateMaxGamePointForDeuce(true)) return;
+                if (!validatePairedScoreFields(true)) return;
+                if (!validateDeucePointRules(true)) return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            showStatus(shouldClearEntry ? 'Clearing saved scores for this selection...' : '⏳ Saving scores...', 'loading');
+
+            calculateTotals(false);
+            const data = collectFormData({ clearEntry: shouldClearEntry });
+            if (!await ensureSuperPoolSaveAllowed(data)) {
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                const response = await fetch(SAVE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.status === 401 || handleAuthError(result)) {
+                    return;
+                }
+
+                if (response.status === 409 || result.status === 'conflict') {
+                    const message = result.message || 'Another admin saved this same score sheet after you loaded it. Reload the latest scores before entering more data.';
+                    setScoreEntryConflictBlocked(true);
+                    showStatus(message, 'error');
+                    showMessageBox('Score Sheet Locked', `${message} The score entry fields are now locked to prevent overwriting newer scores. Click Load Tournament Data or refresh the page to load the latest version.`);
+                    return;
+                }
+
+                if (result.status === 'success') {
+                    const savedMessage = result.message || 'Saved';
+                    const savedPool = result.pool || data.pool;
+                    const savedRound = result.round || data.round;
+                    const savedLabel = isKnockoutRound(savedRound) ? 'Match' : savedRound === ROUND_SUPER_POOL ? 'Super-pool' : 'Pool';
+                    await loadSavedScores(false);
+                    showStatus(`${result.cleared ? 'Cleared' : 'Saved'}: ${savedMessage} (${result.totalEntries} entries in ${savedLabel} ${savedPool})`, 'success');
+                    scheduleHideStatus(5000);
+                    showMessageBox(result.cleared ? 'Scores Cleared' : 'Scores Saved', result.cleared ? `Saved scores cleared for ${savedRound} ${savedPool}.` : `Scores saved and reloaded for ${savedRound} ${savedPool}.`);
+                    return;
+                } else {
+                    showStatus('❌ Error: ' + result.message, 'error');
+                    showMessageBox('Save Error', result.message || 'Scores could not be saved.');
+                }
+            } catch (error) {
+                showStatus('❌ Cannot connect to server. Make sure you ran: node server.js', 'error');
+                showMessageBox('Server Not Connected', 'Cannot connect to the scoring server. Open this page through the tournament website.');
+                console.error('Submit error:', error);
+            } finally {
+                if (!scoreEntryBlockedByConflict) btn.disabled = false;
+            }
+        }
+
+        function clearScores() {
+            if (scoreEntryBlockedByConflict) {
+                showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
+                return;
+            }
+            showMessageBox('Clear Scores', 'Are you sure you want to clear all scores from the page?', () => {
+                resetScoreFields();
+                showStatus('Scores cleared.', 'success');
+                scheduleHideStatus(5000);
+            }, { showCancel: true });
+        }
+
+        function showStatus(msg, type) {
+            clearStatusHideTimer();
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = 'status ' + type;
+        }
+
+        function clearStatusHideTimer() {
+            if (statusHideTimer) {
+                clearTimeout(statusHideTimer);
+                statusHideTimer = null;
+            }
+        }
+
+        function scheduleHideStatus(delay = 2000) {
+            clearStatusHideTimer();
+            statusHideTimer = setTimeout(() => hideStatus(), delay);
+        }
+
+        function hideStatus() {
+            clearStatusHideTimer();
+            document.getElementById('statusMsg').className = 'status';
+        }
+
+        function showMessageBox(title, message, onClose, options) {
+            const modal = document.getElementById('messageModal');
+            document.getElementById('messageModalTitle').textContent = title;
+            document.getElementById('messageModalText').textContent = message;
+            const cancelBtn = document.getElementById('messageModalCancel');
+            cancelBtn.style.display = (options && options.showCancel) ? 'inline-block' : 'none';
+            modal.classList.add('show');
+            modal._onClose = onClose || null;
+            modal._onCancel = (options && options.onCancel) || null;
+            document.getElementById('messageModalOk').focus();
+        }
+
+        function closeMessageBox() {
+            const modal = document.getElementById('messageModal');
+            modal.classList.remove('show');
+            document.getElementById('messageModalCancel').style.display = 'none';
+            if (typeof modal._onClose === 'function') {
+                modal._onClose();
+                modal._onClose = null;
+            }
+            modal._onCancel = null;
+        }
+
+        function cancelMessageBox() {
+            const modal = document.getElementById('messageModal');
+            modal.classList.remove('show');
+            document.getElementById('messageModalCancel').style.display = 'none';
+            if (typeof modal._onCancel === 'function') {
+                modal._onCancel();
+                modal._onCancel = null;
+            }
+            modal._onClose = null;
+        }
+
+        function handleAuthError(result) {
+            const msg = (result && result.message) || '';
+            if (/login required/i.test(msg)) {
+                showMessageBox('Session Expired', 'Admin login is required. You will be redirected to the login page.', () => {
+                    window.location.href = '/scoring_page';
+                });
+                return true;
+            }
+            return false;
+        }
+
+        // Listen for team name changes
+        document.querySelectorAll('[id^="team"]').forEach(input => {
+            if (input.tagName === 'INPUT') {
+                input.addEventListener('input', () => handleTeamNameInput(input));
+            }
+        });
+
+        document.getElementById('eventType').addEventListener('change', async () => {
+            if (tournamentData) {
+                updateTournamentDivisionOptions();
+            }
+            updateRoundOptions();
+            updateTournamentPoolOptions();
+            await applyTournamentPoolToForm();
+            applyRoundScoringDefaults();
+            loadSavedScores(true);
+        });
+
+        document.getElementById('division').addEventListener('change', async () => {
+            updateRoundOptions();
+            updateTournamentPoolOptions();
+            await applyTournamentPoolToForm();
+            applyRoundScoringDefaults();
+            loadSavedScores(true);
+        });
+
+        document.getElementById('roundType').addEventListener('change', handleRoundChange);
+
+        document.getElementById('pool').addEventListener('change', async () => {
+            updateScoreEntryContextBanner();
+            await applyTournamentPoolToForm();
+            applyRoundScoringDefaults();
+            loadSavedScores(true);
+        });
+
+        async function initializeAdminPage() {
+            initializeAdminControls();
+            setTournamentDateToToday();
+            loadLiveRefreshSettings();
+            updateTournamentPoolOptions();
+            generateScoreTable();
+            generateSchedule();
+            applyRoundScoringDefaults();
+            updateScoreEntryContextBanner();
+            try {
+                await loadTournamentData();
+            } catch (error) {
+                await loadSavedScores(false);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeAdminPage();
+        });
+    </script>
+<script src="vertex_promo_ticker.js"></script>
+</body>
+</html>

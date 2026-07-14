@@ -754,7 +754,7 @@ body.detail .detail-shell { display: block; }
 .pool-card .standings td:nth-child(4),
 .pool-card .standings th:nth-child(5),
 .pool-card .standings td:nth-child(5) {
-  width: 42px;
+  width: 52px;
 }
 
 .pool-card .standings th:nth-child(6),
@@ -2084,18 +2084,7 @@ function teamTotalsFromScores(entry, teamIndex) {
 
 function getTieGroupKey(entry, tieRank, tiedGroup) {
   const tiedSeeds = tiedGroup.map(team => team.seed).sort((a, b) => a - b);
-  const scoreVersion = entry?.savedAt || (entry?.scores || [])
-    .filter(score => tiedSeeds.includes(Number(score.team)) || tiedSeeds.includes(Number(score.opponent)))
-    .map(score => [
-      Number(score.team) || 0,
-      Number(score.opponent) || 0,
-      Number(score.set) || 0,
-      Number(score.games) || 0,
-      Number(score.points) || 0
-    ].join("."))
-    .sort()
-    .join("_");
-  return `${tieRank}:${tiedSeeds.join("-")}:${scoreVersion || "current"}`;
+  return `${tieRank}:${tiedSeeds.join("-")}`;
 }
 
 function getMatchResult(scoreMap, firstTeam, secondTeam) {
@@ -2361,24 +2350,8 @@ function getDisplayPoolName(pool) {
 
 function renderStandingValue(poolName, team, canResolveTie = true) {
   if (!team.tiedStanding) return escapeHtml(team.standing);
-  if (!canResolveTie) return "TIE";
-  const categoryId = selectedCategory?.id || "all";
-  const radioName = `tie-${categoryId}-${poolName}-${team.tieGroup}`;
-  return `
-    <label class="tie-choice">
-      <input
-        class="tie-break-radio"
-        type="radio"
-        name="${escapeHtml(radioName)}"
-        value="${escapeHtml(team.seed)}"
-        data-pool="${escapeHtml(poolName)}"
-        data-tie-group="${escapeHtml(team.tieGroup)}"
-        aria-label="Select ${escapeHtml(team.name)} as Pool ${escapeHtml(poolName)} tie winner"
-        ${team.tieSelected ? "checked" : ""}
-      >
-      <span>TIE</span>
-    </label>
-  `;
+  if (team.tieResolved) return escapeHtml(team.resolvedStanding);
+  return `<span style="color:#f39c12;font-weight:900;">TIE</span>`;
 }
 
 function getTieRowClass(team) {
@@ -2399,16 +2372,19 @@ function renderPoolCard(pool, options = {}) {
   const teamCount = standings.length || (Array.isArray(pool.entry?.teams) ? pool.entry.teams.length : 0);
   const poolTitle = teamCount ? `Pool ${poolName} (${teamCount} ${teamCount === 1 ? "Team" : "Teams"})` : `Pool ${poolName}`;
   const rows = standings.length
-    ? standings.map((team, index) => `
+    ? standings.map((team, index) => {
+      const diff = team.points - team.pointsConceded;
+      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
+      return `
       <tr class="${getTieRowClass(team)}">
         <td><span class="rank ${isDecidedQualifier(team, 2) ? "qualifier" : ""}">${escapeHtml(`${poolName}${team.seed}`)}</span></td>
         <td><span class="team-name">${escapeHtml(team.name)}</span></td>
-        <td>${team.matchesWon}</td>
         <td>${team.games}</td>
         <td>${team.points} / ${team.pointsConceded}</td>
+        <td>${diffStr}</td>
         <td>${renderStandingValue(poolName, team, poolFinished)}</td>
       </tr>
-    `).join("")
+    `;}).join("")
     : `<tr><td colspan="6">No teams saved for this pool yet.</td></tr>`;
 
   return `
@@ -2420,7 +2396,7 @@ function renderPoolCard(pool, options = {}) {
       <div class="standings-scroll">
         <table class="standings">
           <thead>
-            <tr><th>Team#</th><th>Team</th><th>MW</th><th>GW</th><th>TPts / TPtc</th><th>Standing</th></tr>
+            <tr><th>Team#</th><th>Team</th><th>GW</th><th>TPts / TPtc</th><th>Pt Diff</th><th>Standing</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -2796,7 +2772,7 @@ function summarizeKnockoutEntry(entry) {
 
 function renderKnockoutMatchCard(title, entry, fallbackA, fallbackB) {
   const summary = summarizeKnockoutEntry(entry);
-  if (!summary) return renderMatchCard(title, fallbackA, fallbackB, "Pending");
+  if (!summary || summary.state === "Pending") return renderMatchCard(title, fallbackA, fallbackB, "Pending");
 
   return renderMatchCard(
     title,
@@ -2910,17 +2886,21 @@ function renderSuperPoolCard(pool) {
   const poolFinished = isPoolComplete(pool.entry) || winnerDecided;
   const sourceText = pool.sourcePools.map(sourcePool => `Pool ${sourcePool}`).join(", ");
   const rows = standings.length
-    ? standings.map((team, index) => `
+    ? standings.map((team, index) => {
+      const diff = team.points - team.pointsConceded;
+      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
+      return `
       <tr class="${getTieRowClass(team)}">
         <td><span class="rank ${isDecidedQualifier(team, 1) ? "qualifier" : ""}">${escapeHtml(`${pool.poolName}${team.seed}`)}</span></td>
         <td><span class="team-name">${escapeHtml(team.name)}</span></td>
         <td>${escapeHtml(team.source || "")}</td>
         <td>${team.games}</td>
         <td>${team.points} / ${team.pointsConceded}</td>
+        <td>${diffStr}</td>
         <td>${renderStandingValue(pool.poolName, team, poolFinished)}</td>
       </tr>
-    `).join("")
-    : `<tr><td colspan="6">Super-pool qualifiers will appear here when pool winners are confirmed.</td></tr>`;
+    `;}).join("")
+    : `<tr><td colspan="7">Super-pool qualifiers will appear here when pool winners are confirmed.</td></tr>`;
 
   return `
     <article class="pool-card">
@@ -2931,7 +2911,7 @@ function renderSuperPoolCard(pool) {
       <div class="standings-scroll">
         <table class="standings">
           <thead>
-            <tr><th>Seed</th><th>Team</th><th>From</th><th>GW</th><th>TPts / TPtc</th><th>Standing</th></tr>
+            <tr><th>Seed</th><th>Team</th><th>From</th><th>GW</th><th>TPts / TPtc</th><th>Pt Diff</th><th>Standing</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
