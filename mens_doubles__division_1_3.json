@@ -1,0 +1,2553 @@
+{
+  "event": "Men's Doubles",
+  "division": "1-3",
+  "pools": {
+    "A": [
+      {
+        "date": "2026-07-11",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 0,
+            "totalPoints": 0
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          }
+        ],
+        "savedAt": "2026-07-11T00:00:03.271Z"
+      },
+      {
+        "date": "2026-07-11",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 2,
+            "totalPoints": 30
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 0,
+            "totalPoints": 6
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 0,
+            "totalPoints": 0
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          }
+        ],
+        "savedAt": "2026-07-11T00:02:58.327Z"
+      },
+      {
+        "date": "2026-07-11",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 0,
+            "totalPoints": 0
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          }
+        ],
+        "savedAt": "2026-07-11T00:03:46.547Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 3,
+            "totalPoints": 53,
+            "totalPointsConceded": 71
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 85,
+            "totalPointsConceded": 57
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 2,
+            "totalPoints": 56,
+            "totalPointsConceded": 75
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 3,
+            "totalPoints": 77,
+            "totalPointsConceded": 68
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 2
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 11
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 8
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T03:40:50.134Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 65,
+            "totalPointsConceded": 68
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 86,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 2,
+            "totalPoints": 56,
+            "totalPointsConceded": 75
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 72,
+            "totalPointsConceded": 72
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 2
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 12
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 8
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T03:51:08.254Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 88,
+            "totalPointsConceded": 65
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 86,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 2,
+            "totalPoints": 56,
+            "totalPointsConceded": 87
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 69,
+            "totalPointsConceded": 83
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 12
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 8
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T03:53:07.947Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 88,
+            "totalPointsConceded": 66
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 87,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 2,
+            "totalPoints": 56,
+            "totalPointsConceded": 87
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 69,
+            "totalPointsConceded": 83
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 13
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 8
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T03:56:13.768Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 88,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 85,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 2,
+            "totalPoints": 56,
+            "totalPointsConceded": 87
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 69,
+            "totalPointsConceded": 83
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 11
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 8
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T04:14:54.438Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 87,
+            "totalPointsConceded": 66
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 3,
+            "totalPoints": 86,
+            "totalPointsConceded": 65
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 3,
+            "totalPoints": 57,
+            "totalPointsConceded": 85
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 69,
+            "totalPointsConceded": 83
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 13
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 13
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 0
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 6
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T04:16:58.004Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 3,
+            "totalPoints": 86,
+            "totalPointsConceded": 62
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 88,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 3,
+            "totalPoints": 54,
+            "totalPointsConceded": 85
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 2,
+            "totalPoints": 66,
+            "totalPointsConceded": 83
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 13
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 0
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 0
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 3
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T04:18:53.040Z"
+      },
+      {
+        "date": "2026-07-12",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "A",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Gourisankar TS / Tom Joy",
+            "totalGames": 4,
+            "totalPoints": 87,
+            "totalPointsConceded": 63
+          },
+          {
+            "name": "Johnny Leung / Kevin Liu",
+            "totalGames": 4,
+            "totalPoints": 88,
+            "totalPointsConceded": 64
+          },
+          {
+            "name": "Anand Sivamani / Jeet Singh Bhatia",
+            "totalGames": 3,
+            "totalPoints": 54,
+            "totalPointsConceded": 85
+          },
+          {
+            "name": "Gonzalo Boto / Tyrone Cayton",
+            "totalGames": 1,
+            "totalPoints": 67,
+            "totalPointsConceded": 84
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": 0,
+            "points": 13
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 0
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 0
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": 0,
+            "points": 9
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": 0,
+            "points": 14
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": 0,
+            "points": 5
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": 0,
+            "points": 10
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": 1,
+            "points": 15
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": 0,
+            "points": 13
+          }
+        ],
+        "savedAt": "2026-07-12T04:21:01.379Z"
+      }
+    ],
+    "B": [],
+    "C": [
+      {
+        "date": "2026-07-11",
+        "event": "Men's Doubles",
+        "division": "1-3",
+        "round": "Pool",
+        "pool": "C",
+        "match": "",
+        "format": 4,
+        "setsPerMatch": 2,
+        "courts": "",
+        "matchStyle": "without-deuce",
+        "gamePoint": 15,
+        "minPoint": 0,
+        "maxPoint": 15,
+        "clearEntry": false,
+        "teams": [
+          {
+            "name": "Antony Jobin / Ashish M Mathai",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Aaron Chen / Atharva Lele",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Philip Byrne / Stephen Dollard",
+            "totalGames": 0,
+            "totalPoints": 0
+          },
+          {
+            "name": "Ebin Joju / Winston Oliver",
+            "totalGames": 0,
+            "totalPoints": 0
+          }
+        ],
+        "scores": [
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 1,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 2,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 3,
+            "opponent": 4,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 1,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 2,
+            "set": 2,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 1,
+            "games": null,
+            "points": null
+          },
+          {
+            "team": 4,
+            "opponent": 3,
+            "set": 2,
+            "games": null,
+            "points": null
+          }
+        ],
+        "savedAt": "2026-07-11T00:04:07.481Z"
+      }
+    ],
+    "D": []
+  },
+  "rounds": {}
+}
