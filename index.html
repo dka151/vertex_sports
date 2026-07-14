@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERTEX Sports - HOTSHOT BC SUMMER TOURNAMENT 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Poppins:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0a0a1a;
+  color: #e8edf3;
+  overflow-x: hidden;
+}
+body.has-feedback-ticker { padding-top: 54px; }
+
+/* Background with vertex watermark */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url('vertex_sports_wallpaper_4k_clean.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.025;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  body::before { background-image: url('vertex_sports_wallpaper_4k_clean_1400.jpg'); }
+}
+
+/* Decorative blobs */
+.blob-1 { position: fixed; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(192,57,43,0.12) 0%, transparent 70%); border-radius: 50%; z-index: -1; }
+.blob-2 { position: fixed; bottom: -150px; left: -150px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(41,128,185,0.1) 0%, transparent 70%); border-radius: 50%; z-index: -1; }
+.blob-3 { position: fixed; top: 50%; left: 50%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(243,156,18,0.08) 0%, transparent 70%); border-radius: 50%; z-index: -1; transform: translate(-50%,-50%); }
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #0a0a1a 0%, #12162a 50%, #0f1020 100%);
+  padding: 50px 20px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid #1a2030;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #c0392b, #f39c12, #2980b9, #27ae60, #c0392b);
+  background-size: 200% 100%;
+  animation: rainbowBar 4s linear infinite;
+}
+@keyframes rainbowBar { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+
+.logo-wrap {
+  display: inline-block;
+  position: relative;
+  margin-bottom: 0;
+}
+.logo-wrap img {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  border: 4px solid #c0392b;
+  box-shadow: 0 8px 30px rgba(192,57,43,0.15);
+  transition: transform 0.3s;
+}
+.logo-wrap img:hover { transform: scale(1.05) rotate(5deg); }
+.logo-wrap::after { content: none; }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+.hero h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 36pt;
+  font-weight: 900;
+  color: #e8edf3;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+.hero h1 span { color: #c0392b; }
+.hero h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15pt;
+  font-weight: 700;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+.hero .tagline {
+  font-size: 11pt;
+  color: #9aacbf;
+  max-width: 550px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+
+.event-pills {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  font-size: 9.5pt;
+  font-weight: 600;
+  color: #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+}
+.pill:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.stat-box {
+  flex: 1;
+  padding: 14px 10px;
+  text-align: center;
+  color: #fff;
+}
+.stat-box:nth-child(1) { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+.stat-box:nth-child(2) { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+.stat-box:nth-child(3) { background: linear-gradient(135deg, #2980b9, #3498db); }
+.stat-box:nth-child(4) { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.stat-num { font-size: 20pt; font-weight: 900; }
+.stat-label { font-size: 7pt; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+
+/* Sections */
+.section {
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.section-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+.section-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18pt;
+  font-weight: 700;
+  color: #e8edf3;
+}
+.section-header p { font-size: 10pt; color: #8a9ab5; margin-top: 5px; }
+
+/* Document cards */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.doc-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-decoration: none;
+  color: #e8edf3;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.doc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: transparent; }
+.doc-icon {
+  width: 50px; height: 50px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22pt;
+  flex-shrink: 0;
+}
+.doc-icon.red { background: linear-gradient(135deg, rgba(192,57,43,0.2), rgba(231,76,60,0.15)); }
+.doc-icon.green { background: linear-gradient(135deg, rgba(39,174,96,0.2), rgba(46,204,113,0.15)); }
+.doc-icon.gold { background: linear-gradient(135deg, rgba(243,156,18,0.2), rgba(241,196,15,0.15)); }
+.doc-icon.blue { background: linear-gradient(135deg, rgba(41,128,185,0.22), rgba(52,152,219,0.16)); }
+.doc-icon.feedback { background: linear-gradient(135deg, rgba(142,68,173,0.22), rgba(243,156,18,0.14)); }
+.doc-info h3 { font-size: 10.5pt; font-weight: 700; margin-bottom: 3px; }
+.doc-info p { font-size: 8.5pt; color: #8a9ab5; }
+.doc-arrow { margin-left: auto; font-size: 14pt; color: #556; transition: all 0.3s; }
+.doc-card:hover .doc-arrow { color: #c0392b; transform: translateX(3px); }
+
+.floating-feedback {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #c0392b, #f39c12);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 11pt;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 14px 34px rgba(192,57,43,0.34);
+  transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+.floating-feedback:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(192,57,43,0.42);
+  filter: brightness(1.08);
+}
+.floating-feedback span:first-child {
+  font-size: 14pt;
+  line-height: 1;
+}
+
+/* Category cards */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.cat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  text-decoration: none;
+  color: #e8edf3;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.cat-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4px;
+}
+.cat-card.wd::before { background: linear-gradient(to bottom, #d63384, #e85d9f); }
+.cat-card.xd::before { background: linear-gradient(to bottom, #e67e22, #f39c12); }
+.cat-card.md::before { background: linear-gradient(to bottom, #2980b9, #3498db); }
+.cat-card:hover { transform: translateX(5px); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+
+.cat-emoji { font-size: 20pt; }
+.cat-info { flex: 1; }
+.cat-info h3 { font-size: 9.5pt; font-weight: 700; margin-bottom: 2px; color: #1a1a1a; }
+.cat-info .meta { font-size: 8pt; color: #555; }
+.cat-info .meta span { display: block; margin-right: 0; margin-bottom: 2px; }
+.cat-info .meta span { margin-right: 10px; }
+.cat-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 7pt;
+  font-weight: 700;
+  color: #fff;
+}
+.cat-card.wd .cat-badge { background: #d63384; }
+.cat-card.xd .cat-badge { background: #e67e22; }
+.cat-card.md .cat-badge { background: #2980b9; }
+
+.full-schedule-btn {
+  display: block;
+  text-align: center;
+  margin: 25px auto 0;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #fff;
+  text-decoration: none;
+  font-size: 10pt;
+  font-weight: 700;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(192,57,43,0.2);
+  max-width: 350px;
+}
+.full-schedule-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(192,57,43,0.3); }
+
+/* Info cards */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+.info-card {
+  width: 100%;
+  min-height: 156px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  transition: all 0.2s;
+}
+.info-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.info-card-icon { font-size: 24pt; margin-bottom: 8px; }
+.info-card h3 { font-size: 9.5pt; font-weight: 700; color: #e8edf3; margin-bottom: 5px; }
+.info-card p { font-size: 8.5pt; color: #8a9ab5; text-align: center; line-height: 1.5; max-width: 240px; }
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #fff;
+  text-align: center;
+  padding: 35px 20px;
+  margin-top: 30px;
+}
+.footer .brand { font-size: 12pt; font-weight: 700; color: #f39c12; margin-bottom: 5px; }
+.footer p { font-size: 8.5pt; color: rgba(255,255,255,0.5); margin: 3px 0; }
+.contact-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  font-size: 9pt;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.contact-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+.contact-btn.instagram svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+/* Feedback ticker */
+.feedback-ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  min-height: 54px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  background: rgba(10,10,26,0.94);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+  backdrop-filter: blur(10px);
+}
+.feedback-ticker.is-visible { display: flex; }
+.feedback-label {
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #c0392b, #f39c12);
+  color: #fff;
+  font-size: 8.5pt;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.feedback-window {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+.feedback-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  white-space: nowrap;
+  will-change: transform;
+  animation: feedbackScroll 72s linear infinite;
+}
+.feedback-ticker:hover .feedback-track { animation-play-state: paused; }
+.feedback-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e8edf3;
+  font-size: 9.5pt;
+  font-weight: 600;
+}
+.feedback-rating {
+  color: #f39c12;
+  font-weight: 900;
+}
+.feedback-author {
+  color: #8a9ab5;
+  font-size: 8.5pt;
+}
+.feedback-separator {
+  color: rgba(255,255,255,0.24);
+  font-weight: 900;
+}
+@keyframes feedbackScroll {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-100%); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .hero h1 { font-size: 22pt; }
+  .stats-bar { flex-wrap: wrap; border-radius: 8px; }
+  .stat-box { min-width: 50%; }
+  body.has-feedback-ticker { padding-top: 48px; }
+  .feedback-ticker { min-height: 48px; }
+  .feedback-label { padding: 0 10px; font-size: 7.5pt; }
+  .feedback-item { font-size: 8.5pt; }
+  .feedback-author { display: inline; font-size: 7.5pt; }
+  .floating-feedback {
+    right: 14px;
+    bottom: 14px;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 10pt;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="blob-1"></div>
+<div class="blob-2"></div>
+<div class="blob-3"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="logo-wrap">
+    <img src="vertex_logo.png" alt="Vertex Sports">
+  </div>
+  <img src="vertex_watermark.png" alt="" style="display:block;margin:0 auto 10px;max-width:220px;height:auto;" onerror="this.style.display='none'">
+  <h1><span>Vertex</span> Sports</h1>
+  <h2>&#127942; HOTSHOT BC SUMMER TOURNAMENT 2026</h2>
+  <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:15px auto 20px;max-width:600px;">
+    <div id="teamsSummaryPill" style="padding:8px 14px;background:rgba(243,156,18,0.25);border:1px solid rgba(243,156,18,0.3);border-radius:8px;font-size:9pt;font-weight:600;color:#fff;">&#128293; 145 teams &bull; 12 categories</div>
+    <div style="padding:8px 14px;background:rgba(41,128,185,0.25);border:1px solid rgba(41,128,185,0.3);border-radius:8px;font-size:9pt;font-weight:600;color:#fff;">&#127942; One incredible day of badminton!</div>
+  </div>
+  
+  <div class="event-pills">
+    <div class="pill">&#128205; Baldoyle Badminton Centre</div>
+    <div class="pill">&#128197; Saturday, 18 July 2026</div>
+    <div class="pill">&#9200; 09:00 &ndash; 22:00</div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box"><div id="teamsStatNum" class="stat-num">145</div><div class="stat-label">Teams</div></div>
+    <div class="stat-box"><div id="categoriesStatNum" class="stat-num">12</div><div class="stat-label">Categories</div></div>
+    <div class="stat-box"><div id="matchesStatNum" class="stat-num">272</div><div class="stat-label">Matches</div></div>
+    <div class="stat-box"><div class="stat-num">8</div><div class="stat-label">Courts</div></div>
+  </div>
+</section>
+
+<!-- DOCUMENTS -->
+<section class="section">
+  <div class="section-header">
+    <h2>&#128196; Tournament Documents</h2>
+    <p>Official programme, team registrations, and draw sheets</p>
+  </div>
+  <div class="doc-grid">
+    <a class="doc-card" href="VERTEX_Senior_Championships_2026_Booklet.html">
+      <div class="doc-icon red">&#128214;</div>
+      <div class="doc-info"><h3>Official Tournament Programme</h3><p>Rules, scoring, regulations &amp; policies</p></div>
+      <div class="doc-arrow">&rarr;</div>
+    </a>
+    <a class="doc-card" href="VERTEX_Teams.html">
+      <div class="doc-icon green">&#128101;</div>
+      <div class="doc-info"><h3>Registered Teams</h3><p id="registeredTeamsSummary">All 145 teams with partner &amp; club details</p></div>
+      <div class="doc-arrow">&rarr;</div>
+    </a>
+    <a class="doc-card" href="VERTEX_Bracket_Posters.html">
+      <div class="doc-icon gold">&#127942;</div>
+      <div class="doc-info"><h3>Pool Draw &amp; Brackets</h3><p>Pool allocations, knockout progression &amp; fixtures</p></div>
+      <div class="doc-arrow">&rarr;</div>
+    </a>
+    <a class="doc-card" href="/live_scores.html">
+      <div class="doc-icon blue">&#128202;</div>
+      <div class="doc-info"><h3>Live Category Scoreboard</h3><p>Pool tables, semi-final/super-pool flow &amp; finals</p></div>
+      <div class="doc-arrow">&rarr;</div>
+    </a>
+    <a class="doc-card" href="/feedback.html">
+      <div class="doc-icon feedback">&#128172;</div>
+      <div class="doc-info"><h3>Post-Tournament Feedback</h3><p>Share your experience after the championships</p></div>
+      <div class="doc-arrow">&rarr;</div>
+    </a>
+  </div>
+</section>
+
+<!-- CATEGORY SCHEDULES -->
+<section class="section">
+  <div class="section-header">
+    <h2>&#128203; Category Schedules</h2>
+    <p>Click any category to view its detailed court-wise schedule</p>
+  </div>
+  <div class="cat-grid">
+    <a class="cat-card wd" href="full_schedule.html?category=WD(1-3)#fullScheduleTitle">
+      <div class="cat-emoji">&#127992;</div>
+      <div class="cat-info"><h3>Women's Doubles &ndash; Division 1-3</h3><div class="meta"><span>&#128101; 5 teams</span><span>&#9200; 9:00 AM</span></div></div>
+      <div class="cat-badge">1P &rarr; F</div>
+    </a>
+    <a class="cat-card wd" href="full_schedule.html?category=WD(4-5)#fullScheduleTitle">
+      <div class="cat-emoji">&#127992;</div>
+      <div class="cat-info"><h3>Women's Doubles &ndash; Division 4-5</h3><div class="meta"><span>&#128101; 8 teams</span><span>&#9200; 5:00 PM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+    <a class="cat-card wd" href="full_schedule.html?category=WD(6-7)#fullScheduleTitle">
+      <div class="cat-emoji">&#127992;</div>
+      <div class="cat-info"><h3>Women's Doubles &ndash; Division 6-7</h3><div class="meta"><span>&#128101; 8 teams</span><span>&#9200; 6:40 PM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+    <a class="cat-card wd" href="full_schedule.html?category=WD(8-9)#fullScheduleTitle">
+      <div class="cat-emoji">&#127992;</div>
+      <div class="cat-info"><h3>Women's Doubles &ndash; Division 8-9</h3><div class="meta"><span>&#128101; 8 teams</span><span>&#9200; 4:20 PM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+    <a class="cat-card xd" href="full_schedule.html?category=XD(1-3)#fullScheduleTitle">
+      <div class="cat-emoji">&#9889;</div>
+      <div class="cat-info"><h3>Mixed Doubles &ndash; Division 1-3</h3><div class="meta"><span>&#128101; 8 teams</span><span>&#9200; 12:20 PM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+    <a class="cat-card xd" href="full_schedule.html?category=XD(4-5)#fullScheduleTitle">
+      <div class="cat-emoji">&#9889;</div>
+      <div class="cat-info"><h3>Mixed Doubles &ndash; Division 4-5</h3><div class="meta"><span>&#128101; 16 teams</span><span>&#9200; 2:20 PM</span></div></div>
+      <div class="cat-badge">4P &rarr; SF &rarr; F</div>
+    </a>
+    <a class="cat-card xd" href="full_schedule.html?category=XD(6-7)#fullScheduleTitle">
+      <div class="cat-emoji">&#9889;</div>
+      <div class="cat-info"><h3>Mixed Doubles &ndash; Division 6-7</h3><div class="meta"><span>&#128101; 16 teams</span><span>&#9200; 3:20 PM</span></div></div>
+      <div class="cat-badge">4P &rarr; SF &rarr; F</div>
+    </a>
+    <a class="cat-card xd" href="full_schedule.html?category=XD(8-9)#fullScheduleTitle">
+      <div class="cat-emoji">&#9889;</div>
+      <div class="cat-info"><h3>Mixed Doubles &ndash; Division 8-9</h3><div class="meta"><span>&#128101; 10 teams</span><span>&#9200; 12:20 PM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+    <a class="cat-card md" href="full_schedule.html?category=MD(1-3)#fullScheduleTitle">
+      <div class="cat-emoji">&#128170;</div>
+      <div class="cat-info"><h3>Men's Doubles &ndash; Division 1-3</h3><div class="meta"><span>&#128101; 16 teams</span><span>&#9200; 9:00 AM</span></div></div>
+      <div class="cat-badge">4P &rarr; SF &rarr; F</div>
+    </a>
+    <a class="cat-card md" href="full_schedule.html?category=MD(4-5)#fullScheduleTitle">
+      <div class="cat-emoji">&#128170;</div>
+      <div class="cat-info"><h3>Men's Doubles &ndash; Division 4-5</h3><div class="meta"><span>&#128101; 20 teams</span><span>&#9200; 6:00 PM</span></div></div>
+      <div class="cat-badge">4P &rarr; SF &rarr; F</div>
+    </a>
+    <a class="cat-card md" href="full_schedule.html?category=MD(6-7)#fullScheduleTitle">
+      <div class="cat-emoji">&#128170;</div>
+      <div class="cat-info"><h3>Men's Doubles &ndash; Division 6-7</h3><div class="meta"><span>&#128101; 20 teams</span><span>&#9200; 11:00 AM</span></div></div>
+      <div class="cat-badge">4P &rarr; SF &rarr; F</div>
+    </a>
+    <a class="cat-card md" href="full_schedule.html?category=MD(8-9)#fullScheduleTitle">
+      <div class="cat-emoji">&#128170;</div>
+      <div class="cat-info"><h3>Men's Doubles &ndash; Division 8-9</h3><div class="meta"><span>&#128101; 10 teams</span><span>&#9200; 9:00 AM</span></div></div>
+      <div class="cat-badge">2P &rarr; F</div>
+    </a>
+  </div>
+
+  <a class="full-schedule-btn" href="full_schedule.html">&#128203; SHOW FULL SCHEDULE</a>
+</section>
+
+<!-- INFO -->
+<section class="section">
+  <div class="section-header">
+    <h2>&#127919; Quick Info</h2>
+    <p>Everything you need to know at a glance</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-card-icon">&#127919;</div>
+      <h3>Match Format</h3>
+      <p>Pool: 2x15pts (no deuce)<br>SF: Bo3x15pts (setting allowed to 20 points)<br>Final: Bo3x15pts (setting allowed to 20 points)</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">&#9200;</div>
+      <h3>Check-in</h3>
+      <p>30 min before your first match at the registration desk</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">&#129309;</div>
+      <h3>Partner Changes</h3>
+      <p>Allowed before first match (division-compliant only)</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">&#127973;</div>
+      <h3>First Aid</h3>
+      <p>At registration desk<br>Emergency: 112 / 999</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">&#127992;</div>
+      <h3>Shuttlecock</h3>
+      <p>Yonex AS30<br>Non-marking shoes required</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">&#9878;&#65039;</div>
+      <h3>Tiebreaker</h3>
+      <p>Games Won &gt; Point Difference &gt; H2H Points</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<section class="footer">
+  <div class="brand">&#127942; Vertex Sports</div>
+  <p>HOTSHOT BC SUMMER TOURNAMENT 2026</p>
+  <p>Baldoyle Badminton Centre &bull; Saturday, 18 July 2026 &bull; 09:00 &ndash; 22:00</p>
+  <div class="contact-row">
+    <a class="contact-btn" href="https://wa.me/353838820744">&#128242; Romeo &ndash; 083 882 0744</a>
+    <a class="contact-btn" href="https://wa.me/353877189700">&#128242; Ralph &ndash; 087 718 9700</a>
+    <a class="contact-btn instagram" href="https://www.instagram.com/sportsvertex/" target="_blank" rel="noopener noreferrer" aria-label="Follow Vertex Sports on Instagram">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+      </svg>
+      <span>Follow us on Instagram</span>
+    </a>
+  </div>
+  <p style="margin-top:20px;font-size:7.5pt;color:rgba(255,255,255,0.25);">&copy; 2026 Vertex Sports. All rights reserved. &#127992;</p>
+</section>
+
+<a class="floating-feedback" href="/feedback.html" aria-label="Open feedback form">
+  <span aria-hidden="true">&#128172;</span>
+  <span>Feedback</span>
+</a>
+
+<div id="feedbackTicker" class="feedback-ticker" aria-label="Tournament feedback ticker">
+  <div class="feedback-label">Feedback</div>
+  <div class="feedback-window">
+    <div id="feedbackTrack" class="feedback-track"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const summaryPill = document.getElementById('teamsSummaryPill');
+  const teamsStatNum = document.getElementById('teamsStatNum');
+  const categoriesStatNum = document.getElementById('categoriesStatNum');
+  const matchesStatNum = document.getElementById('matchesStatNum');
+  const registeredTeamsSummary = document.getElementById('registeredTeamsSummary');
+
+  function updateTeamCounts(totalTeams, totalCategories) {
+    if (!Number.isFinite(totalTeams) || !Number.isFinite(totalCategories)) return;
+    if (summaryPill) summaryPill.innerHTML = `&#128293; ${totalTeams} teams &bull; ${totalCategories} categories`;
+    if (teamsStatNum) teamsStatNum.textContent = totalTeams;
+    if (categoriesStatNum) categoriesStatNum.textContent = totalCategories;
+    if (registeredTeamsSummary) registeredTeamsSummary.textContent = `All ${totalTeams} teams with partner & club details`;
+  }
+
+  fetch('VERTEX_Teams.html', { cache: 'no-store' })
+    .then(response => response.ok ? response.text() : null)
+    .then(html => {
+      if (!html) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const categoryHeaders = Array.from(doc.querySelectorAll('.category'));
+      const totalCategories = categoryHeaders.length;
+      const totalTeams = categoryHeaders.reduce((sum, header) => {
+        const countText = header.querySelector('span')?.textContent || '';
+        const count = Number((countText.match(/\d+/) || [0])[0]);
+        return sum + count;
+      }, 0);
+      if (totalTeams > 0 && totalCategories > 0) updateTeamCounts(totalTeams, totalCategories);
+    })
+    .catch(() => {});
+
+  function countPoolMatches(teamCount) {
+    return teamCount > 1 ? (teamCount * (teamCount - 1)) / 2 : 0;
+  }
+
+  function countKnockoutMatches(page) {
+    const text = page.textContent || '';
+    if (text.includes('4 Pools (A, B, C, D)')) return 3;
+    if (text.includes('2 Pools (A, B)')) return 1;
+    if (text.includes('1 Pool (A)')) return 1;
+    return page.querySelectorAll('.ko-final').length;
+  }
+
+  fetch('VERTEX_Bracket_Posters.html', { cache: 'no-store' })
+    .then(response => response.ok ? response.text() : null)
+    .then(html => {
+      if (!html) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const pages = Array.from(doc.querySelectorAll('.page'));
+      const totalCategories = pages.length;
+      const totalMatches = pages.reduce((sum, page) => {
+        const poolMatches = Array.from(page.querySelectorAll('.pc-h')).reduce((poolSum, header) => {
+          const teamCount = Number((header.textContent || '').match(/\((\d+)\s+TEAMS\)/i)?.[1] || 0);
+          return poolSum + countPoolMatches(teamCount);
+        }, 0);
+        return sum + poolMatches + countKnockoutMatches(page);
+      }, 0);
+
+      if (totalCategories > 0 && categoriesStatNum) categoriesStatNum.textContent = totalCategories;
+      if (totalMatches > 0 && matchesStatNum) matchesStatNum.textContent = totalMatches;
+    })
+    .catch(() => {});
+})();
+
+(function () {
+  const ticker = document.getElementById('feedbackTicker');
+  const track = document.getElementById('feedbackTrack');
+  if (!ticker || !track) return;
+
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[char]));
+  }
+
+  function buildRating(rating) {
+    const value = Number(rating);
+    return value >= 1 && value <= 5 ? `${value}/5` : '';
+  }
+
+  function buildFeedbackAuthor(item) {
+    const name = String(item.name || '').trim();
+    const clubOrTeam = String(item.clubOrTeam || '').trim();
+    const isAnonymousClub = clubOrTeam.toLowerCase() === 'anonymous';
+
+    if (name && clubOrTeam && !isAnonymousClub) return ` - ${name}, ${clubOrTeam}`;
+    if (name) return ` - ${name}`;
+    if (clubOrTeam && !isAnonymousClub) return ` - ${clubOrTeam}`;
+    return '';
+  }
+
+  function renderFeedback(items) {
+    const feedback = (Array.isArray(items) ? items : [])
+      .filter(item => item && item.feedback)
+      .slice(0, 12);
+
+    if (feedback.length === 0) return;
+
+    track.innerHTML = feedback.map(item => {
+      const rating = buildRating(item.overallRating);
+      const author = buildFeedbackAuthor(item);
+      return `
+        <span class="feedback-item">
+          ${rating ? `<span class="feedback-rating">${escapeHtml(rating)}</span>` : ''}
+          <span>"${escapeHtml(item.feedback)}"</span>
+          ${author ? `<span class="feedback-author">${escapeHtml(author)}</span>` : ''}
+        </span>
+        <span class="feedback-separator">|</span>
+      `;
+    }).join('');
+
+    const seconds = Math.max(46, feedback.length * 14);
+    track.style.animationDuration = `${seconds}s`;
+    ticker.classList.add('is-visible');
+    document.body.classList.add('has-feedback-ticker');
+  }
+
+  fetch('/public-feedback', { cache: 'no-store' })
+    .then(response => response.ok ? response.json() : null)
+    .then(result => renderFeedback(result && result.feedback))
+    .catch(() => {});
+})();
+</script>
+
+</body>
+</html>
