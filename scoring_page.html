@@ -934,8 +934,6 @@
                     <option value="Men's Doubles">Men's Doubles</option>
                     <option value="Women's Doubles">Women's Doubles</option>
                     <option value="Mixed Doubles">Mixed Doubles</option>
-                    <option value="Men's Singles">Men's Singles</option>
-                    <option value="Women's Singles">Women's Singles</option>
                 </select>
             </div>
             <div class="info-group">
@@ -1158,7 +1156,16 @@
         const SAVE_URL = '/save';
         const TOURNAMENT_DATA_URL = '/load-tournament-data';
         const LIVE_REFRESH_SETTINGS_URL = '/live-score-settings';
+        const DEFAULT_FETCH_TIMEOUT_MS = 20000;
         // ============================================================
+
+        function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_FETCH_TIMEOUT_MS) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            return fetch(url, { ...options, signal: controller.signal })
+                .finally(() => clearTimeout(timeoutId));
+        }
+
         let teamNamePopupInput = null;
         let teamNamePopupCleanup = null;
         let isLoadingSavedScores = false;
@@ -1248,9 +1255,27 @@
         function resetAutoLogoutTimer() {
             clearAutoLogoutTimer();
             autoLogoutTimer = setTimeout(() => {
-                window.location.href = '/admin-logout';
+                fetch('/admin-logout', { method: 'POST' }).finally(() => {
+                    window.location.href = '/scoring_page';
+                });
             }, AUTO_LOGOUT_MS);
         }
+
+        // Check session validity when tab becomes visible again
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'visible') {
+                fetch('/admin-session-check', { cache: 'no-store' })
+                    .then(response => {
+                        if (response.status === 401) {
+                            window.location.href = '/scoring_page';
+                        }
+                    })
+                    .catch(() => {});
+                resetAutoLogoutTimer();
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         function initializeAdminControls() {
             const logoutButton = document.getElementById('logoutButton');
@@ -1263,7 +1288,9 @@
             ['click', 'keydown', 'mousemove', 'mousedown', 'scroll', 'touchstart', 'change'].forEach(eventName => {
                 window.addEventListener(eventName, resetAutoLogoutTimer, { passive: true });
             });
-            window.addEventListener('pagehide', () => {
+            window.addEventListener('pagehide', (event) => {
+                // Only logout if page is actually being unloaded (not just backgrounded)
+                if (event.persisted) return;
                 try {
                     navigator.sendBeacon('/admin-logout');
                 } catch (error) {
@@ -1643,9 +1670,6 @@
         }
 
         function generateScoreHeader(format) {
-            function escapeHeaderHtml(str) {
-                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            }
             const table = document.getElementById('scoreTable');
             const colgroup = document.getElementById('scoreCols');
             const thead = document.getElementById('scoreHead');
@@ -2406,7 +2430,30 @@
                 showMessageBox('Totals Calculated', 'Totals calculated successfully.');
                 scheduleHideStatus(5000);
             }
-            updateTiebreakerSection();
+            debouncedUpdateTiebreaker();
+        }
+
+        let tiebreakerDebounceTimer = null;
+        function debouncedUpdateTiebreaker() {
+            if (tiebreakerDebounceTimer) clearTimeout(tiebreakerDebounceTimer);
+            tiebreakerDebounceTimer = setTimeout(updateTiebreakerSection, 300);
+        }
+
+        function areAllMatchesComplete(format, setsPerMatch) {
+            for (let row = 1; row <= format; row++) {
+                for (let col = row + 1; col <= format; col++) {
+                    for (let set = 1; set <= setsPerMatch; set++) {
+                        const g1 = document.getElementById(`g_${row}_${col}_${set}`);
+                        const p1 = document.getElementById(`p_${row}_${col}_${set}`);
+                        const g2 = document.getElementById(`g_${col}_${row}_${set}`);
+                        const p2 = document.getElementById(`p_${col}_${row}_${set}`);
+                        if (g1?.disabled || g2?.disabled) continue;
+                        if (!g1 || g1.value === '' || !p1 || p1.value === '') return false;
+                        if (!g2 || g2.value === '' || !p2 || p2.value === '') return false;
+                    }
+                }
+            }
+            return true;
         }
 
         function updateTiebreakerSection() {
@@ -2422,6 +2469,14 @@
             const poolName = document.getElementById('pool').value;
 
             if (!hasEntryResult(entry)) {
+                section.style.display = 'none';
+                content.innerHTML = '';
+                document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
+                return;
+            }
+
+            // Don't show tiebreaker until all scheduled matches have scores filled
+            if (!areAllMatchesComplete(format, setsPerMatch)) {
                 section.style.display = 'none';
                 content.innerHTML = '';
                 document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
@@ -3133,7 +3188,7 @@
                 const currentDivision = document.getElementById('division').value;
                 const currentRound = document.getElementById('roundType').value;
                 const currentPool = document.getElementById('pool').value;
-                const response = await fetch(TOURNAMENT_DATA_URL, { method: 'POST' });
+                const response = await fetchWithTimeout(TOURNAMENT_DATA_URL, { method: 'POST' }, 30000);
                 const result = await response.json();
 
                 if (response.status === 401 || handleAuthError(result)) {
@@ -3179,7 +3234,7 @@
 
             async function readSavedScoresFromJson() {
             const filePath = getSelectedScoreFilePath();
-            const response = await fetch(filePath, { cache: 'no-store' });
+            const response = await fetchWithTimeout(filePath, { cache: 'no-store' });
 
             if (response.status === 404) {
                 return {
@@ -3542,18 +3597,6 @@
 
         function getCategoryFlow(category) {
             if (!category) return { flow: '', middle: ROUND_SEMI_FINAL };
-            if (category.event === "Men's Doubles" && category.division === '6-7') {
-                return { flow: '6P > SP > F', middle: ROUND_SUPER_POOL };
-            }
-            if (
-                (category.event === "Women's Doubles" && category.division === '6-7') ||
-                (category.event === 'Mixed Doubles' && category.division === '4-5')
-            ) {
-                return { flow: '2P > F', middle: 'Final qualifier' };
-            }
-            if (category.event === "Men's Doubles" && category.division === '2-3') {
-                return { flow: '2P > SF > F', middle: ROUND_SEMI_FINAL };
-            }
 
             const poolCount = Array.isArray(category.pools) ? category.pools.length : 0;
             if (poolCount === 1) return { flow: '1P > F', middle: 'Final qualifier' };
@@ -4006,11 +4049,15 @@
             }
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
                 const response = await fetch(SAVE_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 const result = await response.json();
 
@@ -4041,8 +4088,13 @@
                     showMessageBox('Save Error', result.message || 'Scores could not be saved.');
                 }
             } catch (error) {
-                showStatus('❌ Cannot connect to server. Make sure you ran: node server.js', 'error');
-                showMessageBox('Server Not Connected', 'Cannot connect to the scoring server. Open this page through the tournament website.');
+                if (error.name === 'AbortError') {
+                    showStatus('❌ Save request timed out after 30 seconds. The server may be unresponsive.', 'error');
+                    showMessageBox('Save Timeout', 'The save request timed out. Please check if the server is running and try again.');
+                } else {
+                    showStatus('❌ Cannot connect to server. Make sure you ran: node server.js', 'error');
+                    showMessageBox('Server Not Connected', 'Cannot connect to the scoring server. Open this page through the tournament website.');
+                }
                 console.error('Submit error:', error);
             } finally {
                 if (!scoreEntryBlockedByConflict) btn.disabled = false;
