@@ -25,19 +25,7 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   color: var(--text);
   padding-bottom: 54px;
-  background:
-    linear-gradient(rgba(9,11,20,0.975), rgba(9,11,20,0.975)),
-    url("vertex_sports_wallpaper_4k_clean.jpg") center top / 100% auto no-repeat,
-    var(--bg);
-}
-
-@media (min-width: 900px) {
-  body {
-    background:
-      linear-gradient(rgba(9,11,20,0.975), rgba(9,11,20,0.975)),
-      url("vertex_sports_wallpaper_4k_clean_1400.jpg") center top / 100% auto no-repeat,
-      var(--bg);
-  }
+  background: var(--bg);
 }
 
 a { color: inherit; }
@@ -3311,6 +3299,7 @@ async function renderDetail(category) {
   setError("");
   document.documentElement.style.setProperty("--accent", category.accent);
   document.getElementById("detailTitle").textContent = `${category.title} - ${category.grade}`;
+  document.getElementById("poolList").innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">⏳ Loading scores...</div>';
   const directToFinal = category.flow.includes("> F") && !category.flow.includes("SF") && category.middle !== "Super-pool";
   document.getElementById("detailCopy").textContent = directToFinal
     ? `${category.flow.replaceAll(">", "to")} flow. Live board from pool standings to final.`
@@ -3390,8 +3379,7 @@ async function refreshAndSchedule() {
     refreshTimer = null;
   }
 
-  await loadRefreshSettings();
-  await refresh();
+  await Promise.all([loadRefreshSettings(), refresh()]);
   refreshTimer = window.setTimeout(refreshAndSchedule, refreshMs);
   resetRefreshCountdown();
 }
