@@ -1257,7 +1257,7 @@
             clearAutoLogoutTimer();
             autoLogoutTimer = setTimeout(() => {
                 fetch('/admin-logout', { method: 'POST' }).finally(() => {
-                    window.location.href = '/scoring_page';
+                    window.location.href = '/vertexadmin.html';
                 });
             }, AUTO_LOGOUT_MS);
         }
@@ -1268,7 +1268,7 @@
                 fetch('/admin-session-check', { cache: 'no-store' })
                     .then(response => {
                         if (response.status === 401) {
-                            window.location.href = '/scoring_page';
+                            window.location.href = '/vertexadmin.html';
                         }
                     })
                     .catch(() => {});
@@ -1282,7 +1282,9 @@
             const logoutButton = document.getElementById('logoutButton');
             if (logoutButton) {
                 logoutButton.addEventListener('click', () => {
-                    window.location.href = '/admin-logout';
+                    fetch('/admin-logout', { method: 'POST' }).finally(() => {
+                        window.location.href = '/vertexadmin.html';
+                    });
                 });
             }
 
@@ -3909,7 +3911,7 @@
             updateScoreDropdownStyle(select);
         }
 
-        function applySavedScores(entry) {
+        async function applySavedScores(entry) {
             isLoadingSavedScores = true;
 
             try {
@@ -3943,15 +3945,25 @@
                 const currentTeamNames = getCurrentTeamInputValues();
                 const shouldUseSavedTeamNames = getSelectedRound() !== ROUND_POOL;
                 if (shouldUseSavedTeamNames) {
+                    const resolvedTeams = await getAutoTeamsForSelectedRound(tournamentPool || { teams: [] });
                     for (let i = 1; i <= 6; i++) {
                         const input = document.getElementById(`team${i}`);
-                        if (input) input.value = manualTeams.length
-                            ? (manualTeams[i - 1] || '')
-                            : getCarriedForwardTeamName(
-                                currentTeamNames[i - 1],
-                                getSavedTeamName(teams[i - 1]),
-                                tournamentPool?.teams?.[i - 1]
-                            );
+                        if (input) {
+                            if (manualTeams.length) {
+                                input.value = manualTeams[i - 1] || '';
+                            } else {
+                                // Use dynamically resolved name from feeder round (e.g., SF winner for Final)
+                                const resolvedName = resolvedTeams[i - 1] || '';
+                                const savedName = getSavedTeamName(teams[i - 1]);
+                                // If resolved name is a real player name (not placeholder), always use it
+                                // If resolved is a placeholder, it means feeder round has no winner - show placeholder
+                                if (resolvedName && !isPlaceholderTeamName(resolvedName)) {
+                                    input.value = resolvedName;
+                                } else {
+                                    input.value = resolvedName || savedName || '';
+                                }
+                            }
+                        }
                     }
                 } else {
                     for (let i = 1; i <= 6; i++) {
@@ -4199,7 +4211,7 @@
                     throw new Error(result.message || 'Could not load saved scores.');
                 }
 
-                applySavedScores(result.entry);
+                await applySavedScores(result.entry);
                 await enforceHigherLevelLock();
 
                 if (showStatusMessage) {
@@ -4395,7 +4407,7 @@
             const msg = (result && result.message) || '';
             if (/login required/i.test(msg)) {
                 showMessageBox('Session Expired', 'Admin login is required. You will be redirected to the login page.', () => {
-                    window.location.href = '/scoring_page';
+                    window.location.href = '/vertexadmin.html';
                 });
                 return true;
             }
