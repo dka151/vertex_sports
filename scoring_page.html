@@ -753,7 +753,8 @@
             border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .btn-clear:hover { background: rgba(255,255,255,0.2); }
+        .btn-clear:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+        .btn-clear:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         .btn-calc {
             background: linear-gradient(135deg, #27ae60, #2ecc71);
@@ -858,7 +859,7 @@
         }
 
         .match-slot .match-num { font-size: 0.7rem; color: #aaa; margin-bottom: 5px; }
-        .match-slot .match-teams { font-weight: 600; color: #f39c12; }
+        .match-slot .match-teams { font-weight: 600; color: #f39c12; font-size: 0.65rem; }
 
         /* Rules */
         .rules-section {
@@ -1126,7 +1127,7 @@
             <button class="btn btn-calc" onclick="calculateTotals()">🧮 Refresh Totals</button>
             <button class="btn btn-load" id="loadTournamentBtn" onclick="loadTournamentData()">📥 Load Tournament Data</button>
             <button class="btn btn-submit" id="submitBtn" onclick="submitScores()">📤 Save Scores</button>
-            <button class="btn btn-clear" onclick="clearScores()">🗑️ Clear Scores</button>
+            <button class="btn btn-clear" id="clearBtn" onclick="clearScores()">🗑️ Clear Scores</button>
         </div>
 
         <div class="modal-overlay" id="teamNameModal">
@@ -2411,7 +2412,8 @@
                         const gInput = document.getElementById(`g_${row}_${col}_${set}`);
                         const pInput = document.getElementById(`p_${row}_${col}_${set}`);
                         const pOpponent = document.getElementById(`p_${col}_${row}_${set}`);
-                        if (gInput?.disabled || pInput?.disabled) continue;
+                        const isOmittedSet = gInput?.closest('td')?.classList.contains('best-of-three-omitted');
+                        if (isOmittedSet) continue;
                         if (gInput && gInput.value) totalGames += parseInt(gInput.value) || 0;
                         if (pInput && pInput.value) totalPointsWon += parseInt(pInput.value) || 0;
                         if (pOpponent && pOpponent.value) totalPointsConceded += parseInt(pOpponent.value) || 0;
@@ -3981,6 +3983,212 @@
             }
         }
 
+        let higherLevelLocked = false;
+
+        async function enforceHigherLevelLock(scoreFile) {
+            higherLevelLocked = false;
+            try {
+                const currentRound = getSelectedRound();
+                if (!scoreFile) {
+                    scoreFile = await readSelectedScoreFile();
+                }
+                if (!scoreFile) {
+                    setHigherLevelLock(false);
+                    return;
+                }
+
+                const currentPool = document.getElementById('pool').value;
+                const hasHigherData = checkHigherRoundHasData(scoreFile, currentRound, currentPool);
+                setHigherLevelLock(hasHigherData);
+
+                if (hasHigherData) {
+                    const lockingRound = getHigherRoundName(currentRound, currentPool);
+                    showStatus(`🔒 This ${currentRound} ${currentPool} is locked because ${lockingRound} scores already exist. Clear the ${lockingRound} first to edit.`, 'error');
+                }
+            } catch (error) {
+                console.error('enforceHigherLevelLock error:', error);
+                setHigherLevelLock(false);
+            }
+        }
+
+        function checkHigherRoundHasData(scoreFile, currentRound, currentPool) {
+            const category = getSelectedTournamentCategory();
+            const { flow, middle } = category ? getCategoryFlow(category) : { flow: '', middle: '' };
+
+            if (currentRound === ROUND_POOL) {
+                // Determine which higher round this pool feeds into
+                const relatedHigherMatches = getRelatedHigherMatchesForPool(currentPool, flow, middle);
+
+                // Check if any related higher round match has scores
+                for (const { roundKey, matchKey } of relatedHigherMatches) {
+                    if (roundKey === 'superPool') {
+                        // Check super-pool entries
+                        const pools = scoreFile.pools || {};
+                        const entries = Array.isArray(pools[matchKey]) ? pools[matchKey] : [];
+                        const spEntries = entries.filter(e => e.round === ROUND_SUPER_POOL || ['X', 'Y'].includes(e.pool));
+                        const latest = spEntries.length ? spEntries[spEntries.length - 1] : null;
+                        if (latest && hasEntryScores(latest)) return true;
+                    } else {
+                        if (hasSpecificRoundMatch(scoreFile, roundKey, matchKey)) return true;
+                    }
+                }
+                return false;
+            }
+
+            if (currentRound === ROUND_SUPER_POOL) {
+                // Super-pool feeds into SF or Final depending on flow
+                if (flow.includes('SF')) {
+                    if (hasRoundData(scoreFile, 'semiFinal')) return true;
+                }
+                if (hasRoundData(scoreFile, 'final')) return true;
+                return false;
+            }
+
+            if (currentRound === ROUND_SEMI_FINAL) {
+                // SF is locked only if Final has scores
+                if (hasSpecificRoundMatch(scoreFile, 'final', 'F')) return true;
+                return false;
+            }
+
+            // Final is never locked
+            return false;
+        }
+
+        function getRelatedHigherMatchesForPool(poolName, flow, middle) {
+            const matches = [];
+
+            if (middle === ROUND_SUPER_POOL) {
+                // Pool feeds into super-pool: find which super-pool this pool belongs to
+                const assignment = SUPER_POOL_ASSIGNMENTS.find(a => a.sourcePools.includes(poolName));
+                if (assignment) {
+                    matches.push({ roundKey: 'superPool', matchKey: assignment.pool });
+                }
+                // Super-pool then feeds into SF or Final
+                matches.push({ roundKey: 'semiFinal', matchKey: 'SF1' });
+                matches.push({ roundKey: 'semiFinal', matchKey: 'SF2' });
+                matches.push({ roundKey: 'final', matchKey: 'F' });
+                return matches;
+            }
+
+            if (flow.includes('SF')) {
+                // Determine SF pairing dynamically from the seed order
+                const sfMapping = buildPoolToSFMapping(flow);
+                const relatedSF = sfMapping[poolName];
+                if (relatedSF) {
+                    matches.push({ roundKey: 'semiFinal', matchKey: relatedSF });
+                }
+                matches.push({ roundKey: 'final', matchKey: 'F' });
+                return matches;
+            }
+
+            // Direct to final (2P > F or 1P > F)
+            matches.push({ roundKey: 'final', matchKey: 'F' });
+            return matches;
+        }
+
+        function buildPoolToSFMapping(flow) {
+            // The seed order from getStageSeedsForCategory determines pairings:
+            // Seeds are paired: [0] vs [1] = SF1, [2] vs [3] = SF2
+            if (flow.startsWith('4P')) {
+                // 4P: seeds = [A winner, D winner, B winner, C winner]
+                // SF1 = A vs D, SF2 = B vs C
+                return { A: 'SF1', D: 'SF1', B: 'SF2', C: 'SF2' };
+            }
+            if (flow.startsWith('3P')) {
+                // 3P: seeds = [A winner, B winner, C winner, best runner]
+                // SF1 = A vs best-runner, SF2 = B vs C
+                return { A: 'SF1', B: 'SF2', C: 'SF2' };
+            }
+            if (flow.startsWith('2P') && flow.includes('SF')) {
+                // 2P > SF > F: seeds = [A1, B2, B1, A2]
+                // SF1 = A1 vs B2 (pools A,B), SF2 = B1 vs A2 (pools A,B)
+                return { A: 'SF1', B: 'SF1' };
+            }
+            // Fallback
+            return {};
+        }
+
+        function hasSpecificRoundMatch(scoreFile, roundKey, matchKey) {
+            const entries = scoreFile?.rounds?.[roundKey]?.[matchKey];
+            if (!Array.isArray(entries) || entries.length === 0) return false;
+            const latest = entries[entries.length - 1];
+            return latest && hasEntryScores(latest);
+        }
+
+        function hasRoundData(scoreFile, roundKey) {
+            const roundData = scoreFile.rounds?.[roundKey];
+            if (!roundData || typeof roundData !== 'object') return false;
+            for (const matchKey of Object.keys(roundData)) {
+                const entries = Array.isArray(roundData[matchKey]) ? roundData[matchKey] : [];
+                const latest = entries.length ? entries[entries.length - 1] : null;
+                if (latest && hasEntryScores(latest)) return true;
+            }
+            return false;
+        }
+
+        function hasEntryScores(entry) {
+            const scores = Array.isArray(entry.scores) ? entry.scores : [];
+            return scores.some(s => (parseInt(s.games, 10) > 0 || parseInt(s.points, 10) > 0));
+        }
+
+        function getHigherRoundName(currentRound, currentPool) {
+            const category = getSelectedTournamentCategory();
+            const { flow, middle } = category ? getCategoryFlow(category) : { flow: '', middle: '' };
+
+            if (currentRound === ROUND_POOL) {
+                if (middle === ROUND_SUPER_POOL) {
+                    const assignment = SUPER_POOL_ASSIGNMENTS.find(a => a.sourcePools.includes(currentPool));
+                    return assignment ? `Super-pool ${assignment.pool}` : 'Super-pool / Semi Final / Final';
+                }
+                if (flow.includes('SF')) {
+                    const sfMapping = buildPoolToSFMapping(flow);
+                    const sf = sfMapping[currentPool];
+                    return sf ? `${sf} (Semi Final)` : 'Semi Final';
+                }
+                return 'Final';
+            }
+            if (currentRound === ROUND_SUPER_POOL) return 'Semi Final / Final';
+            if (currentRound === ROUND_SEMI_FINAL) return 'Final';
+            return 'higher round';
+        }
+
+        function setHigherLevelLock(isLocked) {
+            higherLevelLocked = isLocked;
+
+            // Don't override conflict lock - it takes priority
+            if (scoreEntryBlockedByConflict) return;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            // Lock/unlock score inputs
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.disabled = isLocked;
+            });
+
+            // Lock/unlock team name inputs
+            const format = parseInt(document.getElementById('format').value) || 4;
+            for (let i = 1; i <= format; i++) {
+                const input = document.getElementById(`team${i}`);
+                if (input) {
+                    input.readOnly = isLocked;
+                    const group = input.closest('.team-input-group');
+                    group?.classList.toggle('locked-name', isLocked);
+                }
+            }
+
+            // Lock/unlock buttons
+            if (submitBtn) submitBtn.disabled = isLocked;
+            if (clearBtn) clearBtn.disabled = isLocked;
+
+            // Visual indicator
+            const scoringSection = document.querySelector('.scoring-section');
+            if (scoringSection) {
+                scoringSection.style.opacity = isLocked ? '0.5' : '1';
+                scoringSection.style.pointerEvents = isLocked ? 'none' : 'auto';
+            }
+        }
+
         async function loadSavedScores(showStatusMessage = false) {
             if (isLoadingSavedScores) return;
 
@@ -3992,6 +4200,7 @@
                 }
 
                 applySavedScores(result.entry);
+                await enforceHigherLevelLock();
 
                 if (showStatusMessage) {
                     const context = getSelectedScoreContextText();
@@ -4021,6 +4230,12 @@
         }
 
         async function submitScores() {
+            if (higherLevelLocked) {
+                const currentPool = document.getElementById('pool').value;
+                const lockingRound = getHigherRoundName(getSelectedRound(), currentPool);
+                showMessageBox('Round Locked', `This round is locked because ${lockingRound} scores already exist. Clear the ${lockingRound} data first before making changes here.`);
+                return;
+            }
             if (scoreEntryBlockedByConflict) {
                 showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
                 return;
@@ -4102,14 +4317,19 @@
         }
 
         function clearScores() {
+            if (higherLevelLocked) {
+                const currentPool = document.getElementById('pool').value;
+                const lockingRound = getHigherRoundName(getSelectedRound(), currentPool);
+                showMessageBox('Round Locked', `This round is locked because ${lockingRound} scores already exist. Clear the ${lockingRound} data first before making changes here.`);
+                return;
+            }
             if (scoreEntryBlockedByConflict) {
                 showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
                 return;
             }
             showMessageBox('Clear Scores', 'Are you sure you want to clear all scores from the page?', () => {
                 resetScoreFields();
-                showStatus('Scores cleared.', 'success');
-                scheduleHideStatus(5000);
+                showStatus('Scores Cleared! You should click SAVE SCORES to save the cleared data, else it will revert to its previous values.', 'success');
             }, { showCancel: true });
         }
 
