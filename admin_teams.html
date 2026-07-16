@@ -166,6 +166,55 @@
             transform: none;
         }
 
+        /* Tab navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: rgba(255,255,255,0.04);
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #ccc;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .tab-btn.active {
+            color: #e94560;
+            background: rgba(233,69,96,0.08);
+            border-bottom-color: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Score data round selector */
+        .score-selector-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
         .teams-section {
             background: rgba(26,26,46,0.85);
             border-radius: 12px;
@@ -486,6 +535,19 @@
             vertical-align: middle;
         }
 
+        /* Compare tab diff highlights */
+        .diff-bracket {
+            color: #2ecc71;
+            font-weight: 600;
+            background: rgba(46,204,113,0.08);
+        }
+
+        .diff-score {
+            color: #e74c3c;
+            font-weight: 600;
+            background: rgba(231,76,60,0.08);
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -518,80 +580,196 @@
 
         <div id="messageBox" class="message"></div>
 
-        <div class="selector-section">
-            <div class="selector-row">
-                <div class="selector-group">
-                    <label>Event</label>
-                    <select id="eventSelect">
-                        <option value="Men's Doubles">Men's Doubles</option>
-                        <option value="Women's Doubles">Women's Doubles</option>
-                        <option value="Mixed Doubles">Mixed Doubles</option>
-                    </select>
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('bracket')">📋 Bracket Posters</button>
+            <button class="tab-btn" onclick="switchTab('scores')">📊 Score Data</button>
+            <button class="tab-btn" onclick="switchTab('compare')">🔍 Compare</button>
+        </div>
+
+        <!-- Bracket Posters Tab -->
+        <div class="tab-content active" id="tab-bracket">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="eventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="divisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Pool</label>
+                        <select id="poolSelect">
+                            <option value="A">Pool A</option>
+                            <option value="B">Pool B</option>
+                            <option value="C">Pool C</option>
+                            <option value="D">Pool D</option>
+                        </select>
+                    </div>
+                    <button class="load-btn" id="loadBtn" onclick="loadTeams()">🔍 Load Teams</button>
                 </div>
-                <div class="selector-group">
-                    <label>Division</label>
-                    <select id="divisionSelect">
-                        <option value="1-3">Division 1-3</option>
-                        <option value="4-5">Division 4-5</option>
-                        <option value="6-7">Division 6-7</option>
-                        <option value="8-9">Division 8-9</option>
-                    </select>
+            </div>
+
+            <div class="teams-section" id="teamsSection" style="display:none;">
+                <h3 id="teamsTitle">📋 Teams</h3>
+
+                <table class="teams-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Club 1</th>
+                            <th>Club 2</th>
+                            <th style="width:120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamsBody"></tbody>
+                </table>
+
+                <div class="add-team-section">
+                    <h4>➕ Add Team</h4>
+                    <div class="add-team-row">
+                        <div class="field">
+                            <label>Player 1</label>
+                            <input type="text" id="addPlayer1" placeholder="First player name">
+                        </div>
+                        <div class="field">
+                            <label>Player 2</label>
+                            <input type="text" id="addPlayer2" placeholder="Second player name">
+                        </div>
+                        <div class="field">
+                            <label>Club 1</label>
+                            <input type="text" id="addClub1" placeholder="Player 1 club">
+                        </div>
+                        <div class="field">
+                            <label>Club 2</label>
+                            <input type="text" id="addClub2" placeholder="Player 2 club">
+                        </div>
+                        <button class="btn-add" onclick="addTeam()">Add</button>
+                    </div>
                 </div>
-                <div class="selector-group">
-                    <label>Pool</label>
-                    <select id="poolSelect">
-                        <option value="A">Pool A</option>
-                        <option value="B">Pool B</option>
-                        <option value="C">Pool C</option>
-                        <option value="D">Pool D</option>
-                    </select>
+
+                <div class="save-section">
+                    <button class="btn-save" id="saveBtn" onclick="confirmSave()">💾 Save Changes</button>
                 </div>
-                <button class="load-btn" id="loadBtn" onclick="loadTeams()">🔍 Load Teams</button>
             </div>
         </div>
 
-        <div class="teams-section" id="teamsSection" style="display:none;">
-            <h3 id="teamsTitle">📋 Teams</h3>
-
-            <table class="teams-table">
-                <thead>
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th>Player 1</th>
-                        <th>Player 2</th>
-                        <th>Club 1</th>
-                        <th>Club 2</th>
-                        <th style="width:120px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="teamsBody"></tbody>
-            </table>
-
-            <div class="add-team-section">
-                <h4>➕ Add Team</h4>
-                <div class="add-team-row">
-                    <div class="field">
-                        <label>Player 1</label>
-                        <input type="text" id="addPlayer1" placeholder="First player name">
+        <!-- Score Data Tab -->
+        <div class="tab-content" id="tab-scores">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="scoreEventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
                     </div>
-                    <div class="field">
-                        <label>Player 2</label>
-                        <input type="text" id="addPlayer2" placeholder="Second player name">
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="scoreDivisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
                     </div>
-                    <div class="field">
-                        <label>Club 1</label>
-                        <input type="text" id="addClub1" placeholder="Player 1 club">
+                    <div class="selector-group">
+                        <label>Round</label>
+                        <select id="scoreRoundSelect" onchange="updateScorePoolOptions()">
+                            <option value="Pool">Pool</option>
+                            <option value="Super-pool">Super-pool</option>
+                            <option value="Semi Final">Semi Final</option>
+                            <option value="Final">Final</option>
+                        </select>
                     </div>
-                    <div class="field">
-                        <label>Club 2</label>
-                        <input type="text" id="addClub2" placeholder="Player 2 club">
+                    <div class="selector-group">
+                        <label>Pool / Match</label>
+                        <select id="scorePoolSelect">
+                            <option value="A">Pool A</option>
+                            <option value="B">Pool B</option>
+                            <option value="C">Pool C</option>
+                            <option value="D">Pool D</option>
+                        </select>
                     </div>
-                    <button class="btn-add" onclick="addTeam()">Add</button>
+                    <button class="load-btn" id="scoreLoadBtn" onclick="loadScoreTeams()">🔍 Load Teams</button>
                 </div>
             </div>
 
-            <div class="save-section">
-                <button class="btn-save" id="saveBtn" onclick="confirmSave()">💾 Save Changes</button>
+            <div class="teams-section" id="scoreTeamsSection" style="display:none;">
+                <h3 id="scoreTeamsTitle">📊 Score Teams</h3>
+
+                <table class="teams-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Club 1</th>
+                            <th>Club 2</th>
+                            <th style="width:90px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreTeamsBody"></tbody>
+                </table>
+
+                <div class="save-section">
+                    <button class="btn-save" id="scoreSaveBtn" onclick="confirmScoreSave()">💾 Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compare Tab -->
+        <div class="tab-content" id="tab-compare">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="compareEventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="compareDivisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
+                    </div>
+                    <button class="load-btn" id="compareLoadBtn" onclick="loadCompare()">🔍 Compare</button>
+                </div>
+            </div>
+
+            <div class="teams-section" id="compareSection" style="display:none;">
+                <h3 id="compareTitle">🔍 Differences</h3>
+                <table class="teams-table" id="compareTable">
+                    <thead>
+                        <tr>
+                            <th style="width:70px;">Pool</th>
+                            <th style="width:50px;">Seed</th>
+                            <th>Bracket Posters (source of truth)</th>
+                            <th>Score Data (SCORES/*.json)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compareBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -614,6 +792,55 @@
         let hasChanges = false;
         let pendingModalAction = null;
 
+        // Score Data tab state
+        let scoreTeams = [];
+        let scoreEditingIndex = -1;
+        let scoreHasChanges = false;
+
+        // ─── Tab Switching ──────────────────────────────────────────────────────
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            if (tab === 'bracket') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-bracket').classList.add('active');
+            } else if (tab === 'scores') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-scores').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('tab-compare').classList.add('active');
+            }
+        }
+
+        // ─── Score Data Pool Options ────────────────────────────────────────────
+
+        function updateScorePoolOptions() {
+            const round = document.getElementById('scoreRoundSelect').value;
+            const poolSelect = document.getElementById('scorePoolSelect');
+            poolSelect.innerHTML = '';
+
+            if (round === 'Pool') {
+                ['A','B','C','D'].forEach(p => {
+                    poolSelect.innerHTML += `<option value="${p}">Pool ${p}</option>`;
+                });
+            } else if (round === 'Super-pool') {
+                ['X','Y'].forEach(p => {
+                    poolSelect.innerHTML += `<option value="${p}">Pool ${p}</option>`;
+                });
+            } else if (round === 'Semi Final') {
+                ['SF1','SF2'].forEach(p => {
+                    poolSelect.innerHTML += `<option value="${p}">${p}</option>`;
+                });
+            } else if (round === 'Final') {
+                poolSelect.innerHTML = `<option value="FN">FN</option>`;
+            }
+        }
+
+        // ─── Common ─────────────────────────────────────────────────────────────
+
         function showMessage(text, type) {
             const box = document.getElementById('messageBox');
             box.textContent = text;
@@ -626,6 +853,18 @@
                 .then(() => { window.location.href = '/vertexadmin.html'; })
                 .catch(() => { window.location.href = '/vertexadmin.html'; });
         }
+
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ─── Bracket Posters Tab ────────────────────────────────────────────────
 
         async function loadTeams() {
             const event = document.getElementById('eventSelect').value;
@@ -699,16 +938,6 @@
                     </td>
                 </tr>`;
             }).join('');
-        }
-
-        function escapeHtml(str) {
-            const d = document.createElement('div');
-            d.textContent = str || '';
-            return d.innerHTML;
-        }
-
-        function escapeAttr(str) {
-            return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
         function startEdit(index) {
@@ -788,26 +1017,6 @@
             );
         }
 
-        function showModal(title, message, onConfirm) {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('confirmMessage').textContent = message;
-            pendingModalAction = onConfirm;
-            document.getElementById('confirmModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('confirmModal').classList.remove('active');
-            pendingModalAction = null;
-        }
-
-        function modalConfirmAction() {
-            const action = pendingModalAction;
-            closeModal();
-            if (typeof action === 'function') {
-                action();
-            }
-        }
-
         async function saveTeams() {
             closeModal();
 
@@ -856,6 +1065,265 @@
         document.getElementById('eventSelect').addEventListener('change', clearTeamsView);
         document.getElementById('divisionSelect').addEventListener('change', clearTeamsView);
         document.getElementById('poolSelect').addEventListener('change', clearTeamsView);
+
+        // ─── Score Data Tab ─────────────────────────────────────────────────────
+
+        async function loadScoreTeams() {
+            const event = document.getElementById('scoreEventSelect').value;
+            const division = document.getElementById('scoreDivisionSelect').value;
+            const round = document.getElementById('scoreRoundSelect').value;
+            const pool = document.getElementById('scorePoolSelect').value;
+
+            const loadBtn = document.getElementById('scoreLoadBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="loading-spinner"></span>Loading...';
+
+            try {
+                const response = await fetch('/api/scores/teams', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool, round })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load score teams');
+                }
+
+                scoreTeams = data.teams || [];
+                scoreHasChanges = false;
+                scoreEditingIndex = -1;
+                renderScoreTeams();
+                document.getElementById('scoreTeamsSection').style.display = 'block';
+                document.getElementById('scoreTeamsTitle').textContent =
+                    `📊 ${event} – Division ${division} – ${round} ${pool} (${scoreTeams.length} teams)`;
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to load score teams', 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '🔍 Load Teams';
+            }
+        }
+
+        function renderScoreTeams() {
+            const tbody = document.getElementById('scoreTeamsBody');
+
+            if (scoreTeams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📭</div>No teams found in this score entry</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = scoreTeams.map((team, i) => {
+                if (scoreEditingIndex === i) {
+                    return `<tr>
+                        <td class="team-number">${i + 1}</td>
+                        <td><input class="edit-input" id="scoreEditP1" value="${escapeAttr(team.player1)}"></td>
+                        <td><input class="edit-input" id="scoreEditP2" value="${escapeAttr(team.player2)}"></td>
+                        <td style="color:#666;">${escapeHtml(team.club1)}</td>
+                        <td style="color:#666;">${escapeHtml(team.club2)}</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit" onclick="saveScoreEdit(${i})">✓ OK</button>
+                            <button class="btn-delete" onclick="cancelScoreEdit()">✗</button>
+                        </td>
+                    </tr>`;
+                }
+                return `<tr>
+                    <td class="team-number">${i + 1}</td>
+                    <td>${escapeHtml(team.player1)}</td>
+                    <td>${escapeHtml(team.player2)}</td>
+                    <td style="color:#666;">${escapeHtml(team.club1)}</td>
+                    <td style="color:#666;">${escapeHtml(team.club2)}</td>
+                    <td class="actions-cell">
+                        <button class="btn-edit" onclick="startScoreEdit(${i})">✏️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function startScoreEdit(index) {
+            scoreEditingIndex = index;
+            renderScoreTeams();
+        }
+
+        function cancelScoreEdit() {
+            scoreEditingIndex = -1;
+            renderScoreTeams();
+        }
+
+        function saveScoreEdit(index) {
+            const p1 = document.getElementById('scoreEditP1').value.trim();
+            const p2 = document.getElementById('scoreEditP2').value.trim();
+
+            if (!p1 && !p2) {
+                showMessage('At least one player name is required', 'error');
+                return;
+            }
+
+            scoreTeams[index].player1 = p1;
+            scoreTeams[index].player2 = p2;
+            scoreEditingIndex = -1;
+            scoreHasChanges = true;
+            renderScoreTeams();
+            showMessage('Team name updated (not yet saved)', 'success');
+        }
+
+        function confirmScoreSave() {
+            if (!scoreHasChanges) {
+                showMessage('No changes to save', 'error');
+                return;
+            }
+            showModal(
+                '⚠️ Confirm Save',
+                'Are you sure you want to save the score team name changes? This will update the score JSON file.',
+                saveScoreTeams
+            );
+        }
+
+        async function saveScoreTeams() {
+            closeModal();
+
+            const event = document.getElementById('scoreEventSelect').value;
+            const division = document.getElementById('scoreDivisionSelect').value;
+            const round = document.getElementById('scoreRoundSelect').value;
+            const pool = document.getElementById('scorePoolSelect').value;
+
+            const saveBtn = document.getElementById('scoreSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+            try {
+                const response = await fetch('/api/scores/teams/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool, round, teams: scoreTeams })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save score teams');
+                }
+
+                scoreHasChanges = false;
+                showMessage('✅ Score team names saved successfully!', 'success');
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to save score teams', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '💾 Save Changes';
+            }
+        }
+
+        // Clear score teams table when selectors change
+        function clearScoreTeamsView() {
+            scoreTeams = [];
+            scoreHasChanges = false;
+            scoreEditingIndex = -1;
+            document.getElementById('scoreTeamsSection').style.display = 'none';
+            document.getElementById('scoreTeamsBody').innerHTML = '';
+        }
+
+        document.getElementById('scoreEventSelect').addEventListener('change', clearScoreTeamsView);
+        document.getElementById('scoreDivisionSelect').addEventListener('change', clearScoreTeamsView);
+        document.getElementById('scoreRoundSelect').addEventListener('change', clearScoreTeamsView);
+        document.getElementById('scorePoolSelect').addEventListener('change', clearScoreTeamsView);
+
+        // ─── Compare Tab ────────────────────────────────────────────────────────
+
+        async function loadCompare() {
+            const event = document.getElementById('compareEventSelect').value;
+            const division = document.getElementById('compareDivisionSelect').value;
+
+            const loadBtn = document.getElementById('compareLoadBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="loading-spinner"></span>Comparing...';
+
+            try {
+                const response = await fetch('/api/teams/compare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division })
+                });
+
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(text || 'Server returned a non-JSON response. Restart the server.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to compare teams');
+                }
+
+                const diffs = data.differences || [];
+                const tbody = document.getElementById('compareBody');
+                const section = document.getElementById('compareSection');
+
+                if (diffs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="icon">✅</div>All team names match! No differences found.</div></td></tr>';
+                } else {
+                    tbody.innerHTML = diffs.map(d => {
+                        return `<tr>
+                            <td><span style="color:#f39c12;font-weight:700;">Pool ${escapeHtml(d.pool)}</span></td>
+                            <td class="team-number">${d.seed}</td>
+                            <td class="diff-bracket">${escapeHtml(d.bracket)}</td>
+                            <td class="diff-score">${escapeHtml(d.score)}</td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                section.style.display = 'block';
+                document.getElementById('compareTitle').textContent =
+                    `🔍 ${event} – Division ${division} — ${diffs.length} difference${diffs.length !== 1 ? 's' : ''} found`;
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to compare teams', 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '🔍 Compare';
+            }
+        }
+
+        // Clear compare view when selectors change
+        document.getElementById('compareEventSelect').addEventListener('change', () => {
+            document.getElementById('compareSection').style.display = 'none';
+            document.getElementById('compareBody').innerHTML = '';
+        });
+        document.getElementById('compareDivisionSelect').addEventListener('change', () => {
+            document.getElementById('compareSection').style.display = 'none';
+            document.getElementById('compareBody').innerHTML = '';
+        });
+
+        // ─── Modal ──────────────────────────────────────────────────────────────
+
+        function showModal(title, message, onConfirm) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            pendingModalAction = onConfirm;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingModalAction = null;
+        }
+
+        function modalConfirmAction() {
+            const action = pendingModalAction;
+            closeModal();
+            if (typeof action === 'function') {
+                action();
+            }
+        }
 
         // Session check on load
         fetch('/admin-session-check', { credentials: 'same-origin' })

@@ -1060,6 +1060,82 @@ async function handleTeamsList(req, res) {
     }
 }
 
+async function handleTeamsCompare(req, res) {
+    try {
+        const body = await collectRequestBody(req);
+        const { event, division } = JSON.parse(body || '{}');
+
+        if (!event || !division) {
+            throw new Error('Event and division are required.');
+        }
+
+        // --- Bracket Posters teams (source of truth) ---
+        if (!fs.existsSync(BRACKET_POSTERS_FILE)) {
+            throw new Error('Bracket posters file not found.');
+        }
+        const html = fs.readFileSync(BRACKET_POSTERS_FILE, 'utf8');
+        const pools = ['A', 'B', 'C', 'D'];
+        const bracketTeams = {};
+        pools.forEach(pool => {
+            const teams = parsePoolTeamsFromBracketPosters(html, event, division, pool);
+            if (teams.length > 0) {
+                bracketTeams[pool] = teams.map(t => {
+                    const parts = [t.player1, t.player2].filter(Boolean);
+                    return parts.join(' / ');
+                });
+            }
+        });
+
+        // --- Score file teams ---
+        const filePath = getScoreFilePath(event, division);
+        const scoreTeams = {};
+        if (fs.existsSync(filePath)) {
+            const scoreFile = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            pools.forEach(pool => {
+                const poolEntries = scoreFile.pools && scoreFile.pools[pool];
+                if (Array.isArray(poolEntries) && poolEntries.length > 0) {
+                    const entry = poolEntries[poolEntries.length - 1];
+                    if (entry && Array.isArray(entry.teams)) {
+                        scoreTeams[pool] = entry.teams.map(t => {
+                            if (typeof t === 'string') return t;
+                            if (t && t.name) return t.name;
+                            return '';
+                        });
+                    }
+                }
+            });
+        }
+
+        // --- Build comparison: only differences ---
+        const differences = [];
+        const allPools = [...new Set([...Object.keys(bracketTeams), ...Object.keys(scoreTeams)])].sort();
+
+        allPools.forEach(pool => {
+            const bTeams = bracketTeams[pool] || [];
+            const sTeams = scoreTeams[pool] || [];
+            const maxLen = Math.max(bTeams.length, sTeams.length);
+
+            for (let i = 0; i < maxLen; i++) {
+                const bracketName = (bTeams[i] || '').trim();
+                const scoreName = (sTeams[i] || '').trim();
+
+                if (bracketName !== scoreName) {
+                    differences.push({
+                        pool,
+                        seed: i + 1,
+                        bracket: bracketName || '(missing)',
+                        score: scoreName || '(missing)'
+                    });
+                }
+            }
+        });
+
+        sendJson(res, 200, { status: 'success', differences, event, division });
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Failed to compare teams.' });
+    }
+}
+
 function updateBracketPostersPool(html, event, division, pool, teams) {
     // Split into pages to find the right category
     const pageMarker = '<div class="page">';
@@ -1320,6 +1396,164 @@ async function handleTeamsSave(req, res) {
 
 // ─── End Team Management Handlers ───────────────────────────────────────────
 
+// ─── Score Data Team Handlers ───────────────────────────────────────────────
+
+async function handleScoreTeamsList(req, res) {
+    try {
+        const body = await collectRequestBody(req);
+        const { event, division, pool, round } = JSON.parse(body || '{}');
+
+        if (!event || !division || !pool || !round) {
+            throw new Error('Event, division, pool, and round are required.');
+        }
+
+        const filePath = getScoreFilePath(event, division);
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`Score file not found for ${event} division ${division}.`);
+        }
+
+        const scoreFile = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        let entry = null;
+
+        if (round === 'Pool' || round === 'Super-pool') {
+            // Pool and Super-pool entries live in scoreFile.pools[pool]
+            const poolEntries = scoreFile.pools && scoreFile.pools[pool];
+            if (!Array.isArray(poolEntries) || poolEntries.length === 0) {
+                throw new Error(`No entries found for pool ${pool} in this score file.`);
+            }
+            if (round === 'Super-pool') {
+                // Find entries where round === 'Super-pool'
+                const superPoolEntries = poolEntries.filter(e => e.round === 'Super-pool');
+                entry = superPoolEntries.length > 0 ? superPoolEntries[superPoolEntries.length - 1] : null;
+                if (!entry) {
+                    throw new Error(`No Super-pool entries found for pool ${pool}.`);
+                }
+            } else {
+                entry = poolEntries[poolEntries.length - 1];
+            }
+        } else if (round === 'Semi Final') {
+            const sfEntries = scoreFile.rounds && scoreFile.rounds.semiFinal && scoreFile.rounds.semiFinal[pool];
+            if (!Array.isArray(sfEntries) || sfEntries.length === 0) {
+                throw new Error(`No Semi Final entries found for match ${pool}.`);
+            }
+            entry = sfEntries[sfEntries.length - 1];
+        } else if (round === 'Final') {
+            const fnEntries = scoreFile.rounds && scoreFile.rounds.final && scoreFile.rounds.final[pool];
+            if (!Array.isArray(fnEntries) || fnEntries.length === 0) {
+                throw new Error(`No Final entries found for match ${pool}.`);
+            }
+            entry = fnEntries[fnEntries.length - 1];
+        } else {
+            throw new Error(`Unknown round: ${round}`);
+        }
+
+        if (!entry || !Array.isArray(entry.teams)) {
+            throw new Error('No teams data found in the score entry.');
+        }
+
+        // Parse teams - can be strings or objects
+        const teams = entry.teams.map(t => {
+            const teamName = typeof t === 'string' ? t : (t && t.name ? t.name : '');
+            const parts = teamName.split(' / ');
+            return {
+                player1: parts[0] || '',
+                player2: parts[1] || '',
+                club1: '—',
+                club2: '—'
+            };
+        });
+
+        sendJson(res, 200, { status: 'success', teams, round, pool });
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Failed to load score teams.' });
+    }
+}
+
+async function handleScoreTeamsSave(req, res) {
+    try {
+        const body = await collectRequestBody(req);
+        const { event, division, pool, round, teams } = JSON.parse(body || '{}');
+
+        if (!event || !division || !pool || !round || !Array.isArray(teams)) {
+            throw new Error('Event, division, pool, round, and teams array are required.');
+        }
+
+        for (const team of teams) {
+            if (!team.player1 && !team.player2) {
+                throw new Error('Each team must have at least one player name.');
+            }
+        }
+
+        const filePath = getScoreFilePath(event, division);
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`Score file not found for ${event} division ${division}.`);
+        }
+
+        await acquireFileLock(filePath);
+        try {
+            const scoreFile = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            let entry = null;
+
+            if (round === 'Pool' || round === 'Super-pool') {
+                const poolEntries = scoreFile.pools && scoreFile.pools[pool];
+                if (!Array.isArray(poolEntries) || poolEntries.length === 0) {
+                    throw new Error(`No entries found for pool ${pool}.`);
+                }
+                if (round === 'Super-pool') {
+                    const superPoolEntries = poolEntries.filter(e => e.round === 'Super-pool');
+                    entry = superPoolEntries.length > 0 ? superPoolEntries[superPoolEntries.length - 1] : null;
+                    if (!entry) throw new Error(`No Super-pool entries found for pool ${pool}.`);
+                } else {
+                    entry = poolEntries[poolEntries.length - 1];
+                }
+            } else if (round === 'Semi Final') {
+                const sfEntries = scoreFile.rounds && scoreFile.rounds.semiFinal && scoreFile.rounds.semiFinal[pool];
+                if (!Array.isArray(sfEntries) || sfEntries.length === 0) {
+                    throw new Error(`No Semi Final entries found for match ${pool}.`);
+                }
+                entry = sfEntries[sfEntries.length - 1];
+            } else if (round === 'Final') {
+                const fnEntries = scoreFile.rounds && scoreFile.rounds.final && scoreFile.rounds.final[pool];
+                if (!Array.isArray(fnEntries) || fnEntries.length === 0) {
+                    throw new Error(`No Final entries found for match ${pool}.`);
+                }
+                entry = fnEntries[fnEntries.length - 1];
+            } else {
+                throw new Error(`Unknown round: ${round}`);
+            }
+
+            if (!entry || !Array.isArray(entry.teams)) {
+                throw new Error('No teams data found in the score entry.');
+            }
+
+            // Update team names preserving all other data
+            for (let i = 0; i < entry.teams.length && i < teams.length; i++) {
+                const newName = [teams[i].player1 || '', teams[i].player2 || ''].filter(Boolean).join(' / ');
+                if (typeof entry.teams[i] === 'string') {
+                    entry.teams[i] = newName;
+                } else if (entry.teams[i] && typeof entry.teams[i] === 'object') {
+                    entry.teams[i].name = newName;
+                }
+            }
+
+            const tempFile = filePath + '.tmp';
+            fs.writeFileSync(tempFile, JSON.stringify(scoreFile, null, 2));
+            fs.renameSync(tempFile, filePath);
+        } finally {
+            releaseFileLock(filePath);
+        }
+
+        sendJson(res, 200, { status: 'success', message: 'Score team names updated successfully.' });
+        console.log(`[${new Date().toLocaleTimeString()}] Score teams saved: ${event} Div ${division} Pool ${pool} Round ${round} (${teams.length} teams)`);
+
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Failed to save score teams.' });
+        console.error(`[${new Date().toLocaleTimeString()}] Score team save error: ${error.message}`);
+    }
+}
+
+// ─── End Score Data Team Handlers ───────────────────────────────────────────
+
 function handleLoadTournamentData(res) {
     try {
         if (!fs.existsSync(BRACKET_POSTERS_FILE)) {
@@ -1573,6 +1807,24 @@ function createServer(config) {
         if (req.method === 'POST' && requestedUrl.pathname === '/api/teams/save') {
             if (!requireAdmin(req, res)) return;
             handleTeamsSave(req, res);
+            return;
+        }
+
+        if (req.method === 'POST' && requestedUrl.pathname === '/api/teams/compare') {
+            if (!requireAdmin(req, res)) return;
+            handleTeamsCompare(req, res);
+            return;
+        }
+
+        if (req.method === 'POST' && requestedUrl.pathname === '/api/scores/teams') {
+            if (!requireAdmin(req, res)) return;
+            handleScoreTeamsList(req, res);
+            return;
+        }
+
+        if (req.method === 'POST' && requestedUrl.pathname === '/api/scores/teams/save') {
+            if (!requireAdmin(req, res)) return;
+            handleScoreTeamsSave(req, res);
             return;
         }
 
