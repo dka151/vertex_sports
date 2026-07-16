@@ -756,7 +756,7 @@ function validateSubmittedScore(score, config) {
     if (round === ROUND_SEMI_FINAL && !/^SF[12]$/i.test(score.pool || '')) {
         throw new Error(`Unknown semi-final match: ${score.pool}`);
     }
-    if (round === ROUND_FINAL && !/^F$/i.test(score.pool || '')) {
+    if (round === ROUND_FINAL && !/^FN$/i.test(score.pool || '')) {
         throw new Error(`Unknown final match: ${score.pool}`);
     }
     if (!isKnockoutRound(round) && !config.pools.includes(score.pool) && !/^[A-Z]$/.test(score.pool)) {

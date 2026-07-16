@@ -1184,7 +1184,7 @@
         const ROUND_SEMI_FINAL = 'Semi Final';
         const ROUND_FINAL = 'Final';
         const SEMI_FINAL_MATCHES = ['SF1', 'SF2'];
-        const FINAL_MATCHES = ['F'];
+        const FINAL_MATCHES = ['FN'];
         const DEFAULT_LIVE_REFRESH_SECONDS = 15;
         const TIE_BREAK_SELECTION_KEY = 'vertexLiveScoreTieBreaks';
         const BEST_RUNNER_SELECTION_KEY = 'vertexLiveScoreBestRunnerBreaks';
@@ -2313,6 +2313,7 @@
                 if (input.tagName !== 'INPUT') return;
                 const group = input.closest('.team-input-group');
                 input.readOnly = !canEditNames;
+                input.disabled = !canEditNames;
                 input.title = canEditNames
                     ? 'Pool-level player names can be edited here.'
                     : 'Names for this round are carried forward from the qualifying saved round.';
@@ -2338,7 +2339,12 @@
         }
 
         function checkPlaceholderNamesBeforeAction() {
-            if (hasAnyPlaceholderTeamName()) {
+            // Only check for placeholder names at Pool level (where names can be edited)
+            // At higher levels, placeholder names are expected and carried forward automatically
+            if (getSelectedRound() !== ROUND_POOL && hasAnyPlaceholderTeamName()) {
+                return true; // Allow action at higher levels even with placeholders
+            }
+            if (getSelectedRound() === ROUND_POOL && hasAnyPlaceholderTeamName()) {
                 showMessageBox('Team Names Required', 'All teams must have actual player names before this action can be performed. Please ensure no placeholder or empty team names remain.');
                 return false;
             }
@@ -4119,7 +4125,7 @@
 
             if (currentRound === ROUND_SEMI_FINAL) {
                 // SF is locked only if Final has scores
-                if (hasSpecificRoundMatch(scoreFile, 'final', 'F')) return true;
+                if (hasSpecificRoundMatch(scoreFile, 'final', 'FN')) return true;
                 return false;
             }
 
@@ -4139,7 +4145,7 @@
                 // Super-pool then feeds into SF or Final
                 matches.push({ roundKey: 'semiFinal', matchKey: 'SF1' });
                 matches.push({ roundKey: 'semiFinal', matchKey: 'SF2' });
-                matches.push({ roundKey: 'final', matchKey: 'F' });
+                matches.push({ roundKey: 'final', matchKey: 'FN' });
                 return matches;
             }
 
@@ -4150,12 +4156,12 @@
                 if (relatedSF) {
                     matches.push({ roundKey: 'semiFinal', matchKey: relatedSF });
                 }
-                matches.push({ roundKey: 'final', matchKey: 'F' });
+                matches.push({ roundKey: 'final', matchKey: 'FN' });
                 return matches;
             }
 
             // Direct to final (2P > F or 1P > F)
-            matches.push({ roundKey: 'final', matchKey: 'F' });
+            matches.push({ roundKey: 'final', matchKey: 'FN' });
             return matches;
         }
 

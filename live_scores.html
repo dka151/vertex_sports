@@ -2016,7 +2016,7 @@ function getKnockoutEntries(scoreFile) {
       SF2: latestRoundEntry(scoreFile, ROUND_KEYS.semiFinal, "SF2")
     },
     final: {
-      F: latestRoundEntry(scoreFile, ROUND_KEYS.final, "F")
+      FN: latestRoundEntry(scoreFile, ROUND_KEYS.final, "FN")
     }
   };
 }
@@ -3011,7 +3011,7 @@ function renderMiddleStage(category, stageSeeds, poolCompletionMap = new Map(), 
 }
 
 function renderFinalStage(category, stageSeeds, previousStageComplete = true, poolCompletionMap = new Map(), allPoolsComplete = true, superPools = [], knockoutEntries = {}) {
-  const finalEntry = knockoutEntries.final?.F;
+  const finalEntry = knockoutEntries.final?.FN;
 
   if (category.middle === "Super-pool") {
     const finalists = SUPER_POOL_ASSIGNMENTS.map(assignment => (
@@ -3109,7 +3109,7 @@ function summarizeSemiFinalStage(category, stageSeeds, poolCompletionMap, allPoo
 
 function summarizeFinalStage(category, stageSeeds, poolCompletionMap, allPoolsComplete, superPoolCounts, knockoutEntries, allPools) {
   const counts = createStageCounts("F");
-  const finalEntry = knockoutEntries.final?.F;
+  const finalEntry = knockoutEntries.final?.FN;
 
   if (finalEntry && hasAnyPoolResult(finalEntry)) {
     addStageStatus(counts, getEntryState(finalEntry));
