@@ -23,6 +23,7 @@ const FEEDBACK_DIR = path.join(__dirname, 'FEEDBACK');
 const FEEDBACK_FILE = path.join(FEEDBACK_DIR, 'feedback.json');
 const LEGACY_FEEDBACK_FILE = path.join(__dirname, 'feedback.js');
 const BRACKET_POSTERS_FILE = path.join(__dirname, 'VERTEX_Bracket_Posters.html');
+const TEAMS_FILE = path.join(__dirname, 'VERTEX_Teams.html');
 const TOURNAMENT_DATA_FILE = path.join(__dirname, 'tournament_data.json');
 const ROUND_POOL = 'Pool';
 const ROUND_SUPER_POOL = 'Super-pool';
@@ -42,7 +43,29 @@ const PASSWORD_HASH_OPTIONS = {
 };
 const ADMIN_SESSION_COOKIE = 'vertex_admin_session';
 const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
+const ADMIN_SESSIONS_FILE = path.join(__dirname, '.admin_sessions.json');
 const adminSessions = new Map();
+
+// Load persisted sessions on startup
+try {
+    if (fs.existsSync(ADMIN_SESSIONS_FILE)) {
+        const saved = JSON.parse(fs.readFileSync(ADMIN_SESSIONS_FILE, 'utf8'));
+        const now = Date.now();
+        Object.entries(saved).forEach(([token, session]) => {
+            if (session && session.expiresAt > now) {
+                adminSessions.set(token, session);
+            }
+        });
+    }
+} catch (e) {}
+
+function persistAdminSessions() {
+    try {
+        const obj = {};
+        adminSessions.forEach((session, token) => { obj[token] = session; });
+        fs.writeFileSync(ADMIN_SESSIONS_FILE, JSON.stringify(obj));
+    } catch (e) {}
+}
 
 const MIME_TYPES = {
     '.html': 'text/html; charset=utf-8',
@@ -549,12 +572,14 @@ function setAdminSession(res, username) {
         expiresAt: Date.now() + ADMIN_SESSION_MS
     });
     res.setHeader('Set-Cookie', `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${ADMIN_SESSION_MS / 1000}`);
+    persistAdminSessions();
 }
 
 function clearAdminSession(req, res) {
     const token = parseCookies(req)[ADMIN_SESSION_COOKIE];
     if (token) adminSessions.delete(token);
     res.setHeader('Set-Cookie', `${ADMIN_SESSION_COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`);
+    persistAdminSessions();
 }
 
 async function handleAdminLogin(req, res) {
@@ -567,7 +592,7 @@ async function handleAdminLogin(req, res) {
         }
 
         const requestedRedirect = String(credentials.redirect || '');
-        const redirect = /^\/(?:vertexadmin|scoring_page|adminfeedback)(?:\.html)?$/i.test(requestedRedirect)
+        const redirect = /^\/(?:vertexadmin|scoring_page|adminfeedback|admin-teams|admin_teams)(?:\.html)?$/i.test(requestedRedirect)
             ? requestedRedirect
             : '/vertexadmin.html';
         setAdminSession(res, credentials.username);
@@ -961,6 +986,341 @@ async function handleAdminFeedbackApproval(req, res) {
     }
 }
 
+// ─── Team Management Handlers ───────────────────────────────────────────────
+
+function parsePoolTeamsFromBracketPosters(html, event, division, pool) {
+    const pageChunks = String(html).split(/<div\s+class=["']page["'][^>]*>/i).slice(1);
+
+    for (const pageHtml of pageChunks) {
+        const titleMatch = pageHtml.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+        const title = titleMatch ? stripTags(titleMatch[1]) : '';
+        const pageEvent = extractEvent(title);
+        const divisionMatch = title.match(/Division\s+([0-9-]+)/i);
+        const pageDivision = divisionMatch ? normalizeDivision(divisionMatch[1]) : '';
+
+        if (pageEvent !== event || pageDivision !== division) continue;
+
+        // Find the target pool
+        const poolPattern = /<div\s+class=["']pc["'][^>]*>\s*<div\s+class=["']pc-h["'][^>]*[^>]*>\s*POOL\s+([A-Z])\s*\(\d+\s+TEAMS?\)\s*<\/div>\s*<div\s+class=["']pc-b["'][^>]*>([\s\S]*?)<\/div>\s*<div\s+class=["']pq["'][^>]*>/gi;
+        let poolMatch;
+
+        while ((poolMatch = poolPattern.exec(pageHtml)) !== null) {
+            if (poolMatch[1] !== pool) continue;
+
+            const poolBody = poolMatch[2];
+            const teams = [];
+            const teamPattern = /<div\s+class=["']pt["'][^>]*>[\s\S]*?<div\s+class=["']pi["'][^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
+            let teamMatch;
+
+            while ((teamMatch = teamPattern.exec(poolBody)) !== null) {
+                const piHtml = teamMatch[1];
+                // Parse player/club pairs: "Player1 <span class="ci">(Club1)</span><br>Player2 <span class="ci">(Club2)</span>"
+                const parts = piHtml.split(/<br\s*\/?>/i);
+                let player1 = '', club1 = '', player2 = '', club2 = '';
+
+                if (parts[0]) {
+                    const clubMatch1 = parts[0].match(/<span\s+class=["']ci["'][^>]*>\(([^)]*)\)<\/span>/i);
+                    club1 = clubMatch1 ? decodeHtml(clubMatch1[1].trim()) : '';
+                    player1 = decodeHtml(parts[0].replace(/<span\b[^>]*>[\s\S]*?<\/span>/gi, '').replace(/<[^>]+>/g, '').trim());
+                }
+                if (parts[1]) {
+                    const clubMatch2 = parts[1].match(/<span\s+class=["']ci["'][^>]*>\(([^)]*)\)<\/span>/i);
+                    club2 = clubMatch2 ? decodeHtml(clubMatch2[1].trim()) : '';
+                    player2 = decodeHtml(parts[1].replace(/<span\b[^>]*>[\s\S]*?<\/span>/gi, '').replace(/<[^>]+>/g, '').trim());
+                }
+
+                teams.push({ player1, player2, club1, club2 });
+            }
+
+            return teams;
+        }
+    }
+
+    return [];
+}
+
+async function handleTeamsList(req, res) {
+    try {
+        const body = await collectRequestBody(req);
+        const { event, division, pool } = JSON.parse(body || '{}');
+
+        if (!event || !division || !pool) {
+            throw new Error('Event, division, and pool are required.');
+        }
+
+        if (!fs.existsSync(BRACKET_POSTERS_FILE)) {
+            throw new Error('Bracket posters file not found.');
+        }
+
+        const html = fs.readFileSync(BRACKET_POSTERS_FILE, 'utf8');
+        const teams = parsePoolTeamsFromBracketPosters(html, event, division, pool);
+
+        sendJson(res, 200, { status: 'success', teams });
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Failed to load teams.' });
+    }
+}
+
+function updateBracketPostersPool(html, event, division, pool, teams) {
+    // Split into pages to find the right category
+    const pageMarker = '<div class="page">';
+    const pages = html.split(pageMarker);
+    const header = pages[0]; // content before first page
+    const pageContents = pages.slice(1);
+
+    for (let i = 0; i < pageContents.length; i++) {
+        const pageHtml = pageContents[i];
+        const titleMatch = pageHtml.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+        const title = titleMatch ? stripTags(titleMatch[1]) : '';
+        const pageEvent = extractEvent(title);
+        const divisionMatch = title.match(/Division\s+([0-9-]+)/i);
+        const pageDivision = divisionMatch ? normalizeDivision(divisionMatch[1]) : '';
+
+        if (pageEvent !== event || pageDivision !== division) continue;
+
+        // Find and replace the target pool content
+        const poolHeaderPattern = new RegExp(
+            '(<div\\s+class=["\']pc["\'][^>]*>\\s*<div\\s+class=["\']pc-h["\'][^>]*>\\s*POOL\\s+' +
+            pool +
+            '\\s*\\()(\\d+)(\\s+TEAMS?\\)\\s*<\\/div>\\s*<div\\s+class=["\']pc-b["\'][^>]*>)([\\s\\S]*?)(<\\/div>\\s*<div\\s+class=["\']pq["\'][^>]*>)',
+            'i'
+        );
+
+        const poolMatch = pageHtml.match(poolHeaderPattern);
+        if (!poolMatch) continue;
+
+        // Build new team HTML
+        const newTeamCount = teams.length;
+        const newTeamsHtml = teams.map((team, idx) => {
+            const p1 = escapeHtmlStr(team.player1 || '');
+            const p2 = escapeHtmlStr(team.player2 || '');
+            const c1 = escapeHtmlStr(team.club1 || '');
+            const c2 = escapeHtmlStr(team.club2 || '');
+            return `<div class="pt"><div class="pn">${idx + 1}</div><div class="pi">${p1} <span class="ci">(${c1})</span><br>${p2} <span class="ci">(${c2})</span></div></div>`;
+        }).join('');
+
+        const updatedPage = pageHtml.replace(
+            poolHeaderPattern,
+            `$1${newTeamCount}$3${newTeamsHtml}$5`
+        );
+
+        pageContents[i] = updatedPage;
+        return header + pageContents.map(p => pageMarker + p).join('');
+    }
+
+    throw new Error(`Pool ${pool} not found for ${event} Division ${division} in bracket posters.`);
+}
+
+function updateTeamsFile(html, event, division, teams) {
+    // Find the category section matching event and division
+    // Categories: "Men's Doubles – Division 1-3" or similar with &ndash;
+    const eventAbbrev = event === "Men's Doubles" ? 'md' : event === "Women's Doubles" ? 'wd' : 'xd';
+
+    // Split by category divs to find the right one
+    const categoryPattern = /<div\s+class="category\s+\w+"[^>]*>[\s\S]*?<\/div>\s*<table[\s\S]*?<\/table>/gi;
+    let match;
+    const sections = [];
+    let lastIndex = 0;
+
+    while ((match = categoryPattern.exec(html)) !== null) {
+        sections.push({
+            before: html.slice(lastIndex, match.index),
+            content: match[0],
+            start: match.index,
+            end: match.index + match[0].length
+        });
+        lastIndex = match.index + match[0].length;
+    }
+
+    const remainder = html.slice(lastIndex);
+
+    // Find matching category
+    for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        const catText = stripTags(section.content.split('</div>')[0] || '');
+        const catEvent = extractEvent(catText);
+        const divMatch = catText.match(/Division\s+([0-9-]+)/i);
+        const catDivision = divMatch ? normalizeDivision(divMatch[1]) : '';
+
+        if (catEvent !== event || catDivision !== division) continue;
+
+        // Rebuild the table with all teams (combines all pools for this category)
+        // We only update the full table - replace the tbody content
+        const tbodyMatch = section.content.match(/(<tbody>)([\s\S]*?)(<\/tbody>)/i);
+        if (!tbodyMatch) continue;
+
+        // Parse existing teams to merge - but for simplicity, we'll just read existing
+        // and replace all teams. The caller provides full team list for the whole category
+        // Since we're updating per-pool, we need to read existing teams, replace the pool portion.
+        // Actually, the teams file has ALL teams for a category (not split by pool),
+        // so we need a different approach: rebuild all teams for this category from bracket posters.
+        // We'll handle this in the save handler by reading all pools from bracket posters after update.
+        return { html, sectionIndex: i, sections, remainder };
+    }
+
+    return null;
+}
+
+function rebuildTeamsFileFromBracketPosters(teamsHtml, bracketHtml, event, division) {
+    // After updating bracket posters, read all pools for this category and rebuild the teams table
+    const pageChunks = String(bracketHtml).split(/<div\s+class=["']page["'][^>]*>/i).slice(1);
+    let allTeams = [];
+
+    for (const pageHtml of pageChunks) {
+        const titleMatch = pageHtml.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+        const title = titleMatch ? stripTags(titleMatch[1]) : '';
+        const pageEvent = extractEvent(title);
+        const divisionMatch = title.match(/Division\s+([0-9-]+)/i);
+        const pageDivision = divisionMatch ? normalizeDivision(divisionMatch[1]) : '';
+
+        if (pageEvent !== event || pageDivision !== division) continue;
+
+        // Collect all teams from all pools on this page
+        const poolPattern = /<div\s+class=["']pc["'][^>]*>\s*<div\s+class=["']pc-h["'][^>]*[^>]*>\s*POOL\s+[A-Z]\s*\(\d+\s+TEAMS?\)\s*<\/div>\s*<div\s+class=["']pc-b["'][^>]*>([\s\S]*?)<\/div>\s*<div\s+class=["']pq["'][^>]*>/gi;
+        let poolMatch;
+
+        while ((poolMatch = poolPattern.exec(pageHtml)) !== null) {
+            const poolBody = poolMatch[1];
+            const teamPattern = /<div\s+class=["']pt["'][^>]*>[\s\S]*?<div\s+class=["']pi["'][^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
+            let teamMatch;
+
+            while ((teamMatch = teamPattern.exec(poolBody)) !== null) {
+                const piHtml = teamMatch[1];
+                const parts = piHtml.split(/<br\s*\/?>/i);
+                let player1 = '', club1 = '', player2 = '', club2 = '';
+
+                if (parts[0]) {
+                    const clubMatch1 = parts[0].match(/<span\s+class=["']ci["'][^>]*>\(([^)]*)\)<\/span>/i);
+                    club1 = clubMatch1 ? decodeHtml(clubMatch1[1].trim()) : '';
+                    player1 = decodeHtml(parts[0].replace(/<span\b[^>]*>[\s\S]*?<\/span>/gi, '').replace(/<[^>]+>/g, '').trim());
+                }
+                if (parts[1]) {
+                    const clubMatch2 = parts[1].match(/<span\s+class=["']ci["'][^>]*>\(([^)]*)\)<\/span>/i);
+                    club2 = clubMatch2 ? decodeHtml(clubMatch2[1].trim()) : '';
+                    player2 = decodeHtml(parts[1].replace(/<span\b[^>]*>[\s\S]*?<\/span>/gi, '').replace(/<[^>]+>/g, '').trim());
+                }
+
+                allTeams.push({ player1, player2, club1, club2 });
+            }
+        }
+        break; // Only process the matching page
+    }
+
+    if (allTeams.length === 0) return teamsHtml;
+
+    // Now find and replace the teams table in VERTEX_Teams.html
+    const categoryPattern = /(<div\s+class="category\s+\w+"[^>]*>[\s\S]*?<\/div>\s*<table[\s\S]*?<thead>[\s\S]*?<\/thead>\s*<tbody>)([\s\S]*?)(<\/tbody>\s*<\/table>)/gi;
+    let catMatch;
+
+    while ((catMatch = categoryPattern.exec(teamsHtml)) !== null) {
+        const headerSection = catMatch[1];
+        const catText = stripTags(headerSection.split('</div>')[0] || '');
+        const catEvent = extractEvent(catText);
+        const divMatch = catText.match(/Division\s+([0-9-]+)/i);
+        const catDivision = divMatch ? normalizeDivision(divMatch[1]) : '';
+
+        if (catEvent !== event || catDivision !== division) continue;
+
+        // Rebuild tbody
+        const newTbody = allTeams.map((team, idx) => {
+            const p1 = escapeHtmlStr(team.player1);
+            const p2 = escapeHtmlStr(team.player2);
+            const c1 = escapeHtmlStr(team.club1);
+            const c2 = escapeHtmlStr(team.club2);
+            return `    <tr><td>${idx + 1}</td><td>${p1}<br>${p2}</td><td>${c1}<br>${c2}</td></tr>`;
+        }).join('\n');
+
+        // Also update the team count in the category header
+        const updatedHeader = headerSection.replace(
+            /(\d+\s+teams)/i,
+            `${allTeams.length} teams`
+        );
+
+        const before = teamsHtml.slice(0, catMatch.index);
+        const after = teamsHtml.slice(catMatch.index + catMatch[0].length);
+        return before + updatedHeader + '\n' + newTbody + '\n' + catMatch[3] + after;
+    }
+
+    return teamsHtml;
+}
+
+function escapeHtmlStr(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+async function handleTeamsSave(req, res) {
+    try {
+        const body = await collectRequestBody(req);
+        const { event, division, pool, teams } = JSON.parse(body || '{}');
+
+        if (!event || !division || !pool || !Array.isArray(teams)) {
+            throw new Error('Event, division, pool, and teams array are required.');
+        }
+
+        // Validate teams
+        for (const team of teams) {
+            if (!team.player1 || !team.player2) {
+                throw new Error('Each team must have player1 and player2.');
+            }
+        }
+
+        if (!fs.existsSync(BRACKET_POSTERS_FILE)) {
+            throw new Error('Bracket posters file not found.');
+        }
+
+        // 1. Update VERTEX_Bracket_Posters.html
+        await acquireFileLock(BRACKET_POSTERS_FILE);
+        try {
+            let bracketHtml = fs.readFileSync(BRACKET_POSTERS_FILE, 'utf8');
+            bracketHtml = updateBracketPostersPool(bracketHtml, event, division, pool, teams);
+
+            const tempBracket = BRACKET_POSTERS_FILE + '.tmp';
+            fs.writeFileSync(tempBracket, bracketHtml);
+            fs.renameSync(tempBracket, BRACKET_POSTERS_FILE);
+
+            // 2. Update VERTEX_Teams.html (rebuild from updated bracket posters)
+            if (fs.existsSync(TEAMS_FILE)) {
+                await acquireFileLock(TEAMS_FILE);
+                try {
+                    let teamsFileHtml = fs.readFileSync(TEAMS_FILE, 'utf8');
+                    teamsFileHtml = rebuildTeamsFileFromBracketPosters(teamsFileHtml, bracketHtml, event, division);
+
+                    const tempTeams = TEAMS_FILE + '.tmp';
+                    fs.writeFileSync(tempTeams, teamsFileHtml);
+                    fs.renameSync(tempTeams, TEAMS_FILE);
+                } finally {
+                    releaseFileLock(TEAMS_FILE);
+                }
+            }
+
+            // 3. Regenerate tournament_data.json
+            const data = parseTournamentBracketPosters(bracketHtml);
+            writeJsonFile(TOURNAMENT_DATA_FILE, data);
+
+        } finally {
+            releaseFileLock(BRACKET_POSTERS_FILE);
+        }
+
+        sendJson(res, 200, {
+            status: 'success',
+            message: 'Teams updated in bracket posters, teams file, and tournament data regenerated.'
+        });
+
+        console.log(`[${new Date().toLocaleTimeString()}] Teams saved: ${event} Div ${division} Pool ${pool} (${teams.length} teams)`);
+
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Failed to save teams.' });
+        console.error(`[${new Date().toLocaleTimeString()}] Team save error: ${error.message}`);
+    }
+}
+
+// ─── End Team Management Handlers ───────────────────────────────────────────
+
 function handleLoadTournamentData(res) {
     try {
         if (!fs.existsSync(BRACKET_POSTERS_FILE)) {
@@ -1056,12 +1416,17 @@ function serveStaticFile(req, res) {
         requestedUrl.pathname === '/scoring_page.html' ||
         requestedUrl.pathname === '/vertexadmin.html' ||
         requestedUrl.pathname === '/adminfeedback' ||
-        requestedUrl.pathname === '/adminfeedback.html';
+        requestedUrl.pathname === '/adminfeedback.html' ||
+        requestedUrl.pathname === '/admin-teams' ||
+        requestedUrl.pathname === '/admin_teams.html';
     const requestedPath = isAdminPagePath
         ? (requestedUrl.pathname === '/adminfeedback' ||
             requestedUrl.pathname === '/adminfeedback.html'
             ? '/adminfeedback.html'
-            : '/scoring_page.html')
+            : requestedUrl.pathname === '/admin-teams' ||
+              requestedUrl.pathname === '/admin_teams.html'
+              ? '/admin_teams.html'
+              : '/scoring_page.html')
         : (requestedUrl.pathname === '/' ? '/index.html' : requestedUrl.pathname);
     const filePath = path.normalize(path.join(__dirname, requestedPath));
 
@@ -1197,6 +1562,18 @@ function createServer(config) {
         if (req.method === 'POST' && requestedUrl.pathname === '/load-tournament-data') {
             if (!requireAdmin(req, res)) return;
             handleLoadTournamentData(res);
+            return;
+        }
+
+        if (req.method === 'POST' && requestedUrl.pathname === '/api/teams/list') {
+            if (!requireAdmin(req, res)) return;
+            handleTeamsList(req, res);
+            return;
+        }
+
+        if (req.method === 'POST' && requestedUrl.pathname === '/api/teams/save') {
+            if (!requireAdmin(req, res)) return;
+            handleTeamsSave(req, res);
             return;
         }
 

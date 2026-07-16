@@ -762,6 +762,7 @@
         }
 
         .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(39,174,96,0.4); }
+        .btn-calc:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         .btn-load {
             background: linear-gradient(135deg, #2980b9, #3498db);
@@ -916,6 +917,7 @@
         <!-- Header -->
         <div class="header">
             <div class="admin-actions">
+                <a href="/admin_teams.html" style="min-height:34px;padding:7px 12px;border-radius:8px;background:rgba(52,152,219,0.15);color:#5dade2;font-size:0.78rem;font-weight:800;text-decoration:none;border:1px solid rgba(52,152,219,0.3);display:inline-flex;align-items:center;">📋 Teams</a>
                 <button class="logout-btn" type="button" id="logoutButton">Logout</button>
             </div>
             <h1>🏸 HOTSHOT BC SUMMER TOURNAMENT 2026</h1>
@@ -966,7 +968,7 @@
             </div>
             <div class="info-group">
                 <label>TEAMS PER POOL</label>
-                <select id="format" onchange="updateTeamSlots()">
+                <select id="format" onchange="updateTeamSlots()" disabled style="opacity:0.7;cursor:not-allowed;">
                     <option value="2">2 Team</option>
                     <option value="3">3 Team</option>
                     <option value="4" selected>4 Team</option>
@@ -976,7 +978,7 @@
             </div>
             <div class="info-group">
                 <label>SETS PER MATCH</label>
-                <select id="setsPerMatch" onchange="handleSetsPerMatchChange()">
+                <select id="setsPerMatch" onchange="handleSetsPerMatchChange()" disabled style="opacity:0.7;cursor:not-allowed;">
                     <option value="1">1 Set</option>
                     <option value="2" selected>2 Sets</option>
                     <option value="3">3 Sets</option>
@@ -1124,7 +1126,7 @@
 
         <!-- Action Buttons -->
         <div class="actions">
-            <button class="btn btn-calc" onclick="calculateTotals()">🧮 Refresh Totals</button>
+            <button class="btn btn-calc" id="calcBtn" onclick="calculateTotals()">🧮 Refresh Totals</button>
             <button class="btn btn-load" id="loadTournamentBtn" onclick="loadTournamentData()">📥 Load Tournament Data</button>
             <button class="btn btn-submit" id="submitBtn" onclick="submitScores()">📤 Save Scores</button>
             <button class="btn btn-clear" id="clearBtn" onclick="clearScores()">🗑️ Clear Scores</button>
@@ -2257,6 +2259,7 @@
             rememberManualTeamOverride();
             updateTeamLabels();
             validateTeamNames(false);
+            updateActionButtonsState();
         }
 
         function updateTeamLabels() {
@@ -2313,7 +2316,7 @@
         }
 
         function updateTeamNameEditability() {
-            const canEditNames = getSelectedRound() === ROUND_POOL && !scoreEntryBlockedByConflict;
+            const canEditNames = getSelectedRound() === ROUND_POOL && !scoreEntryBlockedByConflict && !higherLevelLocked;
             document.querySelectorAll('[id^="team"]').forEach(input => {
                 if (input.tagName !== 'INPUT') return;
                 const group = input.closest('.team-input-group');
@@ -2323,6 +2326,31 @@
                     : 'Names for this round are carried forward from the qualifying saved round.';
                 group?.classList.toggle('locked-name', !canEditNames);
             });
+            updateActionButtonsState();
+        }
+
+        function updateActionButtonsState() {
+            // Buttons stay enabled but show message on click if placeholders exist
+            // No-op - validation happens in the click handlers
+        }
+
+        function hasAnyPlaceholderTeamName() {
+            const format = parseInt(document.getElementById('format').value) || 4;
+            for (let i = 1; i <= format; i++) {
+                const input = document.getElementById(`team${i}`);
+                if (!input) continue;
+                const value = input.value.trim();
+                if (!value || isPlaceholderTeamName(value)) return true;
+            }
+            return false;
+        }
+
+        function checkPlaceholderNamesBeforeAction() {
+            if (hasAnyPlaceholderTeamName()) {
+                showMessageBox('Team Names Required', 'All teams must have actual player names before this action can be performed. Please ensure no placeholder or empty team names remain.');
+                return false;
+            }
+            return true;
         }
 
         function isPlaceholderTeamName(value) {
@@ -2399,6 +2427,7 @@
         }
 
         function calculateTotals(showMessage = true) {
+            if (showMessage && !checkPlaceholderNamesBeforeAction()) return;
             const format = parseInt(document.getElementById('format').value);
             const setsPerMatch = getSetsPerMatch();
 
@@ -3149,7 +3178,22 @@
 
             for (let i = 1; i <= 6; i++) {
                 const input = document.getElementById(`team${i}`);
-                if (input) input.value = manualTeams.length ? (manualTeams[i - 1] || '') : (teams[i - 1] || '');
+                if (input) {
+                    if (round === ROUND_POOL) {
+                        // At pool level, use manual override only if it has a real name
+                        // Otherwise use fresh tournament data
+                        const manualName = manualTeams.length ? (manualTeams[i - 1] || '') : '';
+                        const freshName = teams[i - 1] || '';
+                        if (manualName && !isPlaceholderTeamName(manualName)) {
+                            input.value = manualName;
+                        } else {
+                            input.value = freshName;
+                        }
+                    } else {
+                        // Higher levels: always use dynamically resolved names
+                        input.value = teams[i - 1] || '';
+                    }
+                }
             }
 
             updateTeamLabels();
@@ -3192,6 +3236,24 @@
                 const currentDivision = document.getElementById('division').value;
                 const currentRound = document.getElementById('roundType').value;
                 const currentPool = document.getElementById('pool').value;
+
+                // Clear individual empty/placeholder entries within manual overrides
+                // so fresh tournament data can fill those specific slots
+                for (const key of Object.keys(manualTeamOverrides)) {
+                    const values = manualTeamOverrides[key];
+                    if (Array.isArray(values)) {
+                        let hasAnyReal = false;
+                        for (let i = 0; i < values.length; i++) {
+                            if (!values[i] || !values[i].trim() || isPlaceholderTeamName(values[i])) {
+                                values[i] = '';
+                            } else {
+                                hasAnyReal = true;
+                            }
+                        }
+                        if (!hasAnyReal) delete manualTeamOverrides[key];
+                    }
+                }
+
                 const response = await fetchWithTimeout(TOURNAMENT_DATA_URL, { method: 'POST' }, 30000);
                 const result = await response.json();
 
@@ -3968,9 +4030,16 @@
                 } else {
                     for (let i = 1; i <= 6; i++) {
                         const input = document.getElementById(`team${i}`);
-                        if (input) input.value = manualTeams.length
-                            ? (manualTeams[i - 1] || '')
-                            : getSavedTeamName(teams[i - 1]) || tournamentPool?.teams?.[i - 1] || '';
+                        if (input) {
+                            const manualName = manualTeams.length ? (manualTeams[i - 1] || '') : '';
+                            const savedName = getSavedTeamName(teams[i - 1]);
+                            const freshName = tournamentPool?.teams?.[i - 1] || '';
+                            if (manualName && !isPlaceholderTeamName(manualName)) {
+                                input.value = manualName;
+                            } else {
+                                input.value = savedName || freshName || '';
+                            }
+                        }
                     }
                 }
 
@@ -4252,6 +4321,7 @@
                 showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
                 return;
             }
+            if (!checkPlaceholderNamesBeforeAction()) return;
             if (!ensureScoreTableShapeBeforeSave()) return;
             syncAllGamePairs();
             updateBestOfThreeOmissions();
@@ -4339,6 +4409,7 @@
                 showMessageBox('Score Sheet Locked', 'This score sheet has newer saved data from another admin. Reload the latest scores before making more changes.');
                 return;
             }
+            if (!checkPlaceholderNamesBeforeAction()) return;
             showMessageBox('Clear Scores', 'Are you sure you want to clear all scores from the page?', () => {
                 resetScoreFields();
                 showStatus('Scores Cleared! You should click SAVE SCORES to save the cleared data, else it will revert to its previous values.', 'success');
