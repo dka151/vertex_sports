@@ -288,9 +288,8 @@ const fileLocks = new Map();
 
 function acquireFileLock(filePath) {
     return new Promise(resolve => {
-        const queue = fileLocks.get(filePath);
-        if (queue && queue.length > 0) {
-            queue.push(resolve);
+        if (fileLocks.has(filePath)) {
+            fileLocks.get(filePath).push(resolve);
         } else {
             fileLocks.set(filePath, []);
             resolve();

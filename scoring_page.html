@@ -1292,14 +1292,7 @@
             ['click', 'keydown', 'mousemove', 'mousedown', 'scroll', 'touchstart', 'change'].forEach(eventName => {
                 window.addEventListener(eventName, resetAutoLogoutTimer, { passive: true });
             });
-            window.addEventListener('pagehide', (event) => {
-                // Only logout if page is actually being unloaded (not just backgrounded)
-                if (event.persisted) return;
-                try {
-                    navigator.sendBeacon('/admin-logout');
-                } catch (error) {
-                }
-            });
+            // Session cleanup handled by idle timeout and explicit logout button
             resetAutoLogoutTimer();
         }
 
@@ -1339,7 +1332,7 @@
                     body: JSON.stringify({ refreshSeconds })
                 });
                 const result = await response.json();
-                if (response.status === 401 || handleAuthError(result)) {
+                if (response.status === 401) { handleAuthError(result); return; } if (handleAuthError(result)) {
                     return;
                 }
                 if (!response.ok || result.status !== 'success') {
@@ -3256,7 +3249,7 @@
                 const response = await fetchWithTimeout(TOURNAMENT_DATA_URL, { method: 'POST' }, 30000);
                 const result = await response.json();
 
-                if (response.status === 401 || handleAuthError(result)) {
+                if (response.status === 401) { handleAuthError(result); return; } if (handleAuthError(result)) {
                     return;
                 }
 
@@ -4357,7 +4350,7 @@
 
                 const result = await response.json();
 
-                if (response.status === 401 || handleAuthError(result)) {
+                if (response.status === 401) { handleAuthError(result); return; } if (handleAuthError(result)) {
                     return;
                 }
 
@@ -4523,17 +4516,66 @@
             initializeAdminControls();
             setTournamentDateToToday();
             loadLiveRefreshSettings();
+            restoreLastSelection();
             updateTournamentPoolOptions();
             generateScoreTable();
             generateSchedule();
             applyRoundScoringDefaults();
             updateScoreEntryContextBanner();
             try {
-                await loadTournamentData();
+                // Load tournament data from tournament_data.json (static file, fast)
+                const response = await fetchWithTimeout('tournament_data.json', { cache: 'no-store' });
+                if (response.ok) {
+                    tournamentData = await response.json();
+                    const saved = getLastSelection();
+                    updateTournamentEventOptions(saved.event);
+                    updateTournamentDivisionOptions(saved.division);
+                    updateRoundOptions(saved.round);
+                    updateTournamentPoolOptions(saved.pool);
+                    await applyTournamentPoolToForm();
+                    applyRoundScoringDefaults();
+                }
+                setTournamentLoadingState(false);
+                await loadSavedScores(false);
             } catch (error) {
+                setTournamentLoadingState(false);
                 await loadSavedScores(false);
             }
         }
+
+        const SELECTION_STORAGE_KEY = 'vertexScoringLastSelection';
+
+        function saveCurrentSelection() {
+            try {
+                const selection = {
+                    event: document.getElementById('eventType').value,
+                    division: document.getElementById('division').value,
+                    round: document.getElementById('roundType').value,
+                    pool: document.getElementById('pool').value
+                };
+                localStorage.setItem(SELECTION_STORAGE_KEY, JSON.stringify(selection));
+            } catch (e) {}
+        }
+
+        function getLastSelection() {
+            try {
+                const stored = localStorage.getItem(SELECTION_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) { return {}; }
+        }
+
+        function restoreLastSelection() {
+            const saved = getLastSelection();
+            if (saved.event) document.getElementById('eventType').value = saved.event;
+            if (saved.division) document.getElementById('division').value = saved.division;
+            if (saved.round) document.getElementById('roundType').value = saved.round;
+            if (saved.pool) document.getElementById('pool').value = saved.pool;
+        }
+
+        // Save selection whenever dropdowns change
+        ['eventType', 'division', 'roundType', 'pool'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', saveCurrentSelection);
+        });
 
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
