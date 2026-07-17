@@ -390,6 +390,13 @@
             visibility: hidden;
         }
 
+        .score-input.third-set-greyed {
+            opacity: 0.35;
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.08);
+            cursor: not-allowed;
+        }
+
         .score-input.invalid,
         .score-input.games.invalid,
         .score-input.points.invalid {
@@ -1851,11 +1858,24 @@
             return null;
         }
 
-        function shouldOmitThirdSet(firstTeam, secondTeam) {
-            if (!isBestOfThreeKnockoutRound()) return false;
+        function getThirdSetState(firstTeam, secondTeam) {
+            if (getSetsPerMatch() < 3) return 'enabled';
             const firstSetWinner = getSetWinner(firstTeam, secondTeam, 1);
             const secondSetWinner = getSetWinner(firstTeam, secondTeam, 2);
-            return Boolean(firstSetWinner && secondSetWinner && firstSetWinner === secondSetWinner);
+            // Both sets decided and same winner — hide 3rd set (no decider needed)
+            if (firstSetWinner && secondSetWinner && firstSetWinner === secondSetWinner) {
+                return 'hidden';
+            }
+            // Both sets decided and split 1-1 — enable 3rd set (decider needed)
+            if (firstSetWinner && secondSetWinner && firstSetWinner !== secondSetWinner) {
+                return 'enabled';
+            }
+            // Sets still empty or only one played — show greyed out
+            return 'greyed';
+        }
+
+        function shouldOmitThirdSet(firstTeam, secondTeam) {
+            return getThirdSetState(firstTeam, secondTeam) === 'hidden';
         }
 
         function setScoreSelectOmitted(select, isOmitted) {
@@ -1873,21 +1893,62 @@
             }
         }
 
-        function setThirdSetPairOmitted(firstTeam, secondTeam, isOmitted) {
-            [
+        function setScoreSelectGreyed(select, isGreyed) {
+            if (!select) return;
+            select.disabled = isGreyed;
+            select.classList.toggle('third-set-greyed', isGreyed);
+            if (isGreyed) {
+                select.classList.remove('invalid', 'deuce-invalid');
+            }
+        }
+
+        function setThirdSetPairState(firstTeam, secondTeam, state) {
+            const ids = [
                 `g_${firstTeam}_${secondTeam}_3`,
                 `p_${firstTeam}_${secondTeam}_3`,
                 `g_${secondTeam}_${firstTeam}_3`,
                 `p_${secondTeam}_${firstTeam}_3`
-            ].forEach(id => setScoreSelectOmitted(document.getElementById(id), isOmitted));
+            ];
+            if (state === 'hidden') {
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    setScoreSelectOmitted(el, true);
+                    if (el) el.classList.remove('third-set-greyed');
+                });
+            } else if (state === 'greyed') {
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const cell = el.closest('td');
+                    cell?.classList.remove('best-of-three-omitted');
+                    setScoreSelectGreyed(el, true);
+                });
+            } else {
+                // enabled
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const cell = el.closest('td');
+                    cell?.classList.remove('best-of-three-omitted');
+                    el.classList.remove('third-set-greyed');
+                    el.disabled = false;
+                    updateScoreDropdownStyle(el);
+                });
+            }
+        }
+
+        function setThirdSetPairOmitted(firstTeam, secondTeam, isOmitted) {
+            // Legacy wrapper — now uses state-based logic
+            const state = getThirdSetState(firstTeam, secondTeam);
+            setThirdSetPairState(firstTeam, secondTeam, state);
         }
 
         function updateOmittedThirdSetRows() {
             document.querySelectorAll('#scoreBody tr').forEach(row => {
-                const controls = Array.from(row.querySelectorAll('.score-input'));
+                const cells = Array.from(row.querySelectorAll('td'));
                 const isThirdSetRow = row.querySelector('.set-label')?.textContent.trim() === getSetLabel(3);
-                const allControlsOmitted = controls.length > 0 && controls.every(control => control.disabled);
-                row.classList.toggle('best-of-three-row-omitted', isThirdSetRow && allControlsOmitted);
+                const allCellsHidden = cells.some(cell => cell.classList.contains('best-of-three-omitted'));
+                row.classList.toggle('best-of-three-row-omitted', isThirdSetRow && allCellsHidden);
             });
         }
 
@@ -2528,7 +2589,10 @@
             });
             if (currentGroup.length > 1) tieGroups.push(currentGroup);
 
-            if (tieGroups.length === 0) {
+            // Only show tiebreaker promotion for position 1 ties
+            const position1TieGroups = tieGroups.filter(group => group[0].resolvedStanding === 1);
+
+            if (position1TieGroups.length === 0) {
                 section.style.display = 'none';
                 content.innerHTML = '';
                 document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
@@ -2536,7 +2600,7 @@
             }
 
             section.style.display = 'block';
-            content.innerHTML = tieGroups.map((group, groupIndex) => {
+            content.innerHTML = position1TieGroups.map((group, groupIndex) => {
                 const groupName = `tie_group_${groupIndex}`;
                 const selectedSeed = group.find(t => t.tieSelected)?.seed || null;
                 const isResolved = selectedSeed !== null;
@@ -2572,7 +2636,7 @@
             // Highlight tied team rows in score table
             document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
             const unresolvedSeeds = [];
-            tieGroups.forEach(group => {
+            position1TieGroups.forEach(group => {
                 const isResolved = group.some(t => t.tieSelected);
                 if (!isResolved) {
                     group.forEach(t => unresolvedSeeds.push(t.seed));
