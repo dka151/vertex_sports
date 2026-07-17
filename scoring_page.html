@@ -2400,16 +2400,16 @@
         }
 
         function checkPlaceholderNamesBeforeAction() {
-            // Only check for placeholder names at Pool level (where names can be edited)
-            // At higher levels, placeholder names are expected and carried forward automatically
-            if (getSelectedRound() !== ROUND_POOL && hasAnyPlaceholderTeamName()) {
-                return true; // Allow action at higher levels even with placeholders
-            }
-            if (getSelectedRound() === ROUND_POOL && hasAnyPlaceholderTeamName()) {
+            if (!hasAnyPlaceholderTeamName()) return true;
+
+            if (getSelectedRound() === ROUND_POOL) {
                 showMessageBox('Team Names Required', 'All teams must have actual player names before this action can be performed. Please ensure no placeholder or empty team names remain.');
                 return false;
             }
-            return true;
+
+            // Higher levels (Super-pool, Semi Final, Final) — block if placeholders present
+            showMessageBox('Team Names Not Populated', 'Actual names of the team players are not populated. Scores cannot be submitted or cleared until real team names are carried forward from the previous round. Please ensure the previous round results are saved first.');
+            return false;
         }
 
         function isPlaceholderTeamName(value) {
