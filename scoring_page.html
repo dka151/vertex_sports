@@ -2589,10 +2589,7 @@
             });
             if (currentGroup.length > 1) tieGroups.push(currentGroup);
 
-            // Only show tiebreaker promotion for position 1 ties
-            const position1TieGroups = tieGroups.filter(group => group[0].resolvedStanding === 1);
-
-            if (position1TieGroups.length === 0) {
+            if (tieGroups.length === 0) {
                 section.style.display = 'none';
                 content.innerHTML = '';
                 document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
@@ -2600,7 +2597,7 @@
             }
 
             section.style.display = 'block';
-            content.innerHTML = position1TieGroups.map((group, groupIndex) => {
+            content.innerHTML = tieGroups.map((group, groupIndex) => {
                 const groupName = `tie_group_${groupIndex}`;
                 const selectedSeed = group.find(t => t.tieSelected)?.seed || null;
                 const isResolved = selectedSeed !== null;
@@ -2636,7 +2633,7 @@
             // Highlight tied team rows in score table
             document.querySelectorAll('.score-table tr.tie-highlight').forEach(tr => tr.classList.remove('tie-highlight'));
             const unresolvedSeeds = [];
-            position1TieGroups.forEach(group => {
+            tieGroups.forEach(group => {
                 const isResolved = group.some(t => t.tieSelected);
                 if (!isResolved) {
                     group.forEach(t => unresolvedSeeds.push(t.seed));
