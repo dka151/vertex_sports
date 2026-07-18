@@ -1908,13 +1908,21 @@ function normalizeRefreshMs(value) {
 
 async function loadRefreshSettings() {
   try {
-    const response = await fetch("live_score_settings.json", { cache: "no-store" });
+    const response = await fetch("live_score_settings.json?t=" + Date.now());
     if (!response.ok) throw new Error("Refresh settings not available.");
     const settings = await response.json();
     refreshMs = normalizeRefreshMs(settings.refreshSeconds);
   } catch (error) {
     refreshMs = DEFAULT_REFRESH_MS;
   }
+}
+
+let lastRefreshSettingsLoad = 0;
+async function loadRefreshSettingsThrottled() {
+  // Only reload settings every 60 seconds — it rarely changes
+  if (Date.now() - lastRefreshSettingsLoad < 60000) return;
+  lastRefreshSettingsLoad = Date.now();
+  await loadRefreshSettings();
 }
 
 function setError(message) {
@@ -1924,9 +1932,19 @@ function setError(message) {
 }
 
 async function fetchScoreFile(category) {
-  const response = await fetch(scoreFileFor(category), { cache: "no-store" });
+  const url = scoreFileFor(category) + "?t=" + Date.now();
+  const response = await fetch(url);
   if (response.status === 404) {
-    return { event: category.event, division: category.division, pools: {} };
+    // Retry once quickly in case file was mid-write (atomic rename)
+    await new Promise(r => setTimeout(r, 150));
+    const retry = await fetch(url);
+    if (retry.status === 404) {
+      return { event: category.event, division: category.division, pools: {} };
+    }
+    if (!retry.ok) {
+      return { event: category.event, division: category.division, pools: {} };
+    }
+    return retry.json();
   }
   if (!response.ok) {
     throw new Error(`Could not load ${category.title} ${category.division}`);
@@ -1936,7 +1954,7 @@ async function fetchScoreFile(category) {
 
 async function fetchTournamentData() {
   if (!tournamentDataPromise) {
-    tournamentDataPromise = fetch("tournament_data.json", { cache: "no-store" })
+    tournamentDataPromise = fetch("tournament_data.json?t=" + Date.now())
       .then(response => {
         if (response.status === 404) return null;
         if (!response.ok) throw new Error("Could not load tournament_data.json");
@@ -2159,7 +2177,7 @@ function buildStandings(entry) {
       points: Number(team?.totalPoints ?? fallbackTotals.points) || 0,
       pointsConceded: Number(team?.totalPointsConceded ?? fallbackTotals.pointsConceded) || 0,
       matchesWon,
-      played: countPlayedMatches(entry, teamIndex)
+      played: countPlayedMatches(entry, teamIndex, scoreMap)
     };
   });
 
@@ -2217,10 +2235,10 @@ function buildStandings(entry) {
   return rankedStandings;
 }
 
-function countPlayedMatches(entry, teamIndex) {
+function countPlayedMatches(entry, teamIndex, existingScoreMap) {
   const opponents = new Set();
   const teams = Array.isArray(entry?.teams) ? entry.teams : [];
-  const scoreMap = buildScoreMap(entry);
+  const scoreMap = existingScoreMap || buildScoreMap(entry);
 
   for (let opponent = 1; opponent <= teams.length; opponent++) {
     if (opponent !== teamIndex && getMatchResult(scoreMap, teamIndex, opponent).played) {
@@ -3232,47 +3250,55 @@ async function renderHome() {
   setError("");
   const grid = document.getElementById("categoryGrid");
   const tournamentData = await fetchTournamentData();
-  const cards = await Promise.all(CATEGORIES.map(async category => {
-    try {
-      const scoreFile = await fetchScoreFile(category);
-      const summary = summarizeScoreFile(scoreFile, category, tournamentData);
-      const updatedText = summary.updated ? new Date(summary.updated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Waiting for scores";
-      return {
-        category,
-        html: `
-        <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
-          <div class="tile-head">
-            <div>
-              <div class="tile-title">${escapeHtml(category.title)}</div>
-              <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+
+  // Fetch score files in batches of 4 to avoid overwhelming Apache connections
+  const cards = [];
+  const batchSize = 4;
+  for (let i = 0; i < CATEGORIES.length; i += batchSize) {
+    const batch = CATEGORIES.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(async category => {
+      try {
+        const scoreFile = await fetchScoreFile(category);
+        const summary = summarizeScoreFile(scoreFile, category, tournamentData);
+        const updatedText = summary.updated ? new Date(summary.updated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Waiting for scores";
+        return {
+          category,
+          html: `
+          <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
+            <div class="tile-head">
+              <div>
+                <div class="tile-title">${escapeHtml(category.title)}</div>
+                <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+              </div>
+              <div class="tile-badge">${escapeHtml(category.flow)}</div>
             </div>
-            <div class="tile-badge">${escapeHtml(category.flow)}</div>
-          </div>
-          ${renderCategoryInfo(summary)}
-          ${renderStageCounts(summary.stageCounts)}
-          <div class="tile-meta">
-            <span>Scheduled Start Time: ${escapeHtml(category.start)}</span>
-            <span>Last Score update: ${escapeHtml(updatedText)}</span>
-          </div>
-        </a>
-      `};
-    } catch (error) {
-      return {
-        category,
-        html: `
-        <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
-          <div class="tile-head">
-            <div>
-              <div class="tile-title">${escapeHtml(category.title)}</div>
-              <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+            ${renderCategoryInfo(summary)}
+            ${renderStageCounts(summary.stageCounts)}
+            <div class="tile-meta">
+              <span>Scheduled Start Time: ${escapeHtml(category.start)}</span>
+              <span>Last Score update: ${escapeHtml(updatedText)}</span>
             </div>
-            <div class="tile-badge">${escapeHtml(category.flow)}</div>
-          </div>
-          <div class="tile-status">Score file is not available yet.</div>
-        </a>
-      `};
-    }
-  }));
+          </a>
+        `};
+      } catch (error) {
+        return {
+          category,
+          html: `
+          <a class="category-tile" href="live_scores.html?category=${encodeURIComponent(category.id)}" style="--accent:${category.accent}">
+            <div class="tile-head">
+              <div>
+                <div class="tile-title">${escapeHtml(category.title)}</div>
+                <div class="tile-subtitle">${escapeHtml(category.grade)}</div>
+              </div>
+              <div class="tile-badge">${escapeHtml(category.flow)}</div>
+            </div>
+            <div class="tile-status">Score file is not available yet.</div>
+          </a>
+        `};
+      }
+    }));
+    cards.push(...batchResults);
+  }
 
   const groups = cards.reduce((eventGroups, card) => {
     if (!eventGroups.has(card.category.event)) {
@@ -3294,12 +3320,13 @@ async function renderHome() {
   document.getElementById("homeRefresh").textContent = formatTime();
 }
 
+let lastDetailScoreHash = "";
+
 async function renderDetail(category) {
   document.body.classList.add("detail");
   setError("");
   document.documentElement.style.setProperty("--accent", category.accent);
   document.getElementById("detailTitle").textContent = `${category.title} - ${category.grade}`;
-  document.getElementById("poolList").innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">⏳ Loading scores...</div>';
   const directToFinal = category.flow.includes("> F") && !category.flow.includes("SF") && category.middle !== "Super-pool";
   document.getElementById("detailCopy").textContent = directToFinal
     ? `${category.flow.replaceAll(">", "to")} flow. Live board from pool standings to final.`
@@ -3310,6 +3337,26 @@ async function renderDetail(category) {
       fetchScoreFile(category),
       fetchTournamentData()
     ]);
+
+    // Skip DOM rebuild if score data hasn't changed (compare latest savedAt timestamps)
+    const poolEntries = scoreFile.pools && typeof scoreFile.pools === "object" ? scoreFile.pools : {};
+    const roundEntries = scoreFile.rounds && typeof scoreFile.rounds === "object" ? scoreFile.rounds : {};
+    const latestTimestamps = Object.values(poolEntries)
+      .map(entries => Array.isArray(entries) && entries.length ? entries[entries.length - 1]?.savedAt || "" : "")
+      .concat(
+        Object.values(roundEntries).flatMap(matchMap =>
+          Object.values(matchMap || {}).map(entries => Array.isArray(entries) && entries.length ? entries[entries.length - 1]?.savedAt || "" : "")
+        )
+      )
+      .join("|");
+    if (latestTimestamps === lastDetailScoreHash) {
+      document.getElementById("detailRefresh").textContent = formatTime();
+      resetRefreshCountdown();
+      return;
+    }
+    lastDetailScoreHash = latestTimestamps;
+
+    document.getElementById("poolList").innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">⏳ Loading scores...</div>';
     const pools = latestEntriesByPool(scoreFile, category, tournamentData).sort((a, b) => a.poolName.localeCompare(b.poolName));
     const allPools = pools.length ? pools : ["A", "B", "C", "D"].map(poolName => ({ poolName, entries: [], entry: null }));
     const visiblePools = getPreliminaryPools(category, allPools);
@@ -3379,7 +3426,9 @@ async function refreshAndSchedule() {
     refreshTimer = null;
   }
 
-  await Promise.all([loadRefreshSettings(), refresh()]);
+  // Load settings in background (throttled), don't block the actual refresh
+  loadRefreshSettingsThrottled();
+  await refresh();
   refreshTimer = window.setTimeout(refreshAndSchedule, refreshMs);
   resetRefreshCountdown();
 }
