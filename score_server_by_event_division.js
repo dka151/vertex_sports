@@ -1637,6 +1637,56 @@ function handleScoreFiles(res, config) {
     sendJson(res, 200, { scoresFolder: path.relative(__dirname, SCORES_DIR), files });
 }
 
+function handleLiveSummary(res, config) {
+    const categories = [];
+
+    config.events.forEach(event => {
+        config.divisions.forEach(division => {
+            const filePath = getScoreFilePath(event, division);
+            let lastSavedAt = null;
+
+            if (fs.existsSync(filePath)) {
+                try {
+                    const scoreFile = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                    const timestamps = [];
+
+                    // Collect latest savedAt from each pool
+                    if (scoreFile.pools && typeof scoreFile.pools === 'object') {
+                        Object.values(scoreFile.pools).forEach(entries => {
+                            if (Array.isArray(entries) && entries.length > 0) {
+                                const t = entries[entries.length - 1]?.savedAt;
+                                if (t) timestamps.push(t);
+                            }
+                        });
+                    }
+
+                    // Collect latest savedAt from knockout rounds
+                    if (scoreFile.rounds && typeof scoreFile.rounds === 'object') {
+                        Object.values(scoreFile.rounds).forEach(matchMap => {
+                            if (matchMap && typeof matchMap === 'object') {
+                                Object.values(matchMap).forEach(entries => {
+                                    if (Array.isArray(entries) && entries.length > 0) {
+                                        const t = entries[entries.length - 1]?.savedAt;
+                                        if (t) timestamps.push(t);
+                                    }
+                                });
+                            }
+                        });
+                    }
+
+                    if (timestamps.length > 0) {
+                        lastSavedAt = timestamps.sort().pop();
+                    }
+                } catch (e) {}
+            }
+
+            categories.push({ event, division, lastSavedAt });
+        });
+    });
+
+    sendJson(res, 200, { categories, generatedAt: new Date().toISOString() });
+}
+
 function sendNoStoreHeaders(res) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -1837,6 +1887,11 @@ function createServer(config) {
         if (req.method === 'GET' && requestedUrl.pathname === '/score-files') {
             if (!requireAdmin(req, res)) return;
             handleScoreFiles(res, config);
+            return;
+        }
+
+        if (req.method === 'GET' && requestedUrl.pathname === '/api/live-summary') {
+            handleLiveSummary(res, config);
             return;
         }
 

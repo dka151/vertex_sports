@@ -1927,29 +1927,33 @@ async function loadRefreshSettingsThrottled() {
 
 function setError(message) {
   const errorBox = document.getElementById("errorBox");
-  errorBox.textContent = message || "";
+  if (errorBox) errorBox.textContent = message || "";
   document.body.classList.toggle("has-error", Boolean(message));
 }
 
 async function fetchScoreFile(category) {
-  const url = scoreFileFor(category) + "?t=" + Date.now();
-  const response = await fetch(url);
-  if (response.status === 404) {
-    // Retry once quickly in case file was mid-write (atomic rename)
+  try {
+    const url = scoreFileFor(category) + "?t=" + Date.now();
+    const response = await fetch(url);
+    if (response.ok) {
+      return await response.json();
+    }
+    // Retry once on any failure (404, 500, etc.) in case of transient file lock or connection pressure
     await new Promise(r => setTimeout(r, 150));
-    const retry = await fetch(url);
-    if (retry.status === 404) {
+    const retry = await fetch(scoreFileFor(category) + "?t=" + Date.now());
+    if (retry.ok) {
+      return await retry.json();
+    }
+    if (retry.status === 404 || response.status === 404) {
       return { event: category.event, division: category.division, pools: {} };
     }
-    if (!retry.ok) {
-      return { event: category.event, division: category.division, pools: {} };
-    }
-    return retry.json();
+    throw new Error(`Could not load ${category.title} ${category.division} (HTTP ${retry.status})`);
+  } catch (error) {
+    if (error.message && error.message.startsWith("Could not load")) throw error;
+    // Network error or JSON parse failure — return empty rather than crashing
+    console.warn(`fetchScoreFile failed for ${category.id}:`, error.message);
+    return { event: category.event, division: category.division, pools: {} };
   }
-  if (!response.ok) {
-    throw new Error(`Could not load ${category.title} ${category.division}`);
-  }
-  return response.json();
 }
 
 async function fetchTournamentData() {
@@ -1960,7 +1964,11 @@ async function fetchTournamentData() {
         if (!response.ok) throw new Error("Could not load tournament_data.json");
         return response.json();
       })
-      .catch(() => null);
+      .catch(() => {
+        // Reset promise so it retries on next refresh cycle
+        tournamentDataPromise = null;
+        return null;
+      });
   }
 
   return tournamentDataPromise;
@@ -2300,10 +2308,10 @@ function renderPoolMatchRow(match) {
       `;
 }
 
-function buildPoolMatches(entry) {
+function buildPoolMatches(entry, existingScoreMap) {
   if (!entry) return "";
   const teams = Array.isArray(entry.teams) ? entry.teams : [];
-  const scoreMap = buildScoreMap(entry);
+  const scoreMap = existingScoreMap || buildScoreMap(entry);
   const matches = [];
 
   for (let first = 1; first <= teams.length; first++) {
@@ -2365,7 +2373,8 @@ function renderPoolCard(pool, options = {}) {
   const state = describePoolState(pool.entry);
   const { showHeader = true } = options;
   const poolName = getDisplayPoolName(pool);
-  const poolFinished = isPoolComplete(pool.entry);
+  const scoreMap = pool.entry ? buildScoreMap(pool.entry) : null;
+  const poolFinished = isPoolComplete(pool.entry, scoreMap);
   const standings = pool.entry ? buildStandings(pool.entry) : [];
   const teamCount = standings.length || (Array.isArray(pool.entry?.teams) ? pool.entry.teams.length : 0);
   const poolTitle = teamCount ? `Pool ${poolName} (${teamCount} ${teamCount === 1 ? "Team" : "Teams"})` : `Pool ${poolName}`;
@@ -2399,16 +2408,16 @@ function renderPoolCard(pool, options = {}) {
           <tbody>${rows}</tbody>
         </table>
       </div>
-      ${buildPoolMatches(pool.entry)}
+      ${buildPoolMatches(pool.entry, scoreMap)}
     </article>
   `;
 }
 
-function isPoolComplete(entry) {
+function isPoolComplete(entry, existingScoreMap) {
   const teams = Array.isArray(entry?.teams) ? entry.teams : [];
   if (teams.length < 2) return false;
 
-  const scoreMap = buildScoreMap(entry);
+  const scoreMap = existingScoreMap || buildScoreMap(entry);
   for (let first = 1; first <= teams.length; first++) {
     for (let second = first + 1; second <= teams.length; second++) {
       if (!getMatchResult(scoreMap, first, second).played) {
@@ -2435,8 +2444,13 @@ function getDecidedPoolWinner(entry) {
     }
 
     if (wins >= teams.length - 1) {
-      const standings = buildStandings(entry);
-      return standings.find(team => team.seed === teamIndex) || null;
+      // Return basic team info without rebuilding full standings
+      return {
+        seed: teamIndex,
+        name: getTeamName(teams[teamIndex - 1], `Team ${teamIndex}`),
+        tiedStanding: false,
+        tieResolved: false
+      };
     }
   }
 
@@ -2475,6 +2489,7 @@ function renderStageSummaryCard(item) {
 
 function renderStandardStageFlow(items) {
   const stageFlow = document.getElementById("stageFlow");
+  if (!stageFlow) return;
   stageFlow.className = "stage-flow";
   const fallbackIds = ["poolList", "middleList", "finalList"];
   stageFlow.innerHTML = items.map((item, index) => {
@@ -2493,12 +2508,14 @@ function renderStandardStageFlow(items) {
 
 function renderStageSummary(items) {
   const summary = document.getElementById("stageSummary");
+  if (!summary) return;
   summary.className = "stage-summary show";
   summary.innerHTML = items.map(renderStageSummaryCard).join("");
 }
 
 function hideStageSummary() {
   const summary = document.getElementById("stageSummary");
+  if (!summary) return;
   summary.className = "stage-summary";
   summary.innerHTML = "";
 }
@@ -2876,12 +2893,13 @@ function buildSuperPools(stageSeeds, allPools, poolCompletionMap) {
 }
 
 function renderSuperPoolCard(pool) {
+  const scoreMap = pool.entry ? buildScoreMap(pool.entry) : null;
   const winnerDecided = Boolean(getDecidedPoolWinner(pool.entry));
   const state = winnerDecided
     ? { text: "Finished", pending: false, className: "finished" }
     : describePoolState(pool.entry);
   const standings = buildStandings(pool.entry);
-  const poolFinished = isPoolComplete(pool.entry) || winnerDecided;
+  const poolFinished = isPoolComplete(pool.entry, scoreMap) || winnerDecided;
   const sourceText = pool.sourcePools.map(sourcePool => `Pool ${sourcePool}`).join(", ");
   const rows = standings.length
     ? standings.map((team, index) => {
@@ -2914,7 +2932,7 @@ function renderSuperPoolCard(pool) {
           <tbody>${rows}</tbody>
         </table>
       </div>
-      ${buildPoolMatches(pool.entry)}
+      ${buildPoolMatches(pool.entry, scoreMap)}
     </article>
   `;
 }
@@ -3245,22 +3263,69 @@ function summarizeScoreFile(scoreFile, category, tournamentData) {
   return { poolCount, totalTeams, teamsPerPool, stageCounts, updated };
 }
 
+let lastHomeSummaryTimestamps = {};
+let lastHomeCardsHtml = "";
+
+async function fetchLiveSummary() {
+  try {
+    const response = await fetch("/api/live-summary?t=" + Date.now());
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+function getCategoryKey(category) {
+  return `${category.event}|${category.division}`;
+}
+
 async function renderHome() {
   document.body.classList.remove("detail");
   setError("");
   const grid = document.getElementById("categoryGrid");
+  if (!grid) return;
   const tournamentData = await fetchTournamentData();
 
-  // Fetch score files in batches of 4 to avoid overwhelming Apache connections
-  const cards = [];
+  // Check which categories have changed via lightweight summary endpoint
+  const summary = await fetchLiveSummary();
+  let categoriesToFetch = CATEGORIES;
+
+  if (summary && lastHomeCardsHtml) {
+    // Only re-fetch categories whose lastSavedAt changed
+    const changedKeys = new Set();
+    (summary.categories || []).forEach(cat => {
+      const key = getCategoryKey(cat);
+      if (cat.lastSavedAt !== lastHomeSummaryTimestamps[key]) {
+        changedKeys.add(key);
+        lastHomeSummaryTimestamps[key] = cat.lastSavedAt;
+      }
+    });
+
+    if (changedKeys.size === 0) {
+      // Nothing changed — just update the refresh timestamp
+      document.getElementById("homeRefresh").textContent = formatTime();
+      return;
+    }
+
+    categoriesToFetch = CATEGORIES.filter(cat => changedKeys.has(getCategoryKey(cat)));
+  } else if (summary) {
+    // First load — store all timestamps
+    (summary.categories || []).forEach(cat => {
+      lastHomeSummaryTimestamps[getCategoryKey(cat)] = cat.lastSavedAt;
+    });
+  }
+
+  // Fetch only changed score files in batches of 4
+  const changedCards = new Map();
   const batchSize = 4;
-  for (let i = 0; i < CATEGORIES.length; i += batchSize) {
-    const batch = CATEGORIES.slice(i, i + batchSize);
+  for (let i = 0; i < categoriesToFetch.length; i += batchSize) {
+    const batch = categoriesToFetch.slice(i, i + batchSize);
     const batchResults = await Promise.all(batch.map(async category => {
       try {
         const scoreFile = await fetchScoreFile(category);
-        const summary = summarizeScoreFile(scoreFile, category, tournamentData);
-        const updatedText = summary.updated ? new Date(summary.updated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Waiting for scores";
+        const fileSummary = summarizeScoreFile(scoreFile, category, tournamentData);
+        const updatedText = fileSummary.updated ? new Date(fileSummary.updated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Waiting for scores";
         return {
           category,
           html: `
@@ -3272,8 +3337,8 @@ async function renderHome() {
               </div>
               <div class="tile-badge">${escapeHtml(category.flow)}</div>
             </div>
-            ${renderCategoryInfo(summary)}
-            ${renderStageCounts(summary.stageCounts)}
+            ${renderCategoryInfo(fileSummary)}
+            ${renderStageCounts(fileSummary.stageCounts)}
             <div class="tile-meta">
               <span>Scheduled Start Time: ${escapeHtml(category.start)}</span>
               <span>Last Score update: ${escapeHtml(updatedText)}</span>
@@ -3297,26 +3362,48 @@ async function renderHome() {
         `};
       }
     }));
-    cards.push(...batchResults);
+    batchResults.forEach(result => changedCards.set(result.category.id, result));
   }
 
-  const groups = cards.reduce((eventGroups, card) => {
-    if (!eventGroups.has(card.category.event)) {
-      eventGroups.set(card.category.event, {
-        accent: card.category.accent,
-        cards: []
-      });
-    }
-    eventGroups.get(card.category.event).cards.push(card.html);
-    return eventGroups;
-  }, new Map());
+  // Build full card list (use cached html for unchanged categories)
+  const cards = CATEGORIES.map(category => {
+    if (changedCards.has(category.id)) return changedCards.get(category.id);
+    // Return previously rendered html (stored in DOM)
+    return { category, html: null };
+  });
 
-  grid.innerHTML = Array.from(groups, ([event, group]) => `
-    <section class="category-row" aria-label="${escapeHtml(event)} categories" style="--accent:${group.accent}">
-      <h2 class="category-row-heading">${escapeHtml(event)}</h2>
-      <div class="category-row-cards">${group.cards.join("")}</div>
-    </section>
-  `).join("");
+  // Only rebuild DOM if we have new cards or first render
+  if (!lastHomeCardsHtml || categoriesToFetch.length === CATEGORIES.length) {
+    // Full rebuild
+    const allCards = cards.map(c => c.html || "").filter(Boolean);
+    const groups = cards.filter(c => c.html).reduce((eventGroups, card) => {
+      if (!eventGroups.has(card.category.event)) {
+        eventGroups.set(card.category.event, { accent: card.category.accent, cards: [] });
+      }
+      eventGroups.get(card.category.event).cards.push(card.html);
+      return eventGroups;
+    }, new Map());
+
+    lastHomeCardsHtml = Array.from(groups, ([event, group]) => `
+      <section class="category-row" aria-label="${escapeHtml(event)} categories" style="--accent:${group.accent}">
+        <h2 class="category-row-heading">${escapeHtml(event)}</h2>
+        <div class="category-row-cards">${group.cards.join("")}</div>
+      </section>
+    `).join("");
+    grid.innerHTML = lastHomeCardsHtml;
+  } else {
+    // Partial update — only replace changed tiles in-place
+    changedCards.forEach((card, categoryId) => {
+      const existingTile = grid.querySelector(`a[href*="category=${encodeURIComponent(categoryId)}"]`);
+      if (existingTile && card.html) {
+        const temp = document.createElement("div");
+        temp.innerHTML = card.html;
+        const newTile = temp.firstElementChild;
+        if (newTile) existingTile.replaceWith(newTile);
+      }
+    });
+  }
+
   document.getElementById("homeRefresh").textContent = formatTime();
 }
 
@@ -3349,7 +3436,7 @@ async function renderDetail(category) {
         )
       )
       .join("|");
-    if (latestTimestamps === lastDetailScoreHash) {
+    if (lastDetailScoreHash && latestTimestamps === lastDetailScoreHash) {
       document.getElementById("detailRefresh").textContent = formatTime();
       resetRefreshCountdown();
       return;
@@ -3406,6 +3493,7 @@ async function renderDetail(category) {
     document.getElementById("detailRefresh").textContent = formatTime();
     resetRefreshCountdown();
   } catch (error) {
+    lastDetailScoreHash = ""; // Reset so next refresh always re-renders
     setError("Scores could not be loaded. Open this page through the local scoring server or check the score JSON files.");
     document.getElementById("detailRefresh").textContent = "Load failed";
     resetRefreshCountdown();
@@ -3428,7 +3516,11 @@ async function refreshAndSchedule() {
 
   // Load settings in background (throttled), don't block the actual refresh
   loadRefreshSettingsThrottled();
-  await refresh();
+  try {
+    await refresh();
+  } catch (error) {
+    console.error("Refresh failed:", error);
+  }
   refreshTimer = window.setTimeout(refreshAndSchedule, refreshMs);
   resetRefreshCountdown();
 }
