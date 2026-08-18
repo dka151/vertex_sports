@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex Sports - Team Management</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(26,26,46,0.96);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #e94560;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 1.1rem;
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .admin-actions {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .nav-link {
+            min-height: 34px;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(52,152,219,0.2);
+            color: #5dade2;
+            border: 1px solid rgba(52,152,219,0.4);
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: rgba(52,152,219,0.35);
+        }
+
+        .logout-btn {
+            min-height: 34px;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: rgba(231,76,60,0.18);
+            color: #e74c3c;
+            border: 1px solid rgba(231,76,60,0.4);
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(231,76,60,0.35);
+        }
+
+        .selector-section {
+            background: rgba(26,26,46,0.85);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .selector-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .selector-group {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .selector-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .selector-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(15,52,96,0.5);
+            color: #fff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .selector-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .load-btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .load-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(233,69,96,0.4);
+        }
+
+        .load-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tab navigation */
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: rgba(255,255,255,0.04);
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #ccc;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .tab-btn.active {
+            color: #e94560;
+            background: rgba(233,69,96,0.08);
+            border-bottom-color: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Score data round selector */
+        .score-selector-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .teams-section {
+            background: rgba(26,26,46,0.85);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .teams-section h3 {
+            font-size: 1.1rem;
+            color: #f39c12;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .teams-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .teams-table th {
+            background: rgba(15,52,96,0.6);
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 0.82rem;
+            color: #aaa;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .teams-table td {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+
+        .teams-table tr:hover td {
+            background: rgba(233,69,96,0.05);
+        }
+
+        .teams-table .actions-cell {
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 5px;
+        }
+
+        .btn-edit {
+            background: rgba(52,152,219,0.2);
+            color: #5dade2;
+            border: 1px solid rgba(52,152,219,0.4);
+        }
+
+        .btn-edit:hover {
+            background: rgba(52,152,219,0.4);
+        }
+
+        .btn-delete {
+            background: rgba(231,76,60,0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231,76,60,0.4);
+        }
+
+        .btn-delete:hover {
+            background: rgba(231,76,60,0.4);
+        }
+
+        .add-team-section {
+            background: rgba(39,174,96,0.08);
+            border: 1px solid rgba(46,204,113,0.3);
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 15px;
+        }
+
+        .add-team-section h4 {
+            color: #2ecc71;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .add-team-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .add-team-row .field {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .add-team-row .field label {
+            display: block;
+            font-size: 0.78rem;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .add-team-row .field input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(15,52,96,0.5);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .add-team-row .field input:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        .btn-add {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+        }
+
+        .save-section {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-save {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(243,156,18,0.4);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(39,174,96,0.15);
+            border: 1px solid rgba(46,204,113,0.4);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(231,76,60,0.15);
+            border: 1px solid rgba(231,76,60,0.4);
+            color: #e74c3c;
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .empty-state .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Confirm Dialog */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-box h3 {
+            color: #f39c12;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .modal-box p {
+            color: #ccc;
+            margin-bottom: 20px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            padding: 10px 22px;
+            border-radius: 7px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 3px 10px rgba(243,156,18,0.4);
+        }
+
+        .btn-cancel {
+            background: rgba(255,255,255,0.08);
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* Edit inline */
+        .edit-input {
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(52,152,219,0.5);
+            background: rgba(15,52,96,0.6);
+            color: #fff;
+            font-size: 0.85rem;
+            width: 100%;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #5dade2;
+        }
+
+        .team-number {
+            color: #f39c12;
+            font-weight: 700;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        /* Compare tab diff highlights */
+        .diff-bracket {
+            color: #2ecc71;
+            font-weight: 600;
+            background: rgba(46,204,113,0.08);
+        }
+
+        .diff-score {
+            color: #e74c3c;
+            font-weight: 600;
+            background: rgba(231,76,60,0.08);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.3rem; }
+            .admin-actions { position: static; justify-content: center; margin-top: 12px; }
+            .selector-row { flex-direction: column; }
+            .add-team-row { flex-direction: column; }
+            .teams-table { font-size: 0.8rem; }
+            .teams-table th, .teams-table td { padding: 7px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏸 Team Management</h1>
+            <h2>Vertex Tournament - Admin Panel</h2>
+            <div class="admin-actions">
+                <a href="/vertexadmin.html" class="nav-link">📊 Scoring</a>
+                <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div id="messageBox" class="message"></div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('bracket')">📋 Bracket Posters</button>
+            <button class="tab-btn" onclick="switchTab('scores')">📊 Score Data</button>
+            <button class="tab-btn" onclick="switchTab('compare')">🔍 Compare</button>
+            <button class="tab-btn" onclick="switchTab('livesync')">🔄 Live Scores Sync</button>
+        </div>
+
+        <!-- Bracket Posters Tab -->
+        <div class="tab-content active" id="tab-bracket">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="eventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="divisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Pool</label>
+                        <select id="poolSelect">
+                            <option value="A">Pool A</option>
+                            <option value="B">Pool B</option>
+                            <option value="C">Pool C</option>
+                            <option value="D">Pool D</option>
+                        </select>
+                    </div>
+                    <button class="load-btn" id="loadBtn" onclick="loadTeams()">🔍 Load Teams</button>
+                </div>
+            </div>
+
+            <div class="teams-section" id="teamsSection" style="display:none;">
+                <h3 id="teamsTitle">📋 Teams</h3>
+
+                <table class="teams-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Club 1</th>
+                            <th>Club 2</th>
+                            <th style="width:120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamsBody"></tbody>
+                </table>
+
+                <div class="add-team-section">
+                    <h4>➕ Add Team</h4>
+                    <div class="add-team-row">
+                        <div class="field">
+                            <label>Player 1</label>
+                            <input type="text" id="addPlayer1" placeholder="First player name">
+                        </div>
+                        <div class="field">
+                            <label>Player 2</label>
+                            <input type="text" id="addPlayer2" placeholder="Second player name">
+                        </div>
+                        <div class="field">
+                            <label>Club 1</label>
+                            <input type="text" id="addClub1" placeholder="Player 1 club">
+                        </div>
+                        <div class="field">
+                            <label>Club 2</label>
+                            <input type="text" id="addClub2" placeholder="Player 2 club">
+                        </div>
+                        <button class="btn-add" onclick="addTeam()">Add</button>
+                    </div>
+                </div>
+
+                <div class="save-section">
+                    <button class="btn-save" id="saveBtn" onclick="confirmSave()">💾 Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Data Tab -->
+        <div class="tab-content" id="tab-scores">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="scoreEventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="scoreDivisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Round</label>
+                        <select id="scoreRoundSelect" onchange="updateScorePoolOptions()">
+                            <option value="Pool">Pool</option>
+                            <option value="Semi Final">Semi Final</option>
+                            <option value="Final">Final</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Pool / Match</label>
+                        <select id="scorePoolSelect">
+                            <option value="A">Pool A</option>
+                            <option value="B">Pool B</option>
+                            <option value="C">Pool C</option>
+                            <option value="D">Pool D</option>
+                        </select>
+                    </div>
+                    <button class="load-btn" id="scoreLoadBtn" onclick="loadScoreTeams()">🔍 Load Teams</button>
+                </div>
+            </div>
+
+            <div class="teams-section" id="scoreTeamsSection" style="display:none;">
+                <h3 id="scoreTeamsTitle">📊 Score Teams</h3>
+
+                <table class="teams-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Club 1</th>
+                            <th>Club 2</th>
+                            <th style="width:90px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreTeamsBody"></tbody>
+                </table>
+
+                <div class="save-section">
+                    <button class="btn-save" id="scoreSaveBtn" onclick="confirmScoreSave()">💾 Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compare Tab -->
+        <div class="tab-content" id="tab-compare">
+            <div class="selector-section">
+                <div class="selector-row">
+                    <div class="selector-group">
+                        <label>Event</label>
+                        <select id="compareEventSelect">
+                            <option value="Men's Doubles">Men's Doubles</option>
+                            <option value="Women's Doubles">Women's Doubles</option>
+                            <option value="Mixed Doubles">Mixed Doubles</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label>Division</label>
+                        <select id="compareDivisionSelect">
+                            <option value="1-3">Division 1-3</option>
+                            <option value="4-5">Division 4-5</option>
+                            <option value="6-7">Division 6-7</option>
+                            <option value="8-9">Division 8-9</option>
+                        </select>
+                    </div>
+                    <button class="load-btn" id="compareLoadBtn" onclick="loadCompare()">🔍 Compare</button>
+                </div>
+            </div>
+
+            <div class="teams-section" id="compareSection" style="display:none;">
+                <h3 id="compareTitle">🔍 Differences</h3>
+                <table class="teams-table" id="compareTable">
+                    <thead>
+                        <tr>
+                            <th style="width:70px;">Pool</th>
+                            <th style="width:50px;">Seed</th>
+                            <th>Bracket Posters (source of truth)</th>
+                            <th>Score Data (SCORES/*.json)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compareBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+        <!-- Live Scores Sync Tab -->
+        <div class="tab-content" id="tab-livesync">
+            <div class="selector-section" style="text-align:center;padding:30px;">
+                <h3 style="color:#e94560;margin-bottom:15px;">🔄 Sync Live Scores Configuration</h3>
+                <p style="color:#aaa;margin-bottom:20px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6;">
+                    This will read the latest categories and team data from <strong>tournament_data.json</strong> and update the 
+                    hardcoded <code>CATEGORIES</code> array in <strong>live_scores.html</strong>. Use this after loading new tournament data.
+                </p>
+                <div id="liveSyncPreview" style="margin:20px auto;max-width:700px;text-align:left;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:15px;display:none;">
+                    <h4 style="color:#f39c12;margin-bottom:10px;">📋 Preview — Categories to sync:</h4>
+                    <div id="liveSyncPreviewContent" style="font-size:0.85rem;color:#ccc;line-height:1.8;"></div>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+                    <button class="btn-action" onclick="previewLiveSync()" style="padding:12px 24px;background:linear-gradient(135deg,#2980b9,#3498db);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.95rem;">📋 Preview Changes</button>
+                    <button class="btn-action" id="syncBtn" onclick="executeLiveSync()" disabled style="padding:12px 24px;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.95rem;opacity:0.5;">✅ Apply to live_scores.html</button>
+                </div>
+                <div id="liveSyncStatus" style="margin-top:15px;font-size:0.9rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <h3 id="modalTitle">⚠️ Confirm</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" id="modalConfirmBtn" onclick="modalConfirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTeams = [];
+        let editingIndex = -1;
+        let hasChanges = false;
+        let pendingModalAction = null;
+
+        // Score Data tab state
+        let scoreTeams = [];
+        let scoreEditingIndex = -1;
+        let scoreHasChanges = false;
+
+        // ─── Tab Switching ──────────────────────────────────────────────────────
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            if (tab === 'bracket') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-bracket').classList.add('active');
+            } else if (tab === 'scores') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-scores').classList.add('active');
+            } else if (tab === 'compare') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('tab-compare').classList.add('active');
+            } else if (tab === 'livesync') {
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                document.getElementById('tab-livesync').classList.add('active');
+            }
+        }
+
+        // ─── Score Data Pool Options ────────────────────────────────────────────
+
+        function updateScorePoolOptions() {
+            const round = document.getElementById('scoreRoundSelect').value;
+            const poolSelect = document.getElementById('scorePoolSelect');
+            poolSelect.innerHTML = '';
+
+            if (round === 'Pool') {
+                const event = document.getElementById('scoreEventSelect').value;
+                const division = document.getElementById('scoreDivisionSelect').value;
+                const entry = bracketData.find(d => d.event === event && d.division === division);
+                const pools = entry ? entry.pools : ['A', 'B', 'C', 'D'];
+                pools.forEach(p => {
+                    poolSelect.innerHTML += `<option value="${p}">Pool ${p}</option>`;
+                });
+            } else if (round === 'Semi Final') {
+                ['SF1','SF2'].forEach(p => {
+                    poolSelect.innerHTML += `<option value="${p}">${p}</option>`;
+                });
+            } else if (round === 'Final') {
+                poolSelect.innerHTML = `<option value="FN">FN</option>`;
+            }
+        }
+
+        // ─── Common ─────────────────────────────────────────────────────────────
+
+        function showMessage(text, type) {
+            const box = document.getElementById('messageBox');
+            box.textContent = text;
+            box.className = 'message ' + type;
+            setTimeout(() => { box.className = 'message'; }, 5000);
+        }
+
+        function handleLogout() {
+            fetch('/admin-logout', { method: 'POST', credentials: 'same-origin' })
+                .then(() => { window.location.href = '/vertexadmin.html'; })
+                .catch(() => { window.location.href = '/vertexadmin.html'; });
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // ─── Bracket Posters Tab ────────────────────────────────────────────────
+
+        // Dynamically populate division dropdowns from VERTEX_Bracket_Posters.html
+        let bracketData = []; // { event, division, pools[] }
+
+        async function loadBracketData() {
+            try {
+                const response = await fetch('VERTEX_Bracket_Posters.html', { cache: 'no-store' });
+                if (!response.ok) return;
+                const html = await response.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const pages = doc.querySelectorAll('.page');
+
+                bracketData = [];
+                pages.forEach(page => {
+                    const h2 = page.querySelector('h2');
+                    if (!h2) return;
+                    const text = h2.textContent || '';
+
+                    // Extract event
+                    let event = '';
+                    if (text.includes("Men's Doubles") || text.includes("Mens Doubles")) event = "Men's Doubles";
+                    else if (text.includes("Women's Doubles") || text.includes("Womens Doubles")) event = "Women's Doubles";
+                    else if (text.includes("Mixed Doubles")) event = "Mixed Doubles";
+                    if (!event) return;
+
+                    // Extract division
+                    const divMatch = text.match(/Division\s+([\d]+[\-\u2013][\d]+)/i);
+                    if (!divMatch) return;
+                    const division = divMatch[1].replace(/\u2013/g, '-');
+
+                    // Extract pools
+                    const poolHeaders = page.querySelectorAll('.pc-h');
+                    const pools = [];
+                    poolHeaders.forEach(ph => {
+                        const poolMatch = (ph.textContent || '').match(/POOL\s+([A-Z])/i);
+                        if (poolMatch) pools.push(poolMatch[1]);
+                    });
+
+                    // Determine rounds available (Pool always, SF if multiple pools, Final always)
+                    const rounds = ['Pool'];
+                    if (pools.length >= 3) rounds.push('Semi Final');
+                    rounds.push('Final');
+
+                    bracketData.push({ event, division, pools, rounds });
+                });
+
+                // Populate initial state
+                updateDivisionDropdown('eventSelect', 'divisionSelect');
+                updateDivisionDropdown('scoreEventSelect', 'scoreDivisionSelect');
+                updateDivisionDropdown('compareEventSelect', 'compareDivisionSelect');
+                updatePoolDropdown('eventSelect', 'divisionSelect', 'poolSelect');
+                updateRoundDropdown('scoreEventSelect', 'scoreDivisionSelect', 'scoreRoundSelect');
+            } catch (e) {
+                console.warn('Could not load bracket data:', e.message);
+            }
+        }
+
+        function updateDivisionDropdown(eventSelectId, divisionSelectId) {
+            const event = document.getElementById(eventSelectId).value;
+            const divSelect = document.getElementById(divisionSelectId);
+            const currentValue = divSelect.value;
+
+            const divisions = [...new Set(
+                bracketData.filter(d => d.event === event).map(d => d.division)
+            )].sort((a, b) => parseInt(a) - parseInt(b));
+
+            divSelect.innerHTML = divisions.map(d => `<option value="${d}">Division ${d}</option>`).join('');
+            if (divisions.includes(currentValue)) divSelect.value = currentValue;
+        }
+
+        function updatePoolDropdown(eventSelectId, divisionSelectId, poolSelectId) {
+            const event = document.getElementById(eventSelectId).value;
+            const division = document.getElementById(divisionSelectId).value;
+            const poolSelect = document.getElementById(poolSelectId);
+
+            const entry = bracketData.find(d => d.event === event && d.division === division);
+            const pools = entry ? entry.pools : ['A', 'B', 'C', 'D'];
+
+            poolSelect.innerHTML = pools.map(p => `<option value="${p}">Pool ${p}</option>`).join('');
+        }
+
+        function updateRoundDropdown(eventSelectId, divisionSelectId, roundSelectId) {
+            const event = document.getElementById(eventSelectId).value;
+            const division = document.getElementById(divisionSelectId).value;
+            const roundSelect = document.getElementById(roundSelectId);
+            if (!roundSelect) return;
+
+            const entry = bracketData.find(d => d.event === event && d.division === division);
+            const rounds = entry ? entry.rounds : ['Pool', 'Final'];
+            const currentValue = roundSelect.value;
+
+            roundSelect.innerHTML = rounds.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (rounds.includes(currentValue)) roundSelect.value = currentValue;
+
+            // Update pool options based on new round
+            if (typeof updateScorePoolOptions === 'function') updateScorePoolOptions();
+        }
+
+        // Wire up event listeners for cascading dropdowns
+        document.getElementById('eventSelect').addEventListener('change', () => {
+            updateDivisionDropdown('eventSelect', 'divisionSelect');
+            updatePoolDropdown('eventSelect', 'divisionSelect', 'poolSelect');
+            clearTeamsView();
+        });
+        document.getElementById('divisionSelect').addEventListener('change', () => {
+            updatePoolDropdown('eventSelect', 'divisionSelect', 'poolSelect');
+            clearTeamsView();
+        });
+
+        document.getElementById('scoreEventSelect').addEventListener('change', () => {
+            updateDivisionDropdown('scoreEventSelect', 'scoreDivisionSelect');
+            updateRoundDropdown('scoreEventSelect', 'scoreDivisionSelect', 'scoreRoundSelect');
+            clearScoreTeamsView();
+        });
+        document.getElementById('scoreDivisionSelect').addEventListener('change', () => {
+            updateRoundDropdown('scoreEventSelect', 'scoreDivisionSelect', 'scoreRoundSelect');
+            clearScoreTeamsView();
+        });
+
+        document.getElementById('compareEventSelect').addEventListener('change', () => {
+            updateDivisionDropdown('compareEventSelect', 'compareDivisionSelect');
+            document.getElementById('compareSection').style.display = 'none';
+        });
+
+        loadBracketData();
+
+        async function loadTeams() {
+            const event = document.getElementById('eventSelect').value;
+            const division = document.getElementById('divisionSelect').value;
+            const pool = document.getElementById('poolSelect').value;
+
+            const loadBtn = document.getElementById('loadBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="loading-spinner"></span>Loading...';
+
+            try {
+                const response = await fetch('/api/teams/list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load teams');
+                }
+
+                currentTeams = data.teams || [];
+                hasChanges = false;
+                renderTeams();
+                document.getElementById('teamsSection').style.display = 'block';
+                document.getElementById('teamsTitle').textContent =
+                    `📋 ${event} – Division ${division} – Pool ${pool} (${currentTeams.length} teams)`;
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to load teams', 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '🔍 Load Teams';
+            }
+        }
+
+        function renderTeams() {
+            const tbody = document.getElementById('teamsBody');
+
+            if (currentTeams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📭</div>No teams in this pool</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentTeams.map((team, i) => {
+                if (editingIndex === i) {
+                    return `<tr>
+                        <td class="team-number">${i + 1}</td>
+                        <td><input class="edit-input" id="editP1" value="${escapeAttr(team.player1)}"></td>
+                        <td><input class="edit-input" id="editP2" value="${escapeAttr(team.player2)}"></td>
+                        <td><input class="edit-input" id="editC1" value="${escapeAttr(team.club1)}"></td>
+                        <td><input class="edit-input" id="editC2" value="${escapeAttr(team.club2)}"></td>
+                        <td class="actions-cell">
+                            <button class="btn-edit" onclick="saveEdit(${i})">✓ OK</button>
+                            <button class="btn-delete" onclick="cancelEdit()">✗</button>
+                        </td>
+                    </tr>`;
+                }
+                return `<tr>
+                    <td class="team-number">${i + 1}</td>
+                    <td>${escapeHtml(team.player1)}</td>
+                    <td>${escapeHtml(team.player2)}</td>
+                    <td>${escapeHtml(team.club1)}</td>
+                    <td>${escapeHtml(team.club2)}</td>
+                    <td class="actions-cell">
+                        <button class="btn-edit" onclick="startEdit(${i})">✏️</button>
+                        <button class="btn-delete" onclick="removeTeam(${i})">🗑️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function startEdit(index) {
+            editingIndex = index;
+            renderTeams();
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            renderTeams();
+        }
+
+        function saveEdit(index) {
+            const p1 = document.getElementById('editP1').value.trim();
+            const p2 = document.getElementById('editP2').value.trim();
+            const c1 = document.getElementById('editC1').value.trim();
+            const c2 = document.getElementById('editC2').value.trim();
+
+            if (!p1 || !p2) {
+                showMessage('Player names are required', 'error');
+                return;
+            }
+
+            currentTeams[index] = { player1: p1, player2: p2, club1: c1, club2: c2 };
+            editingIndex = -1;
+            hasChanges = true;
+            renderTeams();
+            showMessage('Team updated (not yet saved)', 'success');
+        }
+
+        function removeTeam(index) {
+            const team = currentTeams[index];
+            showModal(
+                '🗑️ Remove Team',
+                `Are you sure you want to remove "${team.player1} / ${team.player2}" from this pool?`,
+                () => {
+                    currentTeams.splice(index, 1);
+                    hasChanges = true;
+                    renderTeams();
+                    showMessage('Team removed (not yet saved)', 'success');
+                }
+            );
+        }
+
+        function addTeam() {
+            const p1 = document.getElementById('addPlayer1').value.trim();
+            const p2 = document.getElementById('addPlayer2').value.trim();
+            const c1 = document.getElementById('addClub1').value.trim();
+            const c2 = document.getElementById('addClub2').value.trim();
+
+            if (!p1 || !p2) {
+                showMessage('Both player names are required', 'error');
+                return;
+            }
+
+            currentTeams.push({ player1: p1, player2: p2, club1: c1, club2: c2 });
+            hasChanges = true;
+
+            document.getElementById('addPlayer1').value = '';
+            document.getElementById('addPlayer2').value = '';
+            document.getElementById('addClub1').value = '';
+            document.getElementById('addClub2').value = '';
+
+            renderTeams();
+            showMessage('Team added (not yet saved)', 'success');
+        }
+
+        function confirmSave() {
+            if (!hasChanges) {
+                showMessage('No changes to save', 'error');
+                return;
+            }
+            showModal(
+                '⚠️ Confirm Save',
+                'Are you sure you want to save the team changes? This will update the tournament bracket posters and teams file.',
+                saveTeams
+            );
+        }
+
+        async function saveTeams() {
+            closeModal();
+
+            const event = document.getElementById('eventSelect').value;
+            const division = document.getElementById('divisionSelect').value;
+            const pool = document.getElementById('poolSelect').value;
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+            try {
+                const response = await fetch('/api/teams/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool, teams: currentTeams })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save teams');
+                }
+
+                hasChanges = false;
+                showMessage('✅ Teams saved successfully! Bracket posters and tournament data updated.', 'success');
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to save teams', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '💾 Save Changes';
+            }
+        }
+
+        // Clear teams table when selectors change
+        function clearTeamsView() {
+            currentTeams = [];
+            hasChanges = false;
+            editingIndex = -1;
+            document.getElementById('teamsSection').style.display = 'none';
+            document.getElementById('teamsBody').innerHTML = '';
+        }
+
+        document.getElementById('poolSelect').addEventListener('change', clearTeamsView);
+
+        // ─── Score Data Tab ─────────────────────────────────────────────────────
+
+        async function loadScoreTeams() {
+            const event = document.getElementById('scoreEventSelect').value;
+            const division = document.getElementById('scoreDivisionSelect').value;
+            const round = document.getElementById('scoreRoundSelect').value;
+            const pool = document.getElementById('scorePoolSelect').value;
+
+            const loadBtn = document.getElementById('scoreLoadBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="loading-spinner"></span>Loading...';
+
+            try {
+                const response = await fetch('/api/scores/teams', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool, round })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load score teams');
+                }
+
+                scoreTeams = data.teams || [];
+                scoreHasChanges = false;
+                scoreEditingIndex = -1;
+                renderScoreTeams();
+                document.getElementById('scoreTeamsSection').style.display = 'block';
+                document.getElementById('scoreTeamsTitle').textContent =
+                    `📊 ${event} – Division ${division} – ${round} ${pool} (${scoreTeams.length} teams)`;
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to load score teams', 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '🔍 Load Teams';
+            }
+        }
+
+        function renderScoreTeams() {
+            const tbody = document.getElementById('scoreTeamsBody');
+
+            if (scoreTeams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">📭</div>No teams found in this score entry</div></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = scoreTeams.map((team, i) => {
+                if (scoreEditingIndex === i) {
+                    return `<tr>
+                        <td class="team-number">${i + 1}</td>
+                        <td><input class="edit-input" id="scoreEditP1" value="${escapeAttr(team.player1)}"></td>
+                        <td><input class="edit-input" id="scoreEditP2" value="${escapeAttr(team.player2)}"></td>
+                        <td style="color:#666;">${escapeHtml(team.club1)}</td>
+                        <td style="color:#666;">${escapeHtml(team.club2)}</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit" onclick="saveScoreEdit(${i})">✓ OK</button>
+                            <button class="btn-delete" onclick="cancelScoreEdit()">✗</button>
+                        </td>
+                    </tr>`;
+                }
+                return `<tr>
+                    <td class="team-number">${i + 1}</td>
+                    <td>${escapeHtml(team.player1)}</td>
+                    <td>${escapeHtml(team.player2)}</td>
+                    <td style="color:#666;">${escapeHtml(team.club1)}</td>
+                    <td style="color:#666;">${escapeHtml(team.club2)}</td>
+                    <td class="actions-cell">
+                        <button class="btn-edit" onclick="startScoreEdit(${i})">✏️</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function startScoreEdit(index) {
+            scoreEditingIndex = index;
+            renderScoreTeams();
+        }
+
+        function cancelScoreEdit() {
+            scoreEditingIndex = -1;
+            renderScoreTeams();
+        }
+
+        function saveScoreEdit(index) {
+            const p1 = document.getElementById('scoreEditP1').value.trim();
+            const p2 = document.getElementById('scoreEditP2').value.trim();
+
+            if (!p1 && !p2) {
+                showMessage('At least one player name is required', 'error');
+                return;
+            }
+
+            scoreTeams[index].player1 = p1;
+            scoreTeams[index].player2 = p2;
+            scoreEditingIndex = -1;
+            scoreHasChanges = true;
+            renderScoreTeams();
+            showMessage('Team name updated (not yet saved)', 'success');
+        }
+
+        function confirmScoreSave() {
+            if (!scoreHasChanges) {
+                showMessage('No changes to save', 'error');
+                return;
+            }
+            showModal(
+                '⚠️ Confirm Save',
+                'Are you sure you want to save the score team name changes? This will update the score JSON file.',
+                saveScoreTeams
+            );
+        }
+
+        async function saveScoreTeams() {
+            closeModal();
+
+            const event = document.getElementById('scoreEventSelect').value;
+            const division = document.getElementById('scoreDivisionSelect').value;
+            const round = document.getElementById('scoreRoundSelect').value;
+            const pool = document.getElementById('scorePoolSelect').value;
+
+            const saveBtn = document.getElementById('scoreSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+
+            try {
+                const response = await fetch('/api/scores/teams/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division, pool, round, teams: scoreTeams })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to save score teams');
+                }
+
+                scoreHasChanges = false;
+                showMessage('✅ Score team names saved successfully!', 'success');
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to save score teams', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '💾 Save Changes';
+            }
+        }
+
+        // Clear score teams table when selectors change
+        function clearScoreTeamsView() {
+            scoreTeams = [];
+            scoreHasChanges = false;
+            scoreEditingIndex = -1;
+            document.getElementById('scoreTeamsSection').style.display = 'none';
+            document.getElementById('scoreTeamsBody').innerHTML = '';
+        }
+
+        document.getElementById('scoreRoundSelect').addEventListener('change', clearScoreTeamsView);
+        document.getElementById('scorePoolSelect').addEventListener('change', clearScoreTeamsView);
+
+        // ─── Compare Tab ────────────────────────────────────────────────────────
+
+        async function loadCompare() {
+            const event = document.getElementById('compareEventSelect').value;
+            const division = document.getElementById('compareDivisionSelect').value;
+
+            const loadBtn = document.getElementById('compareLoadBtn');
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="loading-spinner"></span>Comparing...';
+
+            try {
+                const response = await fetch('/api/teams/compare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ event, division })
+                });
+
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(text || 'Server returned a non-JSON response. Restart the server.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to compare teams');
+                }
+
+                const diffs = data.differences || [];
+                const tbody = document.getElementById('compareBody');
+                const section = document.getElementById('compareSection');
+
+                if (diffs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="icon">✅</div>All team names match! No differences found.</div></td></tr>';
+                } else {
+                    tbody.innerHTML = diffs.map(d => {
+                        return `<tr>
+                            <td><span style="color:#f39c12;font-weight:700;">Pool ${escapeHtml(d.pool)}</span></td>
+                            <td class="team-number">${d.seed}</td>
+                            <td class="diff-bracket">${escapeHtml(d.bracket)}</td>
+                            <td class="diff-score">${escapeHtml(d.score)}</td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                section.style.display = 'block';
+                document.getElementById('compareTitle').textContent =
+                    `🔍 ${event} – Division ${division} — ${diffs.length} difference${diffs.length !== 1 ? 's' : ''} found`;
+
+            } catch (err) {
+                showMessage(err.message || 'Failed to compare teams', 'error');
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '🔍 Compare';
+            }
+        }
+
+        // ─── Modal ──────────────────────────────────────────────────────────────
+
+        function showModal(title, message, onConfirm) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            pendingModalAction = onConfirm;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingModalAction = null;
+        }
+
+        function modalConfirmAction() {
+            const action = pendingModalAction;
+            closeModal();
+            if (typeof action === 'function') {
+                action();
+            }
+        }
+
+        // Session check on load
+        fetch('/admin-session-check', { credentials: 'same-origin' })
+            .then(r => { if (!r.ok) window.location.href = '/vertexadmin.html'; })
+            .catch(() => { window.location.href = '/vertexadmin.html'; });
+
+        // ─── Live Scores Sync Tab ───────────────────────────────────────────────
+
+        let liveSyncCategories = [];
+
+        async function previewLiveSync() {
+            const status = document.getElementById('liveSyncStatus');
+            const preview = document.getElementById('liveSyncPreview');
+            const previewContent = document.getElementById('liveSyncPreviewContent');
+            const syncBtn = document.getElementById('syncBtn');
+
+            status.innerHTML = '<span style="color:#3498db;">Loading tournament_data.json...</span>';
+            preview.style.display = 'none';
+            syncBtn.disabled = true;
+            syncBtn.style.opacity = '0.5';
+
+            try {
+                const response = await fetch('tournament_data.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Could not load tournament_data.json (HTTP ' + response.status + ')');
+                const data = await response.json();
+                const categories = Array.isArray(data.categories) ? data.categories : [];
+
+                if (categories.length === 0) throw new Error('No categories found in tournament_data.json. Click "Load Tournament Data" on the scoring page first.');
+
+                liveSyncCategories = categories.map(cat => {
+                    const event = cat.event || '';
+                    const division = cat.division || '';
+                    let prefix = 'md';
+                    let accent = '#2980b9';
+                    if (event.toLowerCase().includes('women')) { prefix = 'wd'; accent = '#d63384'; }
+                    else if (event.toLowerCase().includes('mixed')) { prefix = 'xd'; accent = '#e67e22'; }
+
+                    const id = prefix + '-' + division;
+                    const totalTeams = (cat.pools || []).reduce((sum, p) => sum + (p.teams ? p.teams.length : 0), 0);
+                    const poolCount = (cat.pools || []).length;
+                    let flow = '1P > F';
+                    let middle = 'Final qualifier';
+                    if (poolCount >= 3) { flow = poolCount + 'P > SF > F'; middle = 'Semi Final'; }
+                    else if (poolCount === 2) { flow = '2P > F'; middle = 'Final qualifier'; }
+
+                    return { id, event, division, title: event, grade: 'Division ' + division, teams: totalTeams, start: '', flow, accent, middle };
+                });
+
+                previewContent.innerHTML = liveSyncCategories.map((cat, i) =>
+                    `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <strong style="color:#fff;">${i + 1}. ${cat.id}</strong> — ${cat.event} Div ${cat.division} 
+                        <span style="color:#8a9ab5;">(${cat.teams} teams, ${cat.flow})</span>
+                    </div>`
+                ).join('');
+
+                preview.style.display = 'block';
+                syncBtn.disabled = false;
+                syncBtn.style.opacity = '1';
+                status.innerHTML = `<span style="color:#2ecc71;">✓ Found ${liveSyncCategories.length} categories. Review above and click "Apply" to update live_scores.html.</span>`;
+            } catch (e) {
+                status.innerHTML = `<span style="color:#e74c3c;">✗ ${e.message}</span>`;
+            }
+        }
+
+        async function executeLiveSync() {
+            const status = document.getElementById('liveSyncStatus');
+            const syncBtn = document.getElementById('syncBtn');
+
+            if (liveSyncCategories.length === 0) {
+                status.innerHTML = '<span style="color:#e74c3c;">No categories to sync. Click Preview first.</span>';
+                return;
+            }
+
+            syncBtn.disabled = true;
+            syncBtn.style.opacity = '0.5';
+            status.innerHTML = '<span style="color:#3498db;">Sending to server...</span>';
+
+            try {
+                const response = await fetch('/api/sync-live-scores-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categories: liveSyncCategories })
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    status.innerHTML = `<span style="color:#2ecc71;">✓ ${result.message}</span>`;
+                } else {
+                    throw new Error(result.message || 'Unknown error');
+                }
+            } catch (e) {
+                status.innerHTML = `<span style="color:#e74c3c;">✗ ${e.message}</span>`;
+                syncBtn.disabled = false;
+                syncBtn.style.opacity = '1';
+            }
+        }
+    </script>
+</body>
+</html>
