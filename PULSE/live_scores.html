@@ -1546,15 +1546,15 @@ body.has-error .error-box { display: block; }
 
 <script>
 const CATEGORIES = [
-  { id: "md-1-3", event: "Men's Doubles", division: "1-3", title: "Men's Doubles", grade: "Division 1-3", teams: 5, start: "11:00 AM", flow: "1P > F", accent: "#2980b9", middle: "Final qualifier" },
-  { id: "md-4-5", event: "Men's Doubles", division: "4-5", title: "Men's Doubles", grade: "Division 4-5", teams: 18, start: "10:00 AM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
-  { id: "md-6-7", event: "Men's Doubles", division: "6-7", title: "Men's Doubles", grade: "Division 6-7", teams: 14, start: "12:00 PM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
-  { id: "md-8-10", event: "Men's Doubles", division: "8-10", title: "Men's Doubles", grade: "Division 8-10", teams: 12, start: "10:00 AM", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
-  { id: "wd-6-7", event: "Women's Doubles", division: "6-7", title: "Women's Doubles", grade: "Division 6-7", teams: 6, start: "1:00 PM", flow: "2P > F", accent: "#d63384", middle: "Final qualifier" },
-  { id: "wd-8-10", event: "Women's Doubles", division: "8-10", title: "Women's Doubles", grade: "Division 8-10", teams: 4, start: "11:00 AM", flow: "1P > F", accent: "#d63384", middle: "Final qualifier" },
-  { id: "xd-4-5", event: "Mixed Doubles", division: "4-5", title: "Mixed Doubles", grade: "Division 4-5", teams: 11, start: "2:40 PM", flow: "3P > SF > F", accent: "#e67e22", middle: "Semi Final" },
-  { id: "xd-6-7", event: "Mixed Doubles", division: "6-7", title: "Mixed Doubles", grade: "Division 6-7", teams: 9, start: "2:40 PM", flow: "3P > SF > F", accent: "#e67e22", middle: "Semi Final" },
-  { id: "xd-8-10", event: "Mixed Doubles", division: "8-10", title: "Mixed Doubles", grade: "Division 8-10", teams: 9, start: "2:40 PM", flow: "3P > SF > F", accent: "#e67e22", middle: "Semi Final" }
+  { id: "md-1-3", event: "Men's Doubles", division: "1-3", title: "Men's Doubles", grade: "Division 1-3", teams: 5, start: "", flow: "1P > F", accent: "#2980b9", middle: "Final qualifier" },
+  { id: "md-4-5", event: "Men's Doubles", division: "4-5", title: "Men's Doubles", grade: "Division 4-5", teams: 18, start: "", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "md-6-7", event: "Men's Doubles", division: "6-7", title: "Men's Doubles", grade: "Division 6-7", teams: 14, start: "", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "md-8-10", event: "Men's Doubles", division: "8-10", title: "Men's Doubles", grade: "Division 8-10", teams: 12, start: "", flow: "4P > SF > F", accent: "#2980b9", middle: "Semi Final" },
+  { id: "wd-6-7", event: "Women's Doubles", division: "6-7", title: "Women's Doubles", grade: "Division 6-7", teams: 6, start: "", flow: "2P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "wd-8-10", event: "Women's Doubles", division: "8-10", title: "Women's Doubles", grade: "Division 8-10", teams: 4, start: "", flow: "1P > F", accent: "#d63384", middle: "Final qualifier" },
+  { id: "xd-4-5", event: "Mixed Doubles", division: "4-5", title: "Mixed Doubles", grade: "Division 4-5", teams: 12, start: "", flow: "4P > SF > F", accent: "#e67e22", middle: "Semi Final" },
+  { id: "xd-6-7", event: "Mixed Doubles", division: "6-7", title: "Mixed Doubles", grade: "Division 6-7", teams: 9, start: "", flow: "3P > SF > F", accent: "#e67e22", middle: "Semi Final" },
+  { id: "xd-8-10", event: "Mixed Doubles", division: "8-10", title: "Mixed Doubles", grade: "Division 8-10", teams: 9, start: "", flow: "3P > SF > F", accent: "#e67e22", middle: "Semi Final" }
 ];
 
 const CATEGORY_ALIASES = {
