@@ -2412,15 +2412,13 @@ function renderPoolCard(pool, options = {}) {
   const poolTitle = teamCount ? `Pool ${poolName} (${teamCount} ${teamCount === 1 ? "Team" : "Teams"})` : `Pool ${poolName}`;
   const rows = standings.length
     ? standings.map((team, index) => {
-      const diff = team.points - team.pointsConceded;
-      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
       return `
       <tr class="${getTieRowClass(team)}">
         <td><span class="rank ${isDecidedQualifier(team, 2) ? "qualifier" : ""}">${escapeHtml(`${poolName}${team.seed}`)}</span></td>
         <td><span class="team-name">${escapeHtml(team.name)}</span></td>
         <td>${team.games}</td>
-        <td>${team.points} / ${team.pointsConceded}</td>
-        <td>${diffStr}</td>
+        <td>${team.points}</td>
+        <td>${team.pointsConceded}</td>
         <td>${renderStandingValue(poolName, team, poolFinished)}</td>
       </tr>
     `;}).join("")
@@ -2435,7 +2433,7 @@ function renderPoolCard(pool, options = {}) {
       <div class="standings-scroll">
         <table class="standings">
           <thead>
-            <tr><th>Team#</th><th>Team</th><th>GW</th><th>TPts / TPtc</th><th>Pt Diff</th><th>Standing</th></tr>
+            <tr><th>Team#</th><th>Team</th><th>GW</th><th>TPtS</th><th>TPtC</th><th>Standing</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -2935,16 +2933,14 @@ function renderSuperPoolCard(pool) {
   const sourceText = pool.sourcePools.map(sourcePool => `Pool ${sourcePool}`).join(", ");
   const rows = standings.length
     ? standings.map((team, index) => {
-      const diff = team.points - team.pointsConceded;
-      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '0';
       return `
       <tr class="${getTieRowClass(team)}">
         <td><span class="rank ${isDecidedQualifier(team, 1) ? "qualifier" : ""}">${escapeHtml(`${pool.poolName}${team.seed}`)}</span></td>
         <td><span class="team-name">${escapeHtml(team.name)}</span></td>
         <td>${escapeHtml(team.source || "")}</td>
         <td>${team.games}</td>
-        <td>${team.points} / ${team.pointsConceded}</td>
-        <td>${diffStr}</td>
+        <td>${team.points}</td>
+        <td>${team.pointsConceded}</td>
         <td>${renderStandingValue(pool.poolName, team, poolFinished)}</td>
       </tr>
     `;}).join("")
@@ -2959,7 +2955,7 @@ function renderSuperPoolCard(pool) {
       <div class="standings-scroll">
         <table class="standings">
           <thead>
-            <tr><th>Seed</th><th>Team</th><th>From</th><th>GW</th><th>TPts / TPtc</th><th>Pt Diff</th><th>Standing</th></tr>
+            <tr><th>Seed</th><th>Team</th><th>From</th><th>GW</th><th>TPtS</th><th>TPtC</th><th>Standing</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
