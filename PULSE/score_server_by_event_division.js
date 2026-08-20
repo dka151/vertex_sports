@@ -25,6 +25,7 @@ const LEGACY_FEEDBACK_FILE = path.join(__dirname, 'feedback.js');
 const BRACKET_POSTERS_FILE = path.join(__dirname, 'VERTEX_Bracket_Posters.html');
 const TEAMS_FILE = path.join(__dirname, 'VERTEX_Teams.html');
 const TOURNAMENT_DATA_FILE = path.join(__dirname, 'tournament_data.json');
+const TIE_BREAKS_FILE = path.join(__dirname, 'tie_breaks.json');
 const ROUND_POOL = 'Pool';
 const ROUND_SUPER_POOL = 'Super-pool';
 const ROUND_SEMI_FINAL = 'Semi Final';
@@ -1689,6 +1690,72 @@ function handleLiveSummary(res, config) {
     sendJson(res, 200, { categories, generatedAt: new Date().toISOString() });
 }
 
+function readTieBreaks() {
+    const data = readJsonFile(TIE_BREAKS_FILE, {});
+    const tieBreaks = data && typeof data.tieBreaks === 'object' && !Array.isArray(data.tieBreaks)
+        ? data.tieBreaks
+        : {};
+    const bestRunnerBreaks = data && typeof data.bestRunnerBreaks === 'object' && !Array.isArray(data.bestRunnerBreaks)
+        ? data.bestRunnerBreaks
+        : {};
+    return { tieBreaks, bestRunnerBreaks };
+}
+
+function handleTieBreaksGet(res) {
+    sendJson(res, 200, { status: 'success', ...readTieBreaks() });
+}
+
+async function handleTieBreaksSave(req, res) {
+    let locked = false;
+    try {
+        const body = await collectRequestBody(req);
+        const submitted = JSON.parse(body || '{}');
+        const type = String(submitted.type || '');
+        const key = String(submitted.key || '').trim();
+
+        if (!key) {
+            throw new Error('Selection key is required.');
+        }
+
+        await acquireFileLock(TIE_BREAKS_FILE);
+        locked = true;
+
+        const current = readTieBreaks();
+        const clearing = submitted.clear === true;
+
+        if (clearing) {
+            // Remove the selection (used by the "reset tiebreaker" action).
+            if (type === 'bestRunnerTie') {
+                delete current.bestRunnerBreaks[key];
+            } else {
+                delete current.tieBreaks[key];
+            }
+        } else if (type === 'poolTie') {
+            const seed = Number(submitted.value);
+            if (!Number.isFinite(seed) || seed <= 0) {
+                throw new Error('Invalid tie-break selection.');
+            }
+            current.tieBreaks[key] = seed;
+        } else if (type === 'bestRunnerTie') {
+            const value = String(submitted.value || '').trim();
+            if (!value) {
+                throw new Error('Invalid best-runner selection.');
+            }
+            current.bestRunnerBreaks[key] = value;
+        } else {
+            throw new Error('Unknown tie-break type.');
+        }
+
+        writeJsonFile(TIE_BREAKS_FILE, current);
+        sendJson(res, 200, { status: 'success', ...current });
+        console.log(`[${new Date().toLocaleTimeString()}] Tie-break ${clearing ? 'cleared' : 'saved'} (${type}) ${key}`);
+    } catch (error) {
+        sendJson(res, 400, { status: 'error', message: error.message || 'Tie-break could not be saved.' });
+    } finally {
+        if (locked) releaseFileLock(TIE_BREAKS_FILE);
+    }
+}
+
 async function handleSyncLiveScoresConfig(req, res) {
     try {
         const body = await collectRequestBody(req);
@@ -1933,6 +2000,18 @@ function createServer(config) {
         if (req.method === 'GET' && requestedUrl.pathname === '/api/live-summary') {
             handleLiveSummary(res, config);
             return;
+        }
+
+        if (requestedUrl.pathname === '/api/tie-breaks') {
+            if (req.method === 'GET') {
+                handleTieBreaksGet(res);
+                return;
+            }
+            if (req.method === 'POST') {
+                if (!requireAdmin(req, res)) return;
+                handleTieBreaksSave(req, res);
+                return;
+            }
         }
 
         if (req.method === 'POST' && requestedUrl.pathname === '/api/sync-live-scores-config') {

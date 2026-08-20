@@ -282,7 +282,7 @@
         .score-table col.slot-col { width: 74px; }
         .score-table col.team-name-col { width: 190px; }
         .score-table col.set-col { width: 42px; }
-        .score-table col.score-col { width: calc((100% - 476px) / var(--score-cols)); }
+        .score-table col.score-col { width: calc((100% - 564px) / var(--score-cols)); }
         .score-table col.total-games-col { width: 82px; }
         .score-table col.total-points-won-col { width: 88px; }
         .score-table col.total-points-conceded-col { width: 88px; }
@@ -910,7 +910,7 @@
             .score-table col.slot-col { width: 58px; }
             .score-table col.team-name-col { width: 150px; }
             .score-table col.set-col { width: 36px; }
-            .score-table col.score-col { width: calc((100% - 380px) / var(--score-cols)); }
+            .score-table col.score-col { width: calc((100% - 450px) / var(--score-cols)); }
             .score-table col.total-games-col { width: 66px; }
             .score-table col.total-points-won-col { width: 70px; }
             .score-table col.total-points-conceded-col { width: 70px; }
@@ -1715,7 +1715,6 @@
                     <th></th>
                     <th></th>
                     ${scoreHeaders}
-                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -2711,16 +2710,18 @@
 
                     const tieGroupKey = group[0].tieGroup;
                     const categoryId = getCategorySelectionId(category);
-                    const selections = readTieBreakSelections();
-                    selections[`${categoryId}|${poolName}|${tieGroupKey}`] = seed;
-                    tieBreakSelectionsMemory = selections;
-                    try {
-                        window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
-                    } catch (e) {}
+                    const key = `${categoryId}|${poolName}|${tieGroupKey}`;
 
-                    updateTiebreakerSection();
-                    showStatus(`✅ ${teamLabel} promoted to next level.`, 'success');
-                    scheduleHideStatus(5000);
+                    saveServerTieBreak({ type: 'poolTie', key, value: seed }).then(ok => {
+                        if (!ok) {
+                            showStatus('⚠️ Could not save the tiebreaker to the server. Please try again.', 'error');
+                            scheduleHideStatus(5000);
+                            return;
+                        }
+                        updateTiebreakerSection();
+                        showStatus(`✅ ${teamLabel} promoted to next level.`, 'success');
+                        scheduleHideStatus(5000);
+                    });
                 },
                 { showCancel: true }
             );
@@ -2768,16 +2769,17 @@
                     () => {
                         const tieGroupKey = group[0].tieGroup;
                         const categoryId = getCategorySelectionId(category);
-                        const selections = readTieBreakSelections();
-                        delete selections[`${categoryId}|${poolName}|${tieGroupKey}`];
-                        tieBreakSelectionsMemory = selections;
-                        try {
-                            window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
-                        } catch (e) {}
-
-                        updateTiebreakerSection();
-                        showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
-                        scheduleHideStatus(5000);
+                        const key = `${categoryId}|${poolName}|${tieGroupKey}`;
+                        saveServerTieBreak({ type: 'poolTie', key, clear: true }).then(ok => {
+                            if (!ok) {
+                                showStatus('⚠️ Could not reset the tiebreaker on the server. Please try again.', 'error');
+                                scheduleHideStatus(5000);
+                                return;
+                            }
+                            updateTiebreakerSection();
+                            showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
+                            scheduleHideStatus(5000);
+                        });
                     },
                     { showCancel: true }
                 );
@@ -2788,16 +2790,17 @@
                     () => {
                         const tieGroupKey = group[0].tieGroup;
                         const categoryId = getCategorySelectionId(category);
-                        const selections = readTieBreakSelections();
-                        delete selections[`${categoryId}|${poolName}|${tieGroupKey}`];
-                        tieBreakSelectionsMemory = selections;
-                        try {
-                            window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(selections));
-                        } catch (e) {}
-
-                        updateTiebreakerSection();
-                        showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
-                        scheduleHideStatus(5000);
+                        const key = `${categoryId}|${poolName}|${tieGroupKey}`;
+                        saveServerTieBreak({ type: 'poolTie', key, clear: true }).then(ok => {
+                            if (!ok) {
+                                showStatus('⚠️ Could not reset the tiebreaker on the server. Please try again.', 'error');
+                                scheduleHideStatus(5000);
+                                return;
+                            }
+                            updateTiebreakerSection();
+                            showStatus('↩️ Tiebreaker promotion has been reset.', 'success');
+                            scheduleHideStatus(5000);
+                        });
                     },
                     { showCancel: true }
                 );
@@ -3648,15 +3651,44 @@
             return true;
         }
 
-        function readTieBreakSelections() {
+        // Tie-break selections are held on the server so every admin session
+        // stays in sync. Nothing is stored on the client device.
+        async function loadServerTieBreaks() {
             try {
-                const storedSelections = window.localStorage?.getItem(TIE_BREAK_SELECTION_KEY);
-                if (storedSelections) {
-                    tieBreakSelectionsMemory = JSON.parse(storedSelections);
-                }
+                const response = await fetch('/api/tie-breaks?t=' + Date.now(), { credentials: 'same-origin' });
+                if (!response.ok) return;
+                const data = await response.json().catch(() => null);
+                if (!data || data.status !== 'success') return;
+                tieBreakSelectionsMemory = (data.tieBreaks && typeof data.tieBreaks === 'object' && !Array.isArray(data.tieBreaks)) ? data.tieBreaks : {};
+                bestRunnerSelectionsMemory = (data.bestRunnerBreaks && typeof data.bestRunnerBreaks === 'object' && !Array.isArray(data.bestRunnerBreaks)) ? data.bestRunnerBreaks : {};
             } catch (error) {
+                // Server unreachable — keep whatever is currently in memory.
             }
+        }
 
+        // Persist (or clear) a tie-break selection on the server. The server
+        // responds with the full updated state, which we mirror into memory.
+        async function saveServerTieBreak(payload) {
+            try {
+                const response = await fetch('/api/tie-breaks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) return false;
+                const data = await response.json().catch(() => null);
+                if (!data || data.status !== 'success') return false;
+                tieBreakSelectionsMemory = (data.tieBreaks && typeof data.tieBreaks === 'object' && !Array.isArray(data.tieBreaks)) ? data.tieBreaks : {};
+                bestRunnerSelectionsMemory = (data.bestRunnerBreaks && typeof data.bestRunnerBreaks === 'object' && !Array.isArray(data.bestRunnerBreaks)) ? data.bestRunnerBreaks : {};
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function readTieBreakSelections() {
+            // Server is the source of truth; memory is populated by loadServerTieBreaks().
             return { ...tieBreakSelectionsMemory };
         }
 
@@ -3800,14 +3832,7 @@
         }
 
         function readBestRunnerSelections() {
-            try {
-                const storedSelections = window.localStorage?.getItem(BEST_RUNNER_SELECTION_KEY);
-                if (storedSelections) {
-                    bestRunnerSelectionsMemory = JSON.parse(storedSelections);
-                }
-            } catch (error) {
-            }
-
+            // Server is the source of truth; memory is populated by loadServerTieBreaks().
             return { ...bestRunnerSelectionsMemory };
         }
 
@@ -4376,6 +4401,10 @@
             if (isLoadingSavedScores) return;
 
             try {
+                // Pull the latest tie-break selections from the server (source of
+                // truth) so this session matches every other admin session.
+                await loadServerTieBreaks();
+
                 const result = await readSavedScoresFromJson();
 
                 if (result.status !== 'success') {

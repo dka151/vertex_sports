@@ -1738,8 +1738,18 @@ async function applyTieAction(action) {
   if (!action) return;
   if (action.type === "poolTie") {
     setTieBreakSelection(action.pool, action.tieGroup, action.value);
+    await saveServerTieBreak({
+      type: "poolTie",
+      key: getTieBreakKey(action.pool, action.tieGroup),
+      value: Number(action.value)
+    });
   } else if (action.type === "bestRunnerTie") {
     setBestRunnerSelection(action.tieKey, action.value);
+    await saveServerTieBreak({
+      type: "bestRunnerTie",
+      key: action.tieKey,
+      value: action.value
+    });
   }
   await refresh();
 }
@@ -1855,6 +1865,69 @@ function setBestRunnerSelection(tieKey, value) {
     window.localStorage?.setItem(BEST_RUNNER_SELECTION_KEY, JSON.stringify(selections));
   } catch (error) {
   }
+}
+
+// Pull tie-break selections from the server so every device (mobile, desktop,
+// tablet) shows the same resolved standings. The server file is the source of
+// truth; localStorage is only a local cache/fallback.
+async function loadServerTieBreaks() {
+  try {
+    const response = await fetch("/api/tie-breaks?t=" + Date.now(), { credentials: "same-origin" });
+    if (!response.ok) return;
+    const data = await response.json().catch(() => null);
+    if (!data || data.status !== "success") return;
+
+    if (data.tieBreaks && typeof data.tieBreaks === "object" && !Array.isArray(data.tieBreaks)) {
+      tieBreakSelectionsMemory = data.tieBreaks;
+      try { window.localStorage?.setItem(TIE_BREAK_SELECTION_KEY, JSON.stringify(tieBreakSelectionsMemory)); } catch (error) {}
+    }
+    if (data.bestRunnerBreaks && typeof data.bestRunnerBreaks === "object" && !Array.isArray(data.bestRunnerBreaks)) {
+      bestRunnerSelectionsMemory = data.bestRunnerBreaks;
+      try { window.localStorage?.setItem(BEST_RUNNER_SELECTION_KEY, JSON.stringify(bestRunnerSelectionsMemory)); } catch (error) {}
+    }
+  } catch (error) {
+    // Server unreachable — keep whatever is in memory/localStorage.
+  }
+}
+
+// Persist a tie-break selection to the server (admin only). The admin session
+// cookie set during approval authorizes this request.
+async function saveServerTieBreak(payload) {
+  try {
+    const response = await fetch("/api/tie-breaks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload)
+    });
+    return response.ok;
+  } catch (error) {
+    // Local change still applies on this device even if the server save fails.
+    return false;
+  }
+}
+
+// Signature of ALL tie-break selections — used to detect changes during the
+// auto-refresh cycle even when no new score was saved.
+function getTieBreakSignature() {
+  try {
+    return JSON.stringify(tieBreakSelectionsMemory || {}) + "~" + JSON.stringify(bestRunnerSelectionsMemory || {});
+  } catch (error) {
+    return "";
+  }
+}
+
+// Signature of the tie-break selections that belong to one category (keys are
+// prefixed with the category id). Used so the detail view re-renders when its
+// own tie is resolved on another device.
+function getCategoryTieBreakSignature(categoryId) {
+  const prefix = `${categoryId}|`;
+  const collect = store => Object.keys(store || {})
+    .filter(key => key.startsWith(prefix))
+    .sort()
+    .map(key => `${key}=${store[key]}`)
+    .join(",");
+  return `${collect(tieBreakSelectionsMemory)};${collect(bestRunnerSelectionsMemory)}`;
 }
 
 function slugifyScorePath(value) {
@@ -3304,6 +3377,7 @@ function summarizeScoreFile(scoreFile, category, tournamentData) {
 
 let lastHomeSummaryTimestamps = {};
 let lastHomeCardsHtml = "";
+let lastHomeTieBreakSignature = "";
 
 async function fetchLiveSummary() {
   try {
@@ -3330,7 +3404,13 @@ async function renderHome() {
   const summary = await fetchLiveSummary();
   let categoriesToFetch = CATEGORIES;
 
-  if (summary && lastHomeCardsHtml) {
+  // A tie-break resolved on another device does not change any score timestamp,
+  // so track its signature separately and force a full rebuild when it changes.
+  const tieBreakSignature = getTieBreakSignature();
+  const tieBreaksChanged = lastHomeCardsHtml && tieBreakSignature !== lastHomeTieBreakSignature;
+  lastHomeTieBreakSignature = tieBreakSignature;
+
+  if (summary && lastHomeCardsHtml && !tieBreaksChanged) {
     // Only re-fetch categories whose lastSavedAt changed
     const changedKeys = new Set();
     (summary.categories || []).forEach(cat => {
@@ -3348,6 +3428,12 @@ async function renderHome() {
     }
 
     categoriesToFetch = CATEGORIES.filter(cat => changedKeys.has(getCategoryKey(cat)));
+  } else if (summary && tieBreaksChanged) {
+    // Tie-breaks changed — refresh every category card and update timestamps.
+    (summary.categories || []).forEach(cat => {
+      lastHomeSummaryTimestamps[getCategoryKey(cat)] = cat.lastSavedAt;
+    });
+    categoriesToFetch = CATEGORIES;
   } else if (summary) {
     // First load — store all timestamps
     (summary.categories || []).forEach(cat => {
@@ -3475,12 +3561,15 @@ async function renderDetail(category) {
         )
       )
       .join("|");
-    if (lastDetailScoreHash && latestTimestamps === lastDetailScoreHash) {
+    // Include tie-break selections in the change signature so a tie resolved on
+    // another device re-renders here on the next auto-refresh (no hard refresh).
+    const detailSignature = latestTimestamps + "||" + getCategoryTieBreakSignature(category.id);
+    if (lastDetailScoreHash && detailSignature === lastDetailScoreHash) {
       document.getElementById("detailRefresh").textContent = formatTime();
       resetRefreshCountdown();
       return;
     }
-    lastDetailScoreHash = latestTimestamps;
+    lastDetailScoreHash = detailSignature;
 
     document.getElementById("poolList").innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">⏳ Loading scores...</div>';
     const pools = latestEntriesByPool(scoreFile, category, tournamentData).sort((a, b) => a.poolName.localeCompare(b.poolName));
@@ -3540,6 +3629,7 @@ async function renderDetail(category) {
 }
 
 async function refresh() {
+  await loadServerTieBreaks();
   if (selectedCategory) {
     await renderDetail(selectedCategory);
   } else {
